@@ -29,8 +29,6 @@ Für die ILIAS-Version 8 nutzen Sie bitte den branch 'release_8' (https://github
 
 ## Inhaltsverzeichnis
 
-[TOC]
-
 ## Voraussetzungen
 
 Die Mindestvoraussetzungen, mit denen das Plugin getestet wurde, finden Sie hier im Überblick:
