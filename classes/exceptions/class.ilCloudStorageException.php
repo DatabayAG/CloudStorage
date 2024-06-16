@@ -45,7 +45,7 @@ class ilCloudStorageException extends Exception
     protected $code;
     protected $add_info;
     
-    public function __construct(string $exception_code, string $exception_info = "")
+    public function __construct(int $exception_code, string $exception_info = "")
     {
         $this->code = $exception_code;
         $this->add_info = $exception_info;
