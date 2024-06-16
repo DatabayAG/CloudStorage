@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // required??
 require_once(__DIR__ . "/../vendor/autoload.php");
 use ILIAS\DI\Container;

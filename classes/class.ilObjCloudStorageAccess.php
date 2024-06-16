@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
 * Access/Condition checking for CloudStorage object
 *

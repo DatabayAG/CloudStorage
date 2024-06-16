@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /**
  * @author  Stefan Schneider <eqsoft4@gmail.com>
  * GPLv2, see LICENSE

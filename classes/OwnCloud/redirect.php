@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 chdir('../../../../../../../../../');
 
 require_once('./Services/Init/classes/class.ilInitialisation.php');

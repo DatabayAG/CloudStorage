@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 $ti = new ilTextInputGUI($pl->txt("server_url"), "server_url");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);

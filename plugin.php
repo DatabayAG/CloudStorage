@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
  
 // alphanumerical ID of the plugin; never change this
 $id = "xcls";

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use ILIAS\DI\Container;
 //use ILIAS\UI\Component\MessageBox\MessageBox;
 
