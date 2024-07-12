@@ -1,6 +1,6 @@
 <?php
 
-//declare(strict_types=1);
+declare(strict_types=1);
 
 /* Copyright (c) 1998-2013 ILIAS open source, Extended GPL, see docs/LICENSE */
 
@@ -55,9 +55,9 @@ class ilFileUploadSettings
     private function __construct()
     {
         $this->settings = new ilSetting("fileupload");
-        $this->dndUploadEnabled = $this->settings->get("dnd_upload_enabled", true) == true;
-        $this->repositoryDndUploadEnabled = $this->settings->get("repository_dnd_upload_enabled", true) == true;
-        $this->concurrentUploads = $this->settings->get("concurrent_upload_count", self::CONCURRENT_UPLOADS_DEFAULT);
+        $this->dndUploadEnabled = (bool) $this->settings->get("dnd_upload_enabled", "1") == true;
+        $this->repositoryDndUploadEnabled = (bool) $this->settings->get("repository_dnd_upload_enabled", "1") == true;
+        $this->concurrentUploads = (int) $this->settings->get("concurrent_upload_count", (string) self::CONCURRENT_UPLOADS_DEFAULT);
     }
 
     /**
@@ -70,7 +70,7 @@ class ilFileUploadSettings
     {
         $instance = self::getInstance();
         $instance->dndUploadEnabled = $newValue == true;
-        $instance->settings->set("dnd_upload_enabled", $instance->dndUploadEnabled);
+        $instance->settings->set("dnd_upload_enabled", (string) $instance->dndUploadEnabled);
     }
     
     /**
@@ -93,7 +93,7 @@ class ilFileUploadSettings
     {
         $instance = self::getInstance();
         $instance->repositoryDndUploadEnabled = $newValue == true;
-        $instance->settings->set("repository_dnd_upload_enabled", $instance->repositoryDndUploadEnabled);
+        $instance->settings->set("repository_dnd_upload_enabled", (string) $instance->repositoryDndUploadEnabled);
     }
     
     /**
@@ -129,7 +129,7 @@ class ilFileUploadSettings
         
         $instance = self::getInstance();
         $instance->concurrentUploads = $newValue;
-        $instance->settings->set("concurrent_upload_count", $instance->concurrentUploads);
+        $instance->settings->set("concurrent_upload_count", (string) $instance->concurrentUploads);
     }
     
     /**
