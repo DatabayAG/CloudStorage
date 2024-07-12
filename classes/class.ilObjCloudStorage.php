@@ -602,7 +602,9 @@ class ilObjCloudStorage extends ilObjectPlugin
         $set1 = self::parseIniFile(self::INI_FILENAME);
 
         // Host specific ini settings (lms.example.com.ini)
-        $set2 = self::parseIniFile($DIC->http()->request()->getUri());
+        $set2 = self::parseIniFile($DIC->http()->request()->getUri()->__toString());
+
+        $DIC->http()->request()->getUri();
 
         // xmvc_conn specific ini settings (bbb.example.com.ini)
         $set3 = !is_null($settings) ? self::parseIniFile($settings->getServerURL()) : [];
