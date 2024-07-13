@@ -1,6 +1,6 @@
 <?php
 
-//declare(strict_types=1);
+declare(strict_types=1);
 
 use ILIAS\DI\Container;
 
@@ -574,7 +574,7 @@ class ilCloudStorageConfig
 
     public function getTokenUser(?string $user = null)
     {
-        $array = json_decode($this->getAccessToken(), 1);
+        $array = json_decode($this->getAccessToken(), true);
         $token = !is_null($user) && isset($array[$user]) ? $array[$user] : null;
         return is_null($user) ? $array : $token;
     }
