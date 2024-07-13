@@ -1,6 +1,6 @@
 <?php
 
-//declare(strict_types=1);
+declare(strict_types=1);
 
 use ILIAS\DI\Container;
 
@@ -340,7 +340,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $gui = new ilConfirmationGUI();
         $gui->setFormAction($this->dic->ctrl()->getFormAction($this));
         $gui->setHeaderText($this->dic->language()->txt('rep_robj_xcls_delete_conn'));
-        $gui->addItem('conn_id', $this->object->getConnId(), $this->object->getTitle());
+        $gui->addItem('conn_id', (string) $this->object->getConnId(), $this->object->getTitle());
         $gui->setConfirm($this->dic->language()->txt('rep_robj_xcls_delete'), 'deleteCloudStorageConnConfirmed');
         $gui->setCancel($this->dic->language()->txt('cancel'), 'configure');
 
