@@ -1,6 +1,6 @@
 <?php
 
-//declare(strict_types=1);
+declare(strict_types=1);
 
 // required??
 require_once(__DIR__ . "/../vendor/autoload.php");
@@ -396,7 +396,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
             $this->dic->logger()->root()->debug("files...");
             $size = ($item instanceof ilCloudStorageOwnCloudFile) ? $size = $item->getSize() : null;
             $is_dir = $item instanceof ilCloudStorageOwnCloudFolder;
-            $file_tree->addNode($item->getFullPath(), $item->getId(), $is_dir, strtotime($item->getDateTimeLastModified()), $size);
+            $file_tree->addNode($item->getFullPath(), (int) $item->getId(), $is_dir, strtotime($item->getDateTimeLastModified()), $size);
         }
     }
 
@@ -411,7 +411,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         $this->getClient()->deliverFile($path);
     }
 
-    public function getFileById(string $id): bool 
+    public function getFileById(int $id): bool 
     {
         return false;
     }
@@ -427,7 +427,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         }
     }
 
-    public function createFolderById(string $id, string  $folder_name) : string
+    public function createFolderById(int $id, string  $folder_name) : int
     {
         $path = $this->idToPath($id, $folder_name);
 
@@ -456,7 +456,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         $this->getClient()->delete($path);
     }
 
-    public function deleteItemById(string $id): bool
+    public function deleteItemById(int $id): bool
     {
         return false;
     }
@@ -471,7 +471,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
          return $this->owncl_client;
     }
 
-    protected function idToPath(string $id, string $folder_name = '') : string
+    protected function idToPath(int $id, string $folder_name = '') : string
     {
         $path = ilCloudStorageFileTree::getFileTreeFromSession($this->object->getRefId())->getNodeFromId($id)->getPath();
 
@@ -482,7 +482,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         return $path;
     }
 
-    protected function pathToId(string $path) : string
+    protected function pathToId(string $path) : int
     {
         $node = ilCloudStorageFileTree::getFileTreeFromSession($this->object->getRefId())->getNodeFromPath($path);
 

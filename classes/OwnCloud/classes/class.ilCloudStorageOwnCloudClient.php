@@ -291,9 +291,9 @@ class ilCloudStorageOwnCloudClient
     /**
      * @param string $path
      *
-     * @return string
+     * @return int
      */
-    public function pathToId(string $path) : string
+    public function pathToId(string $path) : int
     {
         $settings = $this->owncl->getClientSettings();
 
@@ -308,7 +308,7 @@ class ilCloudStorageOwnCloudClient
             $this->owncl->getHeaders()
         );
 
-        $id = strval(current($response));
+        $id = (int) (current($response));
 
         return $id;
     }

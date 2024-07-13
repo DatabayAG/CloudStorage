@@ -542,14 +542,14 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $node = $file_tree->getNodeFromPath($path);
                 if (!$node) {
                     $current_path = $file_tree->getRootNode()->getPath();
-                    $current_id = $file_tree->getRootNode()->getID();
+                    $current_id = $file_tree->getRootNode()->getId();
                     $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("node_is_null"), false);
                 } else {
-                    $current_id = json_encode($node->getId());
+                    $current_id = $node->getId();
                 }
             } else {
                 $current_path = $file_tree->getRootNode()->getPath();
-                $current_id = $file_tree->getRootNode()->getID();
+                $current_id = $file_tree->getRootNode()->getId();
                 $file_tree->updateFileTree($current_path);
             }
             // old <script type="text/javascript"> var coudFileList = new ilCloudFileList({ASYNC_GET_BLOCK}, {ASYNC_CREATE_FOLDER}, {ASYNC_UPLOAD_FILE}, {ASYNC_DELETE_ITEM}, {ROOT_ID}, {ROOT_PATH}, {CURRENT_ID}, {CURRENT_PATH}, {MAX_FILE_SIZE}); </script>
@@ -558,9 +558,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 json_encode($this->ctrl->getLinkTarget($this, "asyncCreateFolder", null, true)) . ',' .
                 json_encode($this->ctrl->getLinkTarget($this, "asyncUploadFile", null, true)) . ',' .
                 json_encode($this->ctrl->getLinkTarget($this, "asyncDeleteItem", null, true)) . ',' .
-                json_encode($file_tree->getRootNode()->getId()) . ',' .
+                $file_tree->getRootNode()->getId() . ',' .
                 json_encode($file_tree->getRootNode()->getPath()) . ',' .
-                json_encode($current_id) . ',' .
+                $current_id . ',' .
                 "\"" . ilCloudStorageUtil::encodeBase64Path($current_path) . "\"," .
                 json_encode("Max Filesize....") . ");";
             $this->dic->ui()->mainTemplate()->addOnLoadCode($code);

@@ -23,12 +23,7 @@ class ilCloudStorageOwnCloudFile extends ilCloudStorageOwnCloudItem
      */
     protected $content_url = '';
 
-
-    /**
-     * @param $web_url    String
-     * @param $properties array
-     */
-    public function loadFromProperties($web_url, $properties, $parent_id)
+    public function loadFromProperties(string $web_url, array $properties, int $parent_id): void
     {
         parent::loadFromProperties($web_url, $properties, $parent_id);
         $this->setSize($properties["{DAV:}getcontentlength"]);

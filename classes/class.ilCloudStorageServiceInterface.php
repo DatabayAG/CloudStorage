@@ -31,19 +31,19 @@ interface ilCloudStorageServiceInterface
     
     public function getFile(string $path = "", ?ilCloudStorageFileTree $file_tree = null): void;
 
-    public function getFileById(string $id): bool;
+    public function getFileById(int $id): bool;
     
     public function createFolder(string $path = "", ?ilCloudStorageFileTree $file_tree = null): void;
 
-    public function createFolderById(string $parent_id, string $folder_name): string;
+    public function createFolderById(int $parent_id, string $folder_name): int;
     
     public function putFile(string $tmp_name, string $file_name, string $path = '', ?ilCloudStorageFileTree $file_tree = null): void;
 
-    public function putFileById($tmp_name, $file_name, $id): bool;
+    public function putFileById(string $tmp_name, string $file_name, int $id): bool;
 
     public function deleteItem(string $path = "", ?ilCloudStorageFileTree $file_tree = null): void;
 
-    public function deleteItemById(string $id): bool;
+    public function deleteItemById(int $id): bool;
 
     public function isCaseSensitive(): bool;
     

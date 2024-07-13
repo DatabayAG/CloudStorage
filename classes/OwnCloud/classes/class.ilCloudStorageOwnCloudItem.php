@@ -14,9 +14,9 @@ abstract class ilCloudStorageOwnCloudItem
     const TYPE_FOLDER = 1;
     const TYPE_FILE = 2;
     /**
-     * @var string
+     * @var int
      */
-    protected $id = '';
+    protected $id = 0;
     /**
      * @var string
      */
@@ -55,14 +55,10 @@ abstract class ilCloudStorageOwnCloudItem
     protected $e_tag = '';
 
 
-    /**
-     * @param $web_url    String
-     * @param $properties array
-     */
-    public function loadFromProperties($web_url, $properties, $parent_id)
+    public function loadFromProperties(string $web_url, array $properties, int $parent_id): void
     {
         $web_url = rawurldecode($web_url);
-        $this->setId($properties["{http://owncloud.org/ns}fileid"]);
+        $this->setId((int) $properties["{http://owncloud.org/ns}fileid"]);
         $this->setParentId($parent_id);
         $this->setWebUrl($web_url);
         if ($this->getType() == self::TYPE_FOLDER) {
@@ -100,7 +96,7 @@ abstract class ilCloudStorageOwnCloudItem
 
 
     /**
-     * @return string
+     * @return int
      */
     public function getId()
     {
@@ -109,7 +105,7 @@ abstract class ilCloudStorageOwnCloudItem
 
 
     /**
-     * @param string $id
+     * @param int $id
      */
     public function setId($id)
     {

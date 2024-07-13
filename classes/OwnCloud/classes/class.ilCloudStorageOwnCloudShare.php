@@ -1,6 +1,6 @@
 <?php
 
-//declare(strict_types=1);
+declare(strict_types=1);
 
 /**
  * Class ilCloudStorageOwnCloudShare
@@ -181,7 +181,8 @@ class ilCloudStorageOwnCloudShare
      */
     public function hasPermission(int $permission) : bool
     {
-    	return $this->permissions & $permission;
+        // ToDo: check if this is correct: https://www.php.net/manual/de/language.operators.bitwise.php
+    	return ($this->permissions & $permission) == true;
     }
 
     /**
