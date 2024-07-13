@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-// required??
-require_once(__DIR__ . "/../vendor/autoload.php");
 use ILIAS\DI\Container;
 
 use \League\OAuth2\Client\OptionProvider\HttpBasicAuthOptionProvider;

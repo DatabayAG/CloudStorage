@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use ILIAS\DI\Container;
+require_once(__DIR__ . "/../vendor/autoload.php");
 
 /**
 * CloudStorage repository object plugin

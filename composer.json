@@ -5,7 +5,8 @@
   },
   "autoload": {
     "classmap": [
-      "classes/"
+      "./classes/",
+      "./classes/OwnCloud/classes/"
     ]
   }
 }
