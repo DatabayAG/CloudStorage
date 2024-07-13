@@ -204,13 +204,14 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
 
     public function openInPlatform(): void
     {
-        $upload_perm = $this->dic->access()->checkAccess('edit_in_online_editor', '', filter_input(INPUT_GET, 'ref_id', FILTER_SANITIZE_NUMBER_INT));
+        $ref_id = $this->dic->http()->wrapper()->query()->retrieve('ref_id', $this->dic->refinery()->kindlyTo()->int());
+        $upload_perm = $this->dic->access()->checkAccess('edit_in_online_editor', '', $ref_id);
         if (!$upload_perm || !$this->isOpenInPlatformActive()) {
             echo 'Permission Denied.';
             exit;
         }
-        $path = filter_input(INPUT_GET, self::ITEM_PATH, FILTER_SANITIZE_STRING);
-        $id = filter_input(INPUT_GET, self::ITEM_ID, FILTER_SANITIZE_STRING);
+        $path = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_PATH, $this->dic->refinery()->kindlyTo()->string());//filter_input(INPUT_GET, self::ITEM_PATH, FILTER_SANITIZE_STRING);
+        $id = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_ID, $this->dic->refinery()->kindlyTo()->string());//filter_input(INPUT_GET, self::ITEM_ID, FILTER_SANITIZE_STRING);
         $this->service->checkAndRefreshAuthentication();
         $client = $this->service->getClient();
         $client->shareItem($path, $this->dic->user());
