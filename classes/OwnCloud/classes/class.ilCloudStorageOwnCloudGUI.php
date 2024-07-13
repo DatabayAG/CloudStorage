@@ -210,8 +210,8 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
             echo 'Permission Denied.';
             exit;
         }
-        $path = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_PATH, $this->dic->refinery()->kindlyTo()->string());//filter_input(INPUT_GET, self::ITEM_PATH, FILTER_SANITIZE_STRING);
-        $id = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_ID, $this->dic->refinery()->kindlyTo()->string());//filter_input(INPUT_GET, self::ITEM_ID, FILTER_SANITIZE_STRING);
+        $path = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_PATH, $this->dic->refinery()->kindlyTo()->string());
+        $id = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_ID, $this->dic->refinery()->kindlyTo()->string());
         $this->service->checkAndRefreshAuthentication();
         $client = $this->service->getClient();
         $client->shareItem($path, $this->dic->user());
