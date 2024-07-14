@@ -84,33 +84,35 @@ $cb->addSubItem($si);
 $this->form->addItem($cb);
 
 $sh = new ilFormSectionHeaderGUI();
-$sh->setTitle($pl->txt("oa2_active"));
-$sh->setInfo($pl->txt("oa2_active_info"));
+$sh->setTitle($pl->txt("authentication"));
+$sh->setInfo($pl->txt("authentication_info"));
 $this->form->addItem($sh);
-/*
-$cb = new ilCheckboxInputGUI($pl->txt("oa2_active"), "oa2_active");
-// must be set to required until optional BasicAuth is implemented
-$cb->setRequired(true);
-$cb->setInfo($pl->txt("oa2_active_info"));
-*/
+
+$rg = new ilRadioGroupInputGUI('','authentication_type');
+$rg->setRequired(true);
+$rg->setValue('authentication_type');
+
+// OAuth Option
+$ro = new ilRadioOption($pl->txt("oa2_active"),"oa2_active");
+
 $ti = new ilTextInputGUI($pl->txt("oa2_client_id"), "oa2_client_id");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);
 $ti->setSize(60);
-$this->form->addItem($ti);
+$ro->addSubItem($ti);
 
 $ti = new ilTextInputGUI($pl->txt("oa2_client_secret"), "oa2_client_secret");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);
 $ti->setSize(60);
-$this->form->addItem($ti);
+$ro->addSubItem($ti);
 
 $ti = new ilTextInputGUI($pl->txt("oa2_path"), "oa2_path");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);
 $ti->setSize(60);
 $ti->setInfo(ilCloudStorageOwnCloud::getDefaultOAuth2Path());
-$this->form->addItem($ti);
+$ro->addSubItem($ti);
 
 $si = new ilSelectInputGUI($this->plugin_object->txt('oa2_token_request_auth'), 'oa2_token_request_auth');
 $si->setOptions(
@@ -121,7 +123,28 @@ $si->setOptions(
 );
 $si->setInfo($this->plugin_object->txt('oa2_token_request_auth_info'));
 $si->setRequired(false);
-$this->form->addItem($si);
+$ro->addSubItem($si);
+$rg->addOption($ro);
+
+// BasicAuth Option
+
+$ro = new ilRadioOption($pl->txt("bauth_active"),"bauth_active");
+$ti = new ilTextInputGUI($pl->txt("account_username"), "account_username");
+$ti->setRequired(true);
+$ti->setMaxLength(1024);
+$ti->setSize(60);
+$ti->setInfo($pl->txt("account_username_info"));
+$ro->addSubItem($ti);
+
+$pi = new ilPasswordInputGUI($pl->txt("account_password"), "account_password");
+$pi->setRequired(true);
+$pi->setMaxLength(1024);
+$pi->setSize(60);
+$pi->setInfo($pl->txt("account_password"));
+$ro->addSubItem($pi);
+
+$rg->addOption($ro);
+$this->form->addItem($rg);
 
 $sh = new ilFormSectionHeaderGUI();
 $sh->setTitle($pl->txt("extended_networking"));

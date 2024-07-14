@@ -444,10 +444,9 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
             if ($value == null) {
                 $value = '';
             }
-            $field->setValue($value);
+            $field->setValue((string) $value);
             return $field;
         };
-
 
         $formFieldItems = $this->form->getInputItemsRecursive();
         $formHasField = [];
