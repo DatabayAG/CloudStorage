@@ -83,18 +83,12 @@ $cb->addSubItem($si);
 
 $this->form->addItem($cb);
 
-$sh = new ilFormSectionHeaderGUI();
-$sh->setTitle($pl->txt("authentication"));
-$sh->setInfo($pl->txt("authentication_info"));
-$this->form->addItem($sh);
-
-$rg = new ilRadioGroupInputGUI('','authentication_type');
+// Authentication
+$rg = new ilRadioGroupInputGUI($pl->txt("authentication"),'oa2_active');
 $rg->setRequired(true);
-$rg->setValue('authentication_type');
 
 // OAuth Option
-$ro = new ilRadioOption($pl->txt("oa2_active"),"oa2_active");
-
+$ro = new ilRadioOption($pl->txt("oa2_active"),"1");
 $ti = new ilTextInputGUI($pl->txt("oa2_client_id"), "oa2_client_id");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);
@@ -127,24 +121,23 @@ $ro->addSubItem($si);
 $rg->addOption($ro);
 
 // BasicAuth Option
-
-$ro = new ilRadioOption($pl->txt("bauth_active"),"bauth_active");
+$ro = new ilRadioOption($pl->txt("bauth_active"),"0");
 $ti = new ilTextInputGUI($pl->txt("account_username"), "account_username");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);
 $ti->setSize(60);
-$ti->setInfo($pl->txt("account_username_info"));
+//$ti->setInfo($pl->txt("account_username_info"));
 $ro->addSubItem($ti);
 
 $pi = new ilPasswordInputGUI($pl->txt("account_password"), "account_password");
 $pi->setRequired(true);
 $pi->setMaxLength(1024);
 $pi->setSize(60);
-$pi->setInfo($pl->txt("account_password"));
+//$pi->setInfo($pl->txt("account_password"));
 $ro->addSubItem($pi);
-
 $rg->addOption($ro);
 $this->form->addItem($rg);
+
 
 $sh = new ilFormSectionHeaderGUI();
 $sh->setTitle($pl->txt("extended_networking"));

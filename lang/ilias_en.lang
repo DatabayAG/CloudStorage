@@ -99,6 +99,9 @@ oa2_client_secret#:#Secret
 oa2_path#:#OAuth2 path
 oa2_token_request_auth#:#Token request authentication
 oa2_token_request_auth_info#:#Defines how token requests are authenticated (experimental - "Post Body" may be required for NextCloud).
+bauth_active#:#Basic-Authentication
+account_username#:#Username
+account_password#:#Password
 extended_networking#:#Extended Network Settings
 extended_networking_info#:#Only relevant in certain system configurations. Please contact technical support for more information.
 header#:#Basic (header)
@@ -106,6 +109,7 @@ post_body#:#Post Body
 default_info#:#Default: %s
 info_token_expires#:#Access Token expires
 root_folder#:#Folder
+authentication#:#Authentication
 not_authorized#:#Authentication failed. Please reload the page to be redirected to the authentication authority.
 only_owner#:#Only the person who created the Cloud Folder can currently open it.
 open_in_ownCloud#:#Open in external editor

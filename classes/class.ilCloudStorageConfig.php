@@ -177,7 +177,7 @@ class ilCloudStorageConfig
         $this->collaborationAppFormats = $this->getCollaborationAppFormats(true);
         $this->collaborationAppMappingField = 'login';
         $this->collaborationAppUrl = '';
-        $this->oauth2Active = false;
+        $this->oauth2Active = true;
         $this->oauth2ClientId = '';
         $this->oauth2ClientSecret = '';
         $this->oauth2Path = $this->getOAuth2Path(true);
@@ -377,14 +377,12 @@ class ilCloudStorageConfig
 
     public function getOAuth2Active(): bool
     {
-        return true;
-        //return $this->oauth2Active;
+        return $this->oauth2Active;
     }
 
     public function setOAuth2Active(bool $oauth2Active): void
     {
-        $this->oauth2Active = true;
-        //$this->oauth2Active = $oauth2Active;
+        $this->oauth2Active = $oauth2Active;
     }
 
     public function getOAuth2ClientId(): string

@@ -479,7 +479,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $values['col_app_formats']         = $this->object->getCollaborationAppFormats();
         $values['col_app_mapping_field']   = $this->object->getCollaborationAppMappingField();
         $values['col_app_url']             = $this->object->getCollaborationAppUrl();
-        $values['oa2_active']               = $this->object->getOAuth2Active();
+        $values['oa2_active']               = $this->object->ilBoolToInt($this->object->getOAuth2Active());
         $values['oa2_client_id']            = $this->object->getOAuth2ClientId();
         $values['oa2_client_secret']        = $this->object->getOAuth2ClientSecret();
         $values['oa2_path']                 = $this->object->getOAuth2Path();
@@ -515,7 +515,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
 
         if ($form->checkInput()) {
 
-            $this->object->setConnId(!!(bool)($connId = $form->getInput("conn_id")) ? $connId : null);
+            $this->object->setConnId(!!(bool)($connId = (int) $form->getInput("conn_id")) ? $connId : null);
             $this->object->setTitle($form->getInput("title"));
             $this->object->setHint((string)$this->object->removeUnsafeChars($form->getInput("hint")));
             $this->object->setAvailability((int) $form->getInput("cb_availability"));
@@ -528,7 +528,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
             $this->object->setCollaborationAppFormats($form->getInput("col_app_formats"));
             $this->object->setCollaborationAppMappingField($form->getInput("col_app_mapping_field"));
             $this->object->setCollaborationAppUrl($form->getInput("col_app_url"));
-            $this->object->setOAuth2Active(true);
+            $this->object->setOAuth2Active($this->object->ilIntToBool((int) $form->getInput("oa2_active")));
             $this->object->setOauth2ClientId(trim($form->getInput("oa2_client_id")));
             $this->object->setOauth2ClientSecret(trim($form->getInput("oa2_client_secret")));
             $this->object->setOauth2Path($form->getInput("oa2_path"));
