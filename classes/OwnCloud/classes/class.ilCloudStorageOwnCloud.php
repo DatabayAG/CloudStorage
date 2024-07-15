@@ -62,16 +62,23 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         $this->parent_ref_id = $a_parent_ref_id;
         
         //$this->pluginIniSet = ilObjCloudStorage::setPluginIniSet($this->config);
-        if ($this->config->getOAuth2Active()) {
-            $this->provider_options = [
-                        'clientId' => $this->config->getOAuth2ClientID(),
-                        'clientSecret' => $this->config->getOAuth2ClientSecret(),
-                        'redirect_uri' => self::getRedirectUri(),
-                        'urlAuthorize' => $this->config->getFullOAuth2Path() . '/authorize',
-                        'urlAccessToken' => $this->config->getFullOAuth2Path() . '/api/v1/token',
-                        'urlResourceOwnerDetails' => $this->config->getFullOAuth2Path() . '/resource'
-            ];
-            $this->oauth2_provider = new GenericProvider($this->provider_options,['optionProvider' => $this->getOptionProvider($this->config->getOAuth2TokenRequestAuth())]);
+        switch ($this->config->getAuthMethod()) {
+            case $this->config::AUTH_METHOD_OAUTH2:
+                $this->provider_options = [
+                            'clientId' => $this->config->getOAuth2ClientID(),
+                            'clientSecret' => $this->config->getOAuth2ClientSecret(),
+                            'redirect_uri' => self::getRedirectUri(),
+                            'urlAuthorize' => $this->config->getFullOAuth2Path() . '/authorize',
+                            'urlAccessToken' => $this->config->getFullOAuth2Path() . '/api/v1/token',
+                            'urlResourceOwnerDetails' => $this->config->getFullOAuth2Path() . '/resource'
+                ];
+                $this->oauth2_provider = new GenericProvider($this->provider_options,['optionProvider' => $this->getOptionProvider($this->config->getOAuth2TokenRequestAuth())]);
+                break;
+            case $this->config::AUTH_METHOD_BASIC:
+                //ToDo
+                break;
+            default: 
+                //ToDo
         }
         $this->owncl_client = new ilCloudStorageOwnCloudClient($this);
     }
@@ -108,6 +115,25 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
     {
 
         $this->dic->logger()->root()->debug("authService");
+        switch ($this->config->getAuthMethod()) {
+            case $this->config::AUTH_METHOD_OAUTH2:
+                try {
+                    $this->OAuth2Authenticate($callback_url);
+                } catch(ilCloudStorageException $e) {
+                    $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), true);
+                }
+                break;
+            case $this->config::AUTH_METHOD_BASIC:
+                try {
+                    $this->basicAuthenticate($callback_url);
+                } catch(ilCloudStorageException $e) {
+                    $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), true);
+                }
+                break;
+            default: 
+                //ToDo
+        }
+        /*
         if ($this->config->getOAuth2Active()) {
             try {
                 $this->OAuth2Authenticate($callback_url);
@@ -121,6 +147,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
                 $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), true);
             }
         }
+        */
     }
 
     public function OAuth2Authenticate(string $callback_url): void 
@@ -161,11 +188,23 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         if (!$this->getClient()->folderExists($root_folder)) {
             $this->createFolder($root_folder);
         }
+        switch ($this->config->getAuthMethod()) {
+            case $this->config::AUTH_METHOD_OAUTH2:
+                $this->OAuth2AfterAuthentication();
+                break;
+            case $this->config::AUTH_METHOD_BASIC:
+                $this->basicAfterAuthentication();
+                break;
+            default: 
+                //ToDo
+        }
+        /*
         if ($this->config->getOAuth2Active()) {
             $this->OAuth2AfterAuthentication();
         } else {
             $this->basicAfterAuthentication();
         }
+        */
         ilSession::clear(self::CALLBACK_URL);
         ilSession::clear(self::OAUTH2_PROVIDER_OPTIONS);
         ilSession::clear(self::OAUTH2_TOKEN_REQUEST_AUTH);
@@ -216,6 +255,19 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
     public function getHeaders(): array
     {
         $this->dic->logger()->root()->debug("getHeaders");
+        switch ($this->config->getAuthMethod()) {
+            case $this->config::AUTH_METHOD_OAUTH2:
+                return array('Authorization' => 'Bearer ' . $this->getToken()->getAccessToken());
+                break;
+            case $this->config::AUTH_METHOD_BASIC:
+                return array(
+                    'Authorization' => 'Basic ' . base64_encode($this->object->getUsername() . ':' . $this->object->getPassword())
+                );
+                break;
+            default: 
+                //ToDo
+        }
+        /*
         if ($this->config->getOAuth2Active()) {
             return array('Authorization' => 'Bearer ' . $this->getToken()->getAccessToken());
         } else {
@@ -223,11 +275,45 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
                 'Authorization' => 'Basic ' . base64_encode($this->object->getUsername() . ':' . $this->object->getPassword())
             );
         }
+        */
     }
 
     public function getClientSettings(): array
     {
         $this->dic->logger()->root()->debug("getClientSettings");
+        switch ($this->config->getAuthMethod()) {
+            case $this->config::AUTH_METHOD_OAUTH2:
+                if ($this->config->getProxyURL() != '') {
+                    return array(
+                        'baseUri' => $this->config->getFullWebDAVPath(),
+                        'proxy'   => $this->config->getProxyURL(),
+                    );
+                } else {
+                    return array(
+                        'baseUri' => $this->config->getFullWebDAVPath(),
+                    );
+                }
+                break;
+            case $this->config::AUTH_METHOD_BASIC:
+                if ($this->config->getProxyURL() != '') {
+                    return array(
+                        'baseUri'  => $this->config->getFullWebDAVPath(),
+                        'userName' => $this->object->getUsername(),
+                        'password' => $this->object->getPassword(),
+                        'proxy'    => $this->config->getProxyURL(),
+                    );
+                } else {
+                    return array(
+                        'baseUri'  => $this->config->getFullWebDAVPath(),
+                        'userName' => $this->object->getUsername(),
+                        'password' => $this->object->getPassword(),
+                    );
+                }
+                break;
+            default: 
+                //ToDo
+        }
+        /*
         if ($this->config->getOAuth2Active()) {
             if ($this->config->getProxyURL() != '') {
                 return array(
@@ -255,6 +341,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
                 );
             }
         }
+        */
     }
 
     public function getToken(): ilCloudStorageOwnCloudToken

@@ -224,7 +224,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $this->object->setCollaborationAppMappingField($oldConn['collaboration_app_integration_mapping_field']);
         $this->object->setCollaborationAppUrl($oldConn['collaboration_app_integration_url']);
         //$this->object->setOAuth2Active($this->object->ilIntToBool((int) $oldConn['oauth2_active']));
-        $this->object->setOAuth2Active(true);
+        //$this->object->setOAuth2Active(true);
         if ($keepCredentials) {
             $this->object->setOAuth2ClientId($oldConn['oauth2_active_oauth2_client_id']);
             $this->object->setOAuth2ClientSecret($oldConn['oauth2_active_oauth2_client_secret']);
@@ -479,7 +479,6 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $values['col_app_formats']         = $this->object->getCollaborationAppFormats();
         $values['col_app_mapping_field']   = $this->object->getCollaborationAppMappingField();
         $values['col_app_url']             = $this->object->getCollaborationAppUrl();
-        $values['oa2_active']               = $this->object->ilBoolToInt($this->object->getOAuth2Active());
         $values['oa2_client_id']            = $this->object->getOAuth2ClientId();
         $values['oa2_client_secret']        = $this->object->getOAuth2ClientSecret();
         $values['oa2_path']                 = $this->object->getOAuth2Path();
@@ -528,7 +527,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
             $this->object->setCollaborationAppFormats($form->getInput("col_app_formats"));
             $this->object->setCollaborationAppMappingField($form->getInput("col_app_mapping_field"));
             $this->object->setCollaborationAppUrl($form->getInput("col_app_url"));
-            $this->object->setOAuth2Active($this->object->ilIntToBool((int) $form->getInput("oa2_active")));
+            $this->object->setAuthMethod($form->getInput("auth_method"));
             $this->object->setOauth2ClientId(trim($form->getInput("oa2_client_id")));
             $this->object->setOauth2ClientSecret(trim($form->getInput("oa2_client_secret")));
             $this->object->setOauth2Path($form->getInput("oa2_path"));
@@ -569,7 +568,6 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $values['col_app_formats']         = $this->object->getCollaborationAppFormats();
         $values['col_app_mapping_field']   = $this->object->getCollaborationAppMappingField();
         $values['col_app_url']             = $this->object->getCollaborationAppUrl();
-        $values['oa2_active']               = $this->object->getOAuth2Active();
         $values['oa2_client_id']            = $this->object->getOAuth2ClientId();
         $values['oa2_client_secret']        = $this->object->getOAuth2ClientSecret();
         $values['oa2_path']                 = $this->object->getOAuth2Path();

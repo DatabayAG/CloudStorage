@@ -84,11 +84,11 @@ $cb->addSubItem($si);
 $this->form->addItem($cb);
 
 // Authentication
-$rg = new ilRadioGroupInputGUI($pl->txt("authentication"),'oa2_active');
+$rg = new ilRadioGroupInputGUI($pl->txt("authentication"),'auth_method');
 $rg->setRequired(true);
 
 // OAuth Option
-$ro = new ilRadioOption($pl->txt("oa2_active"),"1");
+$ro = new ilRadioOption($pl->txt("oa2_active"),"oauth2");
 $ti = new ilTextInputGUI($pl->txt("oa2_client_id"), "oa2_client_id");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);
@@ -121,7 +121,10 @@ $ro->addSubItem($si);
 $rg->addOption($ro);
 
 // BasicAuth Option
-$ro = new ilRadioOption($pl->txt("bauth_active"),"0");
+$ro = new ilRadioOption($pl->txt("bauth_active"),"basic");
+$ro->setInfo($pl->txt("bauth_active_info"));
+
+/*
 $ti = new ilTextInputGUI($pl->txt("account_username"), "account_username");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);
@@ -135,6 +138,7 @@ $pi->setMaxLength(1024);
 $pi->setSize(60);
 //$pi->setInfo($pl->txt("account_password"));
 $ro->addSubItem($pi);
+*/
 $rg->addOption($ro);
 $this->form->addItem($rg);
 

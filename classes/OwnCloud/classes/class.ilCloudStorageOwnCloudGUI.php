@@ -108,11 +108,25 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
             $this->form->addItem($open_in_owncloud);
         }
         */
+        switch ($this->config->getAuthMethod()) {
+            case $this->config::AUTH_METHOD_OAUTH2:
+                $n = new ilNonEditableValueGUI($this->object->txt('info_token_expires'));
+                $n->setValue(date('d.m.Y - H:i:s', $this->service->getToken()->getValidThrough()));
+                $this->parent->form->addItem($n);
+                break;
+            case $this->config::AUTH_METHOD_BASIC:
+                //ToDo
+                break;
+            default: 
+                //ToDo
+        }
+        /*
         if ($this->config->getOAuth2Active()) {    
             $n = new ilNonEditableValueGUI($this->object->txt('info_token_expires'));
             $n->setValue(date('d.m.Y - H:i:s', $this->service->getToken()->getValidThrough()));
             $this->parent->form->addItem($n);
         }
+        */
     }
 
     public function getPropertiesValues(array &$values): void

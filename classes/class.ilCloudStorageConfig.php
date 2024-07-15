@@ -32,6 +32,10 @@ class ilCloudStorageConfig
 
     public const FS_RELATED_FUNCTION = [];
 
+    public const AUTH_METHOD_BASIC = 'basic';
+    public const AUTH_METHOD_OAUTH2 = 'oauth2';
+    public const AUTH_METHOD_OICD = 'iocd';
+
     private Container $dic;
     private ilDBInterface $db;
 
@@ -133,7 +137,6 @@ class ilCloudStorageConfig
             'col_app_formats'          => ['text', $this->getCollaborationAppFormats()],
             'col_app_mapping_field'    => ['text', $this->getCollaborationAppMappingField()],
             'col_app_url'              => ['text', $this->getCollaborationAppUrl()],
-            'oa2_active'                => ['integer', $this->ilBoolToInt($this->getOAuth2Active())],
             'oa2_client_id'             => ['text', $this->getOAuth2ClientId()],
             'oa2_client_secret'         => ['text', $this->getOAuth2ClientSecret()],
             'oa2_path'                  => ['text', $this->getOAuth2Path()],
@@ -222,7 +225,6 @@ class ilCloudStorageConfig
             $this->setCollaborationAppFormats($record["col_app_formats"]);
             $this->setCollaborationAppMappingField($record["col_app_mapping_field"]);
             $this->setCollaborationAppUrl($record["col_app_url"]);
-            $this->setOAuth2Active($this->ilIntToBool($record["oa2_active"]));
             $this->setOauth2ClientId($record["oa2_client_id"]);
             $this->setOauth2ClientSecret($record["oa2_client_secret"]);
             $this->setOauth2Path($record["oa2_path"]);
@@ -373,16 +375,6 @@ class ilCloudStorageConfig
     public function setCollaborationAppUrl(string $collaborationAppUrl): void
     {
         $this->collaborationAppUrl = $collaborationAppUrl;
-    }
-
-    public function getOAuth2Active(): bool
-    {
-        return $this->oauth2Active;
-    }
-
-    public function setOAuth2Active(bool $oauth2Active): void
-    {
-        $this->oauth2Active = $oauth2Active;
     }
 
     public function getOAuth2ClientId(): string

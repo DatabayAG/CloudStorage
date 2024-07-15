@@ -100,6 +100,7 @@ oa2_path#:#OAuth2 path
 oa2_token_request_auth#:#Token request authentication
 oa2_token_request_auth_info#:#Defines how token requests are authenticated (experimental - "Post Body" may be required for NextCloud).
 bauth_active#:#Basic-Authentication
+bauth_active_info#:#Username and password have to be specified at Cloud Folder creation.
 account_username#:#Username
 account_password#:#Password
 extended_networking#:#Extended Network Settings

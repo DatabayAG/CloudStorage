@@ -63,33 +63,11 @@ class ilObjCloudStorageAccess extends ilObjectPluginAccess
             $object = new ilObjCloudStorage($a_ref_id);
             $obj_ids = $object->getAllWithSameOwnerAndConnection();
             $service = ilCloudStorageConfig::getServiceFromConfig($a_ref_id, $object->getConnId());
+            $config = ilCloudStorageConfig::getInstance($object->getConnId());
             assert($service instanceof ilCloudStorageServiceInterface);
-            if (!$service->checkAndRefreshAuthentication()) {
-                foreach ($obj_ids as $obj_id) {
-                    $ref_ids = ilObject::_getAllReferences($obj_id);
-                    foreach ($ref_ids as $ref_id) {
-                        self::$connection_check_cache[$ref_id] = self::$connection_status;
-                        $obj = new ilObjCloudStorage($ref_id);
-                        $obj->setAuthComplete(false);
-                        $obj->update();
-                    }
-                }
-            } else {
-                try {
-                    $service->checkConnection();
-                    foreach ($obj_ids as $obj_id) {
-                        $ref_ids = ilObject::_getAllReferences($obj_id);
-                        foreach ($ref_ids as $ref_id) {
-                            self::$connection_check_cache[$ref_id] = 0;
-                            $obj = new ilObjCloudStorage($ref_id);
-                            $obj->setAuthComplete(true);
-                            $obj->update();
-                        }
-                    }
-                } catch(ilCloudStorageException $e) {
-                    self::$connection_status = $e->getCode();
-                    // authorization failed even though auth_complete = true
-                    if ($object->getAuthComplete() && $e->getCode() == ilCloudStorageException::NOT_AUTHORIZED) {
+            switch ($config->getAuthMethod()) {
+                case ilCloudStorageConfig::AUTH_METHOD_OAUTH2:
+                    if (!$service->checkAndRefreshAuthentication()) {
                         foreach ($obj_ids as $obj_id) {
                             $ref_ids = ilObject::_getAllReferences($obj_id);
                             foreach ($ref_ids as $ref_id) {
@@ -100,15 +78,48 @@ class ilObjCloudStorageAccess extends ilObjectPluginAccess
                             }
                         }
                     } else {
-                        foreach ($obj_ids as $obj_id) {
-                            $ref_ids = ilObject::_getAllReferences($obj_id);
-                            foreach ($ref_ids as $ref_id) {
-                                self::$connection_check_cache[$ref_id] = self::$connection_status;
+                        try {
+                            $service->checkConnection();
+                            foreach ($obj_ids as $obj_id) {
+                                $ref_ids = ilObject::_getAllReferences($obj_id);
+                                foreach ($ref_ids as $ref_id) {
+                                    self::$connection_check_cache[$ref_id] = 0;
+                                    $obj = new ilObjCloudStorage($ref_id);
+                                    $obj->setAuthComplete(true);
+                                    $obj->update();
+                                }
+                            }
+                        } catch(ilCloudStorageException $e) {
+                            self::$connection_status = $e->getCode();
+                            // authorization failed even though auth_complete = true
+                            if ($object->getAuthComplete() && $e->getCode() == ilCloudStorageException::NOT_AUTHORIZED) {
+                                foreach ($obj_ids as $obj_id) {
+                                    $ref_ids = ilObject::_getAllReferences($obj_id);
+                                    foreach ($ref_ids as $ref_id) {
+                                        self::$connection_check_cache[$ref_id] = self::$connection_status;
+                                        $obj = new ilObjCloudStorage($ref_id);
+                                        $obj->setAuthComplete(false);
+                                        $obj->update();
+                                    }
+                                }
+                            } else {
+                                foreach ($obj_ids as $obj_id) {
+                                    $ref_ids = ilObject::_getAllReferences($obj_id);
+                                    foreach ($ref_ids as $ref_id) {
+                                        self::$connection_check_cache[$ref_id] = self::$connection_status;
+                                    }
+                                }
                             }
                         }
                     }
-                }
+                    break;
+                case $config::AUTH_METHOD_BASIC:
+                    //ToDo
+                    break;
+                default: 
+                    //ToDo
             }
+            
         }
     }
 

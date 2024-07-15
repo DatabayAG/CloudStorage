@@ -108,29 +108,33 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageServiceInterface);
         $this->dic->ui()->mainTemplate()->setAlertProperties($this->getAlertProperties());
-        // OAuth2
-        if ($this->config->getOAuth2Active()) {
-            if (!$this->dic->http()->wrapper()->query()->has('authMode')) {
-                if (!$this->object->getAuthComplete()) {
-                    if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {
-                        $this->serviceAuth($this->object);
+        
+        switch ($this->config->getAuthMethod()) {
+            case $this->config::AUTH_METHOD_OAUTH2:
+                if (!$this->dic->http()->wrapper()->query()->has('authMode')) {
+                    if (!$this->object->getAuthComplete()) {
+                        if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {
+                            $this->serviceAuth($this->object);
+                        } else {
+                            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("only_owner"), true);
+                            $this->redirectToRefId($this->parent_id);
+                        }
                     } else {
-                        $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("only_owner"), true);
-                        $this->redirectToRefId($this->parent_id);
-                    }
-                } else {
-                    try {
-                        $this->service->checkConnection();
-                    } catch(ilCloudStorageException $e) {
-                        $this->handleConnectionException($e, false);
+                        try {
+                            $this->service->checkConnection();
+                        } catch(ilCloudStorageException $e) {
+                            $this->handleConnectionException($e, false);
+                        }
                     }
                 }
-            }
-        } else { // BasicAuth
-            // Sn: ToDo
-            $this->dic->logger()->root()->debug("BasicAuth");
+            break;
+            case $this->config::AUTH_METHOD_BASIC:
+                $this->dic->logger()->root()->debug("BasicAuth");
+                break;
+            default:
+                $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', 'unsuported auth_method:' . $this->config->getAuthMethod(), true);
         }
-        
+
         switch ($cmd) {
             case "editProperties":
                 $this->checkPermission("write");
@@ -329,12 +333,44 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->redirectToRefId($this->parent_id);
         }
         $form = parent::initCreateForm($a_new_type);
-        // CloudStorageConn selection
+        // CloudStorageConn RadioButtons
+
+        $rg = new ilRadioGroupInputGUI($this->txt("conn_id"),'conn_id');
+        $rg->setRequired(true);
+        foreach (ilCloudStorageConfig::_getAvailableCloudStorageConn(true) as $key => $value) {
+            $ro = new ilRadioOption($value, $key);
+            $config = ilCloudStorageConfig::getInstance($key);
+            if ($config->getAuthMethod() == ilCloudStorageConfig::AUTH_METHOD_BASIC) {
+                $ti = new ilTextInputGUI($this->txt("account_username"), "username");
+                $ti->setRequired(true);
+                $ti->setMaxLength(1024);
+                $ti->setSize(60);
+                $ro->addSubItem($ti);
+
+                $pi = new ilPasswordInputGUI($this->txt("account_password"), "password");
+                $pi->setRequired(true);
+                $pi->setMaxLength(1024);
+                $pi->setSize(60);
+                $ro->addSubItem($pi);
+            }
+            $rg->addOption($ro);
+        }
+        $form->addItem($rg);
+        /*
+        // Connections as radio buttons
+        $ro = new ilRadioOption($pl->txt("oa2_active"),"oauth2");
+        $ti = new ilTextInputGUI($pl->txt("oa2_client_id"), "oa2_client_id");
+        $ti->setRequired(true);
+        $ti->setMaxLength(1024);
+        $ti->setSize(60);
+        $ro->addSubItem($ti);
+
         $combo = new ilSelectInputGUI($this->txt("conn_id"), 'conn_id');
         $combo->setRequired(true);
         $combo->setOptions(ilCloudStorageConfig::_getAvailableCloudStorageConn(true));
         //$combo->setInfo($pl->txt('info_platform_chg_reset_data'));
         $form->addItem($combo);
+        */
 
         // online
         $cb = new ilCheckboxInputGUI($this->lng->txt("online"), "online");
@@ -356,6 +392,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         // Sn: ToDo ?
         //$newObj->setAuthUser($DIC->user()->getEmail());
         $newObj->setOwnerId($this->dic->user()->getId());
+        $newObj->setUsername($form->getInput("username"));
+        $newObj->setPassword($form->getInput("password"));
+
         $newObj->createFolder((int) $form->getInput("online"), $form->getInput("conn_id"));
         $newObj->update();
         
@@ -452,6 +491,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->dic->object()->commonSettings()->legacyForm($this->form, $this->object)->saveTileImage();
             $this->object->setTitle(ilStr::shortenTextExtended($this->form->getInput("title"),64,true));
             $this->object->setDescription($this->form->getInput("desc"));
+            $this->object->setUsername($this->form->getInput("username"));
+            $this->object->setPassword($this->form->getInput("password"));
             $this->object->setOnline($this->form->getInput("online"));
             $this->serviceGUI->updateProperties();
             $this->object->update();

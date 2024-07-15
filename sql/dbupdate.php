@@ -260,4 +260,13 @@ if (!$ilDB->tableExists('rep_robj_xcls_ocld_tk')) {
 require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
 ilObjCloudStorage::migrationSetup();
 ?>
-
+<#5>
+<?php
+if ($ilDB->tableExists('rep_robj_xcls_conn')) {
+    $ilDB->queryF('UPDATE rep_robj_xcls_conn SET auth_method = %s', array('text'), array('oauth2'));
+}
+if ($ilDB->tableExists('rep_robj_xcls_conn')) {
+    $ilDB->queryF('UPDATE rep_robj_xcls_conn SET auth_method = %s', array('text'), array('oauth2'));
+    $ilDB->dropTableColumn('rep_robj_xcls_conn','oa2_active');
+}
+?>
