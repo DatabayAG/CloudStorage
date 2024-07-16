@@ -130,6 +130,22 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             break;
             case $this->config::AUTH_METHOD_BASIC:
                 $this->dic->logger()->root()->debug("BasicAuth");
+                if (!$this->dic->http()->wrapper()->query()->has('authMode')) { // required in BasicAuth Process?
+                    if (!$this->object->getAuthComplete()) {
+                        if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {
+                            $this->serviceAuth($this->object);
+                        } else {
+                            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("only_owner"), true);
+                            $this->redirectToRefId($this->parent_id);
+                        }
+                    } else {
+                        try {
+                            $this->service->checkConnection();
+                        } catch(ilCloudStorageException $e) {
+                            $this->handleConnectionException($e, false);
+                        }
+                    }
+                }
                 break;
             default:
                 $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', 'unsuported auth_method:' . $this->config->getAuthMethod(), true);
@@ -451,12 +467,10 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $info->setValue(ilCloudStorageConfig::_getCloudStorageConnData()[$this->object->getConnId()]['title']);
         $this->form->addItem($info);
 
-
         // SpecialID
         $info = new ilNonEditableValueGUI($this->lng->txt("object_id"));
         $info->setValue($this->object->getId());
         $this->form->addItem($info);
-
 
         // online
         $cb = new ilCheckboxInputGUI($this->lng->txt("online"), "online");
@@ -491,8 +505,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->dic->object()->commonSettings()->legacyForm($this->form, $this->object)->saveTileImage();
             $this->object->setTitle(ilStr::shortenTextExtended($this->form->getInput("title"),64,true));
             $this->object->setDescription($this->form->getInput("desc"));
-            $this->object->setUsername($this->form->getInput("username"));
-            $this->object->setPassword($this->form->getInput("password"));
             $this->object->setOnline($this->form->getInput("online"));
             $this->serviceGUI->updateProperties();
             $this->object->update();

@@ -114,7 +114,39 @@ class ilObjCloudStorageAccess extends ilObjectPluginAccess
                     }
                     break;
                 case $config::AUTH_METHOD_BASIC:
-                    //ToDo
+                    try {
+                        $service->checkConnection();
+                        foreach ($obj_ids as $obj_id) {
+                            $ref_ids = ilObject::_getAllReferences($obj_id);
+                            foreach ($ref_ids as $ref_id) {
+                                self::$connection_check_cache[$ref_id] = 0;
+                                $obj = new ilObjCloudStorage($ref_id);
+                                $obj->setAuthComplete(true);
+                                $obj->update();
+                            }
+                        }
+                    } catch(ilCloudStorageException $e) {
+                        self::$connection_status = $e->getCode();
+                        // authorization failed even though auth_complete = true
+                        if ($object->getAuthComplete() && $e->getCode() == ilCloudStorageException::NOT_AUTHORIZED) {
+                            foreach ($obj_ids as $obj_id) {
+                                $ref_ids = ilObject::_getAllReferences($obj_id);
+                                foreach ($ref_ids as $ref_id) {
+                                    self::$connection_check_cache[$ref_id] = self::$connection_status;
+                                    $obj = new ilObjCloudStorage($ref_id);
+                                    $obj->setAuthComplete(false);
+                                    $obj->update();
+                                }
+                            }
+                        } else {
+                            foreach ($obj_ids as $obj_id) {
+                                $ref_ids = ilObject::_getAllReferences($obj_id);
+                                foreach ($ref_ids as $ref_id) {
+                                    self::$connection_check_cache[$ref_id] = self::$connection_status;
+                                }
+                            }
+                        }
+                    }
                     break;
                 default: 
                     //ToDo

@@ -102,6 +102,7 @@ oa2_token_request_auth#:#Token-Request Authentifizierung
 oa2_token_request_auth_info#:#Definiert, auf welche Art Token-Requests authentifiziert werden (experimentell - für NextCloud wird möglicherweise "Post Body" benötigt).
 bauth_active#:#Basic-Authentifizierung
 bauth_active_info#:#Beim Anlegen des Cloud-Ordners müssen Benutzernamen und Passwort angegeben werden.
+bauth_edit#:#Authentifizierung bearbeiten
 account_username#:#Benutzername
 account_password#:#Passwort
 extended_networking#:#Erweiterte Netzwerkeinstellungen
