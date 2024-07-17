@@ -281,16 +281,21 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
     public function getClientSettings(): array
     {
         $this->dic->logger()->root()->debug("getClientSettings");
+        
         switch ($this->config->getAuthMethod()) {
             case $this->config::AUTH_METHOD_OAUTH2:
                 if ($this->config->getProxyURL() != '') {
                     return array(
                         'baseUri' => $this->config->getFullWebDAVPath(),
+                        'webDavPath' => $this->config->getWebDavPath(),
+                        'refId' => $this->object->getRefId(),
                         'proxy'   => $this->config->getProxyURL(),
                     );
                 } else {
                     return array(
                         'baseUri' => $this->config->getFullWebDAVPath(),
+                        'webDavPath' => $this->config->getWebDavPath(),
+                        'refId' => $this->object->getRefId(),
                     );
                 }
                 break;
@@ -300,6 +305,8 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
                         'baseUri'  => $this->config->getFullWebDAVPath(),
                         'userName' => $this->object->getUsername(),
                         'password' => $this->object->getPassword(),
+                        'webDavPath' => $this->config->getWebDavPath(),
+                        'refId' => $this->object->getRefId(),
                         'proxy'    => $this->config->getProxyURL(),
                     );
                 } else {
@@ -307,6 +314,8 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
                         'baseUri'  => $this->config->getFullWebDAVPath(),
                         'userName' => $this->object->getUsername(),
                         'password' => $this->object->getPassword(),
+                        'webDavPath' => $this->config->getWebDavPath(),
+                        'refId' => $this->object->getRefId(),
                     );
                 }
                 break;
@@ -493,6 +502,8 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
 
     public function getFile(string $path = "", ?ilCloudStorageFileTree $file_tree = null): void
     {
+        global $DIC;
+        $DIC->logger()->root()->log("getFile: " . $path);
         $this->getClient()->deliverFile($path);
     }
 

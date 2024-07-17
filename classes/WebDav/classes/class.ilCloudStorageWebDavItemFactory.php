@@ -15,10 +15,11 @@ class ilCloudStorageWebDavItemFactory
      *
      * @return ilCloudStorageWebDavFolder[]|ilCloudStorageWebDavFile[]
      */
-    public static function getInstancesFromResponse(array $response, int $refId)
+    public static function getInstancesFromResponse(array $response, array $settings)
     {
         global $DIC;
         $return = array();
+        $refId = $settings['refId'];
         if (count($response) == 0) {
             return $return;
         }
@@ -49,7 +50,7 @@ class ilCloudStorageWebDavItemFactory
                 } else {
                     $id = $cache[$web_url];
                 }
-                $exid_item->loadFromProperties($web_url, $props, $parent_id, $id);
+                $exid_item->loadFromProperties($web_url, $props, $parent_id, $id, $settings);
                 //ilCloudStorageWebDavItemCache::store($exid_item); // not used
                 $return[] = $exid_item;
             } else { // is file
@@ -60,12 +61,13 @@ class ilCloudStorageWebDavItemFactory
                 } else {
                     $id = $cache[$web_url];
                 }
-                $exid_item->loadFromProperties($web_url, $props, $parent_id, $id);
+                $exid_item->loadFromProperties($web_url, $props, $parent_id, $id, $settings);
                 //ilCloudStorageWebDavItemCache::store($exid_item); // not used
                 $return[] = $exid_item;
             }
         }
         ilCloudStorageWebDavClient::storeUniqueIdCache($cache, $refId);
+        $DIC->logger()->root()->log(var_export(ilCloudStorageWebDavClient::getUniqueIdCache($refId),true));
         return $return;
     }
 }

@@ -65,7 +65,7 @@ class ilCloudStorageWebDavDAVClient extends Client
             }
         }
         $res = $response->getBodyAsString();
-        //$DIC->logger()->root()->log($res);
+        $DIC->logger()->root()->log($res);
         $result = $this->parseMultiStatus($res);
 
         // If depth was 0, we only return the top item

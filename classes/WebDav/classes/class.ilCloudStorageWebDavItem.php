@@ -55,9 +55,10 @@ abstract class ilCloudStorageWebDavItem
     protected $e_tag = '';
 
 
-    public function loadFromProperties(string $web_url, array $properties, int $parent_id, int $id): void
+    public function loadFromProperties(string $web_url, array $properties, int $parent_id, int $id, array $settings): void
     {
         $web_url = rawurldecode($web_url);
+        $web_dav_path = $settings['webDavPath'];
         $this->setId($id);
         $this->setParentId($parent_id);
         $this->setWebUrl($web_url);
@@ -66,7 +67,8 @@ abstract class ilCloudStorageWebDavItem
         }
         $this->setName(substr($web_url, strrpos($web_url, '/') + 1, strlen($web_url) - strrpos($web_url, '/')));
         $web_url = substr($web_url, 0, -(strlen($this->getName())));
-        $this->setPath($web_url);
+        $this->setPath(substr($web_url, strpos($web_url, $web_dav_path) + strlen($web_dav_path)));
+        //$this->setPath($web_url);
         $this->setDateTimeLastModified($properties["{DAV:}getlastmodified"]);
         //$this->setETag($properties["{DAV:}getetag"]);
     }

@@ -93,6 +93,7 @@ class ilCloudStorageWebDavClient
                 [
                     '{DAV:}resourcetype',
                     '{DAV:}getcontentlength',
+                    '{DAV:}getcontenttype',
                     '{DAV:}getlastmodified'
                 ],
                 1,
@@ -100,7 +101,7 @@ class ilCloudStorageWebDavClient
             );
             //$DIC->logger()->root()->log(var_export($response,true));
             // $response = $client->propFind($settings['baseUri'] . $id, [], 1, $this->getAuth()->getHeaders());
-            $items = ilCloudStorageWebDavItemFactory::getInstancesFromResponse($response, $this->dav->object->getRefId());
+            $items = ilCloudStorageWebDavItemFactory::getInstancesFromResponse($response, $settings);
             $DIC->logger()->root()->log(var_export($items,true));
             return $items;
         }
@@ -132,14 +133,17 @@ class ilCloudStorageWebDavClient
 
     public function deliverFile(string $path): void
     {
+        global $DIC;
+        $DIC->logger()->root()->log("deliverFile");
         $path = ltrim($path, "/");
         $encoded_path = $this->urlencode($path);
         $headers = $this->dav->getHeaders();
         $settings = $this->dav->getClientSettings();
         $arr = $this->getWebDAVClient()->propFind($settings['baseUri'] . $encoded_path, array(), 1, $headers);
+
         $prop = array_shift($arr);
         //header("Content-type: " . $prop['{DAV:}getcontenttype']);
-        header("Content-Length: " . $prop['{DAV:}getcontentlength']);
+        //header("Content-Length: " . $prop['{DAV:}getcontentlength']);
         header("Connection: close");
         header('Content-Disposition: attachment; filename="' . basename($path) . '"');
         set_time_limit(0);
@@ -164,8 +168,9 @@ class ilCloudStorageWebDavClient
      */
     public function createFolder($path): bool
     {
-        $path = $this->urlencode($path);
-        $response = $this->getWebDAVClient()->request('MKCOL', ltrim($path, '/'), null, $this->dav->getHeaders());
+        $path = $this->urlencode(rtrim(ltrim($path, '/'),'/')).'/';
+        //see: https://github.com/seedvault-app/seedvault/issues/500
+        $response = $this->getWebDAVClient()->request('MKCOL', $path, null, $this->dav->getHeaders());
         if (self::DEBUG) {
             global $log;
             $log->write("[davClient]->createFolder({$path}) | response status Code: {$response['statusCode']}");
@@ -295,26 +300,31 @@ class ilCloudStorageWebDavClient
      */
     public function pathToId(string $path) : int
     {
+        global $DIC;
+
+        $DIC->logger()->root()->log("pathToId: " . $path);
         $settings = $this->dav->getClientSettings();
 
-        $client = $this->getWebDAVClient();
+        $cache = self::getUniqueIdCache($settings['refId']);
 
-        $response = $client->propFind(
-            $settings['baseUri'] . $this->urlencode($path),
-            [
-                '{http://davoud.org/ns}fileid'
-            ],
-            0,
-            $this->dav->getHeaders()
-        );
+        $id = array_search($path, $cache);
+        
+        $DIC->logger()->root()->log("id 0: " . (string) $id);
 
-        $id = (int) (current($response));
-
+        if (!$id) {
+            $DIC->logger()->root()->log("id 1: " . (string) $id);
+            $id = self::getUniqueId($cache);
+            $cache[$path] = $id;
+            self::storeUniqueIdCache($cache, $settings['refId']);
+        }
+        $DIC->logger()->root()->log("id 2: " . (string) $id);
         return $id;
     }
 
     public static function storeUniqueIdCache(array $uniqueId, int $refId): void {
+        global $DIC;
         $_SESSION[(string)$refId."_uniqueid_cache"] = $uniqueId;
+        $DIC->logger()->root()->debug(var_export(self::getUniqueIdCache($refId),true));
     }
 
     public static function getUniqueIdCache(int $refId): array {
