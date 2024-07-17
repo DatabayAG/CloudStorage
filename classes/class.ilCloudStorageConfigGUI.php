@@ -321,7 +321,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         }
         $rg->setValue(array_search($this->fsDefaultType, ilCloudStorageConfig::AVAILABLE_FS_CONN));
         $this->form->addItem($rg);
-        $this->form->addCommandButton("editCloudStorageConn", $this->plugin_object->txt("configure_add"));
+        $this->form->addCommandButton("editCloudStorageConn", $this->plugin_object->txt("add_type"));
         $this->form->addCommandButton("configure", $this->lng->txt("cancel"));
     }
 

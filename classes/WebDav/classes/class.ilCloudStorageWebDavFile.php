@@ -1,0 +1,87 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Class ilCloudStorageWebDavFile
+ *
+ * @author  Theodor Truffer <tt@studer-raimann.ch>
+ */
+class ilCloudStorageWebDavFile extends ilCloudStorageWebDavItem
+{
+
+    /**
+     * @var int
+     */
+    protected $type = self::TYPE_FILE;
+    /**
+     * @var int
+     */
+    protected $size = 0;
+    /**
+     * @var string
+     */
+    protected $content_url = '';
+
+    public function loadFromProperties(string $web_url, array $properties, int $parent_id, int $id): void
+    {
+        parent::loadFromProperties($web_url, $properties, $parent_id, $id);
+        $this->setSize($properties["{DAV:}getcontentlength"]);
+    }
+
+
+    /**
+     * @param $web_url    String
+     * @param $properties array
+     */
+    public function loadFromResponse($response, $path)
+    {
+        $this->setName(substr($path, strrpos($path, '/')));
+        $this->setContentUrl($path);
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getSuffix()
+    {
+        return pathinfo($this->getName(), PATHINFO_EXTENSION);
+    }
+
+
+    /**
+     * @return int
+     */
+    public function getSize()
+    {
+        return $this->size;
+    }
+
+
+    /**
+     * @param int $size
+     */
+    public function setSize($size)
+    {
+        $this->size = $size;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getContentUrl()
+    {
+        return $this->content_url;
+    }
+
+
+    /**
+     * @param string $content_url
+     */
+    public function setContentUrl($content_url)
+    {
+        $this->content_url = $content_url;
+    }
+}

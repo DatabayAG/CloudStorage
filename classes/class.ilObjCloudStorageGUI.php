@@ -357,13 +357,13 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $ro = new ilRadioOption($value, $key);
             $config = ilCloudStorageConfig::getInstance($key);
             if ($config->getAuthMethod() == ilCloudStorageConfig::AUTH_METHOD_BASIC) {
-                $ti = new ilTextInputGUI($this->txt("account_username"), "username");
+                $ti = new ilTextInputGUI($this->txt("account_username"), "username_{$key}");
                 $ti->setRequired(true);
                 $ti->setMaxLength(1024);
                 $ti->setSize(60);
                 $ro->addSubItem($ti);
 
-                $pi = new ilPasswordInputGUI($this->txt("account_password"), "password");
+                $pi = new ilPasswordInputGUI($this->txt("account_password"), "password_{$key}");
                 $pi->setRequired(true);
                 $pi->setMaxLength(1024);
                 $pi->setSize(60);
@@ -372,21 +372,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $rg->addOption($ro);
         }
         $form->addItem($rg);
-        /*
-        // Connections as radio buttons
-        $ro = new ilRadioOption($pl->txt("oa2_active"),"oauth2");
-        $ti = new ilTextInputGUI($pl->txt("oa2_client_id"), "oa2_client_id");
-        $ti->setRequired(true);
-        $ti->setMaxLength(1024);
-        $ti->setSize(60);
-        $ro->addSubItem($ti);
-
-        $combo = new ilSelectInputGUI($this->txt("conn_id"), 'conn_id');
-        $combo->setRequired(true);
-        $combo->setOptions(ilCloudStorageConfig::_getAvailableCloudStorageConn(true));
-        //$combo->setInfo($pl->txt('info_platform_chg_reset_data'));
-        $form->addItem($combo);
-        */
 
         // online
         $cb = new ilCheckboxInputGUI($this->lng->txt("online"), "online");
@@ -407,11 +392,12 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         assert($newObj instanceof ilObjCloudStorage);
         // Sn: ToDo ?
         //$newObj->setAuthUser($DIC->user()->getEmail());
+        $connId = $form->getInput("conn_id");
         $newObj->setOwnerId($this->dic->user()->getId());
-        $newObj->setUsername($form->getInput("username"));
-        $newObj->setPassword($form->getInput("password"));
+        $newObj->setUsername($form->getInput("username_{$connId}"));
+        $newObj->setPassword($form->getInput("password_{$connId}"));
 
-        $newObj->createFolder((int) $form->getInput("online"), $form->getInput("conn_id"));
+        $newObj->createFolder((int) $form->getInput("online"), $connId);
         $newObj->update();
         
         parent::afterSave($newObj);

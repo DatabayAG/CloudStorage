@@ -68,6 +68,7 @@ conf_availability_2#:#New ones can be created
 untrashed_usages#:#Number of usages
 saving_invoked#:#Settings saved
 create_type#:#Define new Cloud Connection
+add_type#:#Add new Cloud Connection
 delete_type#:#Delete Cloud Connection
 delete_conn#:#Delete Cloud Connection?
 conn_deleted#:#The Cloud Connection was deleted.

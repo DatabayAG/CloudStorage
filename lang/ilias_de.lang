@@ -68,6 +68,7 @@ conf_availability_2#:#Neue erzeugbar
 untrashed_usages#:#Anzahl Verwendungen
 saving_invoked#:#Einstellungen gespeichert
 create_type#:#Neue Cloud-Anbindung definieren
+add_type#:#Cloud-Anbindung hinzufügen
 delete_type#:#Cloud-Anbindung löschen
 delete_conn#:#Cloud-Anbindung löschen?
 conn_deleted#:#Die Cloud-Anbindung wurde gelöscht.
