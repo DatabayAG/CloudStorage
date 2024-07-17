@@ -62,7 +62,7 @@ class ilCloudStorageWebDavClient
     {
         global $DIC;
         try {
-            $response = $this->getWebDAVClient()->request('GET', '', null, $this->dav->getHeaders());
+            $response = $this->getWebDAVClient()->request('PROPFIND', $this->dav->object->getRootFolder(), null, $this->dav->getHeaders());
         } catch (Exception $e) {
             $DIC->logger()->root()->error($e->getMessage());
             throw new ilCloudStorageException(ilCloudStorageException::NO_CONNECTION, $e->getMessage());
