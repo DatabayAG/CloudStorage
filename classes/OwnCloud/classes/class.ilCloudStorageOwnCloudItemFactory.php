@@ -22,7 +22,7 @@ class ilCloudStorageOwnCloudItemFactory
             return $return;
         }
         $parent = array_shift($response);
-        $parent_id = (int) $parent['{http://owncloud.org/ns}id'];
+        $parent_id = (int) $parent['{http://owncloud.org/ns}fileid'];
         foreach ($response as $web_url => $props) {
             if (!array_key_exists("{DAV:}getcontenttype", $props)) {//is folder
                 $exid_item = new ilCloudStorageOwnCloudFolder();
