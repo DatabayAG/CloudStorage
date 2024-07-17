@@ -15,7 +15,7 @@ class ilCloudStorageWebDavItemFactory
      *
      * @return ilCloudStorageWebDavFolder[]|ilCloudStorageWebDavFile[]
      */
-    public static function getInstancesFromResponse($response, ilCloudStorageWebDavClient $client)
+    public static function getInstancesFromResponse(array $response, int $refId)
     {
         global $DIC;
         $return = array();
@@ -25,45 +25,47 @@ class ilCloudStorageWebDavItemFactory
         
         $parent_id = 0;
 
+        $cache = ilCloudStorageWebDavClient::getUniqueIdCache($refId);
+
         // get first item as parent
         foreach ($response as $web_url => $props) {
-            if (!array_key_exists($web_url,ilCloudStorageWebDavClient::$unique_path_ids)) {
-                $parent_id = count(ilCloudStorageWebDavClient::$unique_path_ids)+1;
-                ilCloudStorageWebDavClient::$unique_path_ids[$web_url] = $parent_id;
+            if (!array_key_exists($web_url,$cache)) {
+                $parent_id = ilCloudStorageWebDavClient::getUniqueId($cache);
+                $cache[$web_url] = $parent_id;
             } else {
-                $parent_id = ilCloudStorageWebDavClient::$unique_path_ids[$web_url];
+                $parent_id = $cache[$web_url];
             }
             break;
         }
 
         array_shift($response);
-        
+       
         foreach ($response as $web_url => $props) {
             if (!array_key_exists("{DAV:}getcontentlength", $props)) {//is folder
                 $exid_item = new ilCloudStorageWebDavFolder();
-                if (!array_key_exists($web_url,ilCloudStorageWebDavClient::$unique_path_ids)) {
-                    $id = count(ilCloudStorageWebDavClient::$unique_path_ids)+1;
-                    ilCloudStorageWebDavClient::$unique_path_ids[$web_url] = $id;
+                if (!array_key_exists($web_url, $cache)) {
+                    $id = ilCloudStorageWebDavClient::getUniqueId($cache);
+                    $cache[$web_url] = $id;
                 } else {
-                    $id = ilCloudStorageWebDavClient::$unique_path_ids[$web_url];
+                    $id = $cache[$web_url];
                 }
                 $exid_item->loadFromProperties($web_url, $props, $parent_id, $id);
                 //ilCloudStorageWebDavItemCache::store($exid_item); // not used
                 $return[] = $exid_item;
             } else { // is file
                 $exid_item = new ilCloudStorageWebDavFile();
-                if (!array_key_exists($web_url,ilCloudStorageWebDavClient::$unique_path_ids)) {
-                    $id = count(ilCloudStorageWebDavClient::$unique_path_ids)+1;
-                    ilCloudStorageWebDavClient::$unique_path_ids[$web_url] = $id;
+                if (!array_key_exists($web_url, $cache)) {
+                    $id = ilCloudStorageWebDavClient::getUniqueId($cache);
+                    $cache[$web_url] = $id;
                 } else {
-                    $id = ilCloudStorageWebDavClient::$unique_path_ids[$web_url];
+                    $id = $cache[$web_url];
                 }
                 $exid_item->loadFromProperties($web_url, $props, $parent_id, $id);
                 //ilCloudStorageWebDavItemCache::store($exid_item); // not used
                 $return[] = $exid_item;
             }
         }
-        $DIC->logger()->root()->log(var_export(ilCloudStorageWebDavClient::$unique_path_ids,true));
+        ilCloudStorageWebDavClient::storeUniqueIdCache($cache, $refId);
         return $return;
     }
 }

@@ -46,8 +46,7 @@ class ilCloudStorageWebDavClient
 
         return $this->rest_client;
     }
-
-
+    
     public function hasConnection(): bool
     {
         try {   //sabredav version 1.8 throws exception on missing connection
@@ -101,7 +100,7 @@ class ilCloudStorageWebDavClient
             );
             //$DIC->logger()->root()->log(var_export($response,true));
             // $response = $client->propFind($settings['baseUri'] . $id, [], 1, $this->getAuth()->getHeaders());
-            $items = ilCloudStorageWebDavItemFactory::getInstancesFromResponse($response, $this);
+            $items = ilCloudStorageWebDavItemFactory::getInstancesFromResponse($response, $this->dav->object->getRefId());
             $DIC->logger()->root()->log(var_export($items,true));
             return $items;
         }
@@ -312,5 +311,20 @@ class ilCloudStorageWebDavClient
         $id = (int) (current($response));
 
         return $id;
+    }
+
+    public static function storeUniqueIdCache(array $uniqueId, int $refId): void {
+        $_SESSION[(string)$refId."_uniqueid_cache"] = $uniqueId;
+    }
+
+    public static function getUniqueIdCache(int $refId): array {
+        if (!isset($_SESSION[(string)$refId . "_uniqueid_cache"])) {
+            $_SESSION[(string)$refId."_uniqueid_cache"] = array();
+        }
+        return $_SESSION[(string)$refId."_uniqueid_cache"];
+    }
+
+    public static function getUniqueId($cache) {
+        return count($cache) + 1;
     }
 }

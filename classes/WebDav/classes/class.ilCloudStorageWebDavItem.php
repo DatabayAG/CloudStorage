@@ -58,7 +58,6 @@ abstract class ilCloudStorageWebDavItem
     public function loadFromProperties(string $web_url, array $properties, int $parent_id, int $id): void
     {
         $web_url = rawurldecode($web_url);
-        //$this->setId((int) $properties["{http://davoud.org/ns}fileid"]);
         $this->setId($id);
         $this->setParentId($parent_id);
         $this->setWebUrl($web_url);
@@ -67,7 +66,7 @@ abstract class ilCloudStorageWebDavItem
         }
         $this->setName(substr($web_url, strrpos($web_url, '/') + 1, strlen($web_url) - strrpos($web_url, '/')));
         $web_url = substr($web_url, 0, -(strlen($this->getName())));
-        $this->setPath(substr($web_url, strpos($web_url, 'remote.php/webdav/') + 18));
+        $this->setPath($web_url);
         $this->setDateTimeLastModified($properties["{DAV:}getlastmodified"]);
         //$this->setETag($properties["{DAV:}getetag"]);
     }
