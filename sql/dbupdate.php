@@ -263,10 +263,11 @@ ilObjCloudStorage::migrationSetup();
 <#5>
 <?php
 if ($ilDB->tableExists('rep_robj_xcls_conn')) {
-    $ilDB->queryF('UPDATE rep_robj_xcls_conn SET auth_method = %s', array('text'), array('oauth2'));
-}
-if ($ilDB->tableExists('rep_robj_xcls_conn')) {
-    $ilDB->queryF('UPDATE rep_robj_xcls_conn SET auth_method = %s', array('text'), array('oauth2'));
-    $ilDB->dropTableColumn('rep_robj_xcls_conn','oa2_active');
+    if ($ilDB->tableColumnExists('rep_robj_xcls_conn', 'auth_method')) {
+        $ilDB->queryF('UPDATE rep_robj_xcls_conn SET auth_method = %s WHERE auth_method = ""', array('text'), array('oauth2'));
+    }
+    if ($ilDB->tableColumnExists('rep_robj_xcls_conn', 'oa2_active')) {
+        $ilDB->dropTableColumn('rep_robj_xcls_conn','oa2_active');
+    }
 }
 ?>
