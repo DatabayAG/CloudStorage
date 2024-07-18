@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 // use ILIAS\DI\Container;
 
-class ilCloudStorageWebDavTreeGUI extends ilTreeExplorerLegacyGUI
+class ilCloudStorageWebDavTreeGUI extends ilCloudStorageWebDavTreeExplorerLegacyGUI
 {
 
     //private Container $dic;
@@ -25,7 +25,8 @@ class ilCloudStorageWebDavTreeGUI extends ilTreeExplorerLegacyGUI
     public function __construct(string $a_expl_id, ilObjCloudStorageGUI $a_parent_obj, string $a_parent_cmd, ilCloudStorageWebDavTree $tree)
     {
         global $tpl, $ilLog;
-        //global $DIC;
+        global $DIC;
+
         parent::__construct($a_expl_id, $a_parent_obj, $a_parent_cmd, $tree);
         $this->setSkipRootNode(false);
         $this->setPreloadChilds(false);

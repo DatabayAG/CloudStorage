@@ -25,7 +25,7 @@ use ILIAS\UI\Component\Tree\Tree;
  *
  * @author Alexander Killing <killing@leifos.de>
  */
-abstract class ilTreeExplorerLegacyGUI extends ilExplorerBaseGUI implements \ILIAS\UI\Component\Tree\TreeRecursion
+abstract class ilCloudStorageOwnCloudTreeExplorerLegacyGUI extends ilExplorerBaseGUI implements \ILIAS\UI\Component\Tree\TreeRecursion
 {
     protected ?ilLanguage $lng = null;
     protected \Psr\Http\Message\ServerRequestInterface $httpRequest;

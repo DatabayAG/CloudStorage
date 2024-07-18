@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 // use ILIAS\DI\Container;
 
-class ilCloudStorageOwnCloudTreeGUI extends ilTreeExplorerLegacyGUI
+class ilCloudStorageOwnCloudTreeGUI extends ilCloudStorageOwnCloudTreeExplorerLegacyGUI
 {
 
     //private Container $dic;
