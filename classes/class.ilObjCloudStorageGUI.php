@@ -80,6 +80,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
         if($this->object instanceof ilObjCloudStorage) {
             assert($this->object instanceof ilObjCloudStorage);
+            $this->dic->logger()->root()->debug("platform id: " . $this->platform);
+            $this->dic->logger()->root()->debug("service class: " . ilCloudStorageConfig::AVAILABLE_XCLS_SERVICES[$this->platform]);
             $serviceClass = ilCloudStorageConfig::AVAILABLE_XCLS_SERVICES[$this->platform];
             $this->service = new $serviceClass($this->object->getRefId(), $this->object->getConnId());
             $serviceGUI = $serviceClass."GUI";
@@ -102,7 +104,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
         //assert($this->object instanceof ilObjCloudStorage);
         $this->dic->logger()->root()->debug("cmd " . $cmd);
-
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageServiceInterface);
         $this->dic->ui()->mainTemplate()->setAlertProperties($this->getAlertProperties());
@@ -207,7 +208,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         }
     }
 
-    // ToDo: not aware of multi type WebDav!!
     private function handleConnectionException(ilCloudStorageException $e) {
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageServiceInterface);
@@ -219,39 +219,50 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 break;
             case ilCloudStorageException::NOT_AUTHORIZED:
                 // ignore exception on authMode
-                if (!$this->dic->http()->wrapper()->query()->has('authMode')) {
-                    
-                    // there is no token for user
-                    if (!$this->service->checkAndRefreshAuthentication()) {
-                        $this->object->setAuthComplete(false);
-                        $this->object->doUpdate();    
-                        if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {                        
-                            $this->serviceAuth();
-                        } else {
-                            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->object->txt('only_owner'), true);
-                            ilObjCloudStorageGUI::_redirectToRefId($this->parent_id);
-                        }
-                    } else {
-                        // there is a valid token (not expired)
-                        $this->dic->logger()->root()->debug("checkAndRefreshAuthentication true");
-                        // check connection: maybe token is valid but auth was deleted on cloud provider
-                        try {
-                            $this->service->checkConnection();
-                        } catch(ilCloudStorageException $e) {
-                            if ($e->getCode() == ilCloudStorageException::NOT_AUTHORIZED) {
+                switch ($this->config->getAuthMethod()) {
+                    case $this->config::AUTH_METHOD_OAUTH2:
+                        if (!$this->dic->http()->wrapper()->query()->has('authMode')) {
+                            // there is no token for user
+                            if (!$this->service->checkAndRefreshAuthentication()) {
                                 $this->object->setAuthComplete(false);
-                                $this->object->doUpdate();
-                                if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {
-                                    ilCloudStorageOwnCloudToken::deleteUserToken($this->object->getConnId());
-                                    $this->serviceAuth();                    
+                                $this->object->doUpdate();    
+                                if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {                        
+                                    $this->serviceAuth();
                                 } else {
                                     $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->object->txt('only_owner'), true);
                                     ilObjCloudStorageGUI::_redirectToRefId($this->parent_id);
                                 }
+                            } else {
+                                // there is a valid token (not expired)
+                                $this->dic->logger()->root()->debug("checkAndRefreshAuthentication true");
+                                // check connection: maybe token is valid but auth was deleted on cloud provider
+                                try {
+                                    $this->service->checkConnection();
+                                } catch(ilCloudStorageException $e) {
+                                    if ($e->getCode() == ilCloudStorageException::NOT_AUTHORIZED) {
+                                        $this->object->setAuthComplete(false);
+                                        $this->object->doUpdate();
+                                        if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {
+                                            ilCloudStorageOwnCloudToken::deleteUserToken($this->object->getConnId());
+                                            $this->serviceAuth();                    
+                                        } else {
+                                            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->object->txt('only_owner'), true);
+                                            ilObjCloudStorageGUI::_redirectToRefId($this->parent_id);
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
-                }
+                        break;
+                    case $this->config::AUTH_METHOD_BASIC:
+                        $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), true);
+                        $this->redirectToRefId($this->parent_id);
+                        break;
+                    default:
+                        $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), true);
+                        $this->redirectToRefId($this->parent_id);
+                        break;
+                }   
                 break;
         }
     }
