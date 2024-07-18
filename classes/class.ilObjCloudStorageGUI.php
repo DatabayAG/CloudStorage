@@ -16,15 +16,11 @@ use ILIAS\DI\Container;
  *   screens) and ilInfoScreenGUI (handles the info screen).
  *
  * @ilCtrl_isCalledBy ilObjCloudStorageGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
- * @ilCtrl_Calls ilObjCloudStorageGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilRepositorySearchGUI, ilCloudStorageOwnCloudGUI, ilObjFileUploadHandlerGUI
+ * @ilCtrl_Calls ilObjCloudStorageGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilRepositorySearchGUI, ilCloudStorageOwnCloudGUI, ilCloudStorageWebDavGUI, ilObjFileUploadHandlerGUI
  *
  */
 class ilObjCloudStorageGUI extends ilObjectPluginGUI
 {
-    public const START_TYPE = [
-        'OWNCLOUD'  => 'start'
-    ];
-
     public const INTEGER = "integer";
 
     public const INT = "int";
@@ -69,6 +65,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $this->lng->loadLanguageModule('rep_robj_xcls');
 
         $this->platform = $this->object instanceof ilObjCloudStorage ? ilCloudStorageConfig::getInstance($this->object->getConnId())->getServiceId() : $this->platform; #
+
+        $this->dic->logger()->root()->debug("service: " . $this->platform);
 
         $this->config = $this->object instanceof ilObjCloudStorage ? ilCloudStorageConfig::getInstance($this->object->getConnId()) : $this->config;
 
@@ -129,7 +127,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 }
             break;
             case $this->config::AUTH_METHOD_BASIC:
-                $this->dic->logger()->root()->debug("BasicAuth");
                 if (!$this->dic->http()->wrapper()->query()->has('authMode')) { // required in BasicAuth Process?
                     if (!$this->object->getAuthComplete()) {
                         if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {
@@ -210,6 +207,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         }
     }
 
+    // ToDo: not aware of multi type WebDav!!
     private function handleConnectionException(ilCloudStorageException $e) {
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageServiceInterface);
