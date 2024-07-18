@@ -101,7 +101,7 @@ class ilCloudStorageOwnCloudClient
             );
             // $response = $client->propFind($settings['baseUri'] . $id, [], 1, $this->getAuth()->getHeaders());
             $items = ilCloudStorageOwnCloudItemFactory::getInstancesFromResponse($response);
-            $DIC->logger()->root()->log(var_export($items,true));
+            //$DIC->logger()->root()->log(var_export($items,true));
             return $items;
         }
 
