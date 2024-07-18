@@ -81,8 +81,10 @@ class ilCloudStorageWebDavClient
     {
         global $DIC;
         
+        if ($id == "/") {
+            $id = $this->dav->object->getRootFolder();
+        }
         $id = $this->urlencode(ltrim($id, '/'));
-        //$ilLog->write('listFolder: ' . $id);
 
         $settings = $this->dav->getClientSettings();
         if ($client = $this->getWebDAVClient()) {
