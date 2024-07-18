@@ -139,13 +139,6 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
             default:
                 //ToDo
         }
-        /*
-        if ($this->config->getOAuth2Active()) {    
-            $n = new ilNonEditableValueGUI($this->object->txt('info_token_expires'));
-            $n->setValue(date('d.m.Y - H:i:s', $this->service->getToken()->getValidThrough()));
-            $this->parent->form->addItem($n);
-        }
-        */
     }
 
     public function getPropertiesValues(array &$values): void
