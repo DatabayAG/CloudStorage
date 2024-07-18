@@ -50,7 +50,7 @@ class ilCloudStorageWebDavClient
     public function hasConnection(): bool
     {
         try {   //sabredav version 1.8 throws exception on missing connection
-            $response = $this->getWebDAVClient()->request('GET', '', null, $this->dav->getHeaders());
+            $response = $this->getWebDAVClient()->request('PROPFIND', $this->dav->object->getRootFolder(), null, $this->dav->getHeaders());
         } catch (Exception $e) {
             return false;
         }
@@ -80,7 +80,7 @@ class ilCloudStorageWebDavClient
     public function listFolder($id)
     {
         global $DIC;
-        $DIC->logger()->root()->log("listFolder");
+        
         $id = $this->urlencode(ltrim($id, '/'));
         //$ilLog->write('listFolder: ' . $id);
 
@@ -102,7 +102,7 @@ class ilCloudStorageWebDavClient
             //$DIC->logger()->root()->log(var_export($response,true));
             // $response = $client->propFind($settings['baseUri'] . $id, [], 1, $this->getAuth()->getHeaders());
             $items = ilCloudStorageWebDavItemFactory::getInstancesFromResponse($response, $settings);
-            $DIC->logger()->root()->log(var_export($items,true));
+            //$DIC->logger()->root()->log(var_export($items,true));
             return $items;
         }
 
@@ -134,7 +134,6 @@ class ilCloudStorageWebDavClient
     public function deliverFile(string $path): void
     {
         global $DIC;
-        $DIC->logger()->root()->log("deliverFile");
         $path = ltrim($path, "/");
         $encoded_path = $this->urlencode($path);
         $headers = $this->dav->getHeaders();
@@ -302,22 +301,17 @@ class ilCloudStorageWebDavClient
     {
         global $DIC;
 
-        $DIC->logger()->root()->log("pathToId: " . $path);
         $settings = $this->dav->getClientSettings();
 
         $cache = self::getUniqueIdCache($settings['refId']);
 
         $id = array_search($path, $cache);
-        
-        $DIC->logger()->root()->log("id 0: " . (string) $id);
 
         if (!$id) {
-            $DIC->logger()->root()->log("id 1: " . (string) $id);
             $id = self::getUniqueId($cache);
             $cache[$path] = $id;
             self::storeUniqueIdCache($cache, $settings['refId']);
         }
-        $DIC->logger()->root()->log("id 2: " . (string) $id);
         return $id;
     }
 
