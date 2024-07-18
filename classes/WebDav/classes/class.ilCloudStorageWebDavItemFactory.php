@@ -67,7 +67,7 @@ class ilCloudStorageWebDavItemFactory
             }
         }
         ilCloudStorageWebDavClient::storeUniqueIdCache($cache, $refId);
-        $DIC->logger()->root()->log(var_export(ilCloudStorageWebDavClient::getUniqueIdCache($refId),true));
+        //$DIC->logger()->root()->log(var_export(ilCloudStorageWebDavClient::getUniqueIdCache($refId),true));
         return $return;
     }
 }
