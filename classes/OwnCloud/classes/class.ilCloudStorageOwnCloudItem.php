@@ -82,7 +82,7 @@ abstract class ilCloudStorageOwnCloudItem
             $path = $this->getPath();
         }
 
-        return $path . '/' . $this->getName();
+        return rtrim($path,"/") . '/' . $this->getName();
     }
 
 
