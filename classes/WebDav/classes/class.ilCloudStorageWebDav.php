@@ -486,10 +486,13 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
     {
         $this->dic->logger()->root()->debug("addToFileTree");
         $files = $this->getClient()->listFolder($parent_folder);
+        //$this->dic->logger()->root()->info("C - files: " . var_export($files, true));
         foreach ($files as $k => $item) {
-            $this->dic->logger()->root()->debug("files...");
+            //$this->dic->logger()->root()->info(var_export($item, true));
             $size = ($item instanceof ilCloudStorageWebDavFile) ? $size = $item->getSize() : null;
             $is_dir = $item instanceof ilCloudStorageWebDavFolder;
+            $fullPath = $item->getFullPath();
+            //$this->dic->logger()->root()->info("C - fullPath: " . $fullPath);
             $file_tree->addNode($item->getFullPath(), (int) $item->getId(), $is_dir, strtotime($item->getDateTimeLastModified()), $size);
         }
     }
@@ -514,22 +517,34 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
 
     public function createFolder(string $path = '', ?ilCloudStorageFileTree $file_tree = null): void
     {
+        global $DIC;
         if ($file_tree instanceof ilCloudStorageFileTree) {
             $path = ilCloudStorageUtil::joinPaths($file_tree->getRootPath(), $path);
         }
-
+        $DIC->logger()->root()->log("C - path: " . $path);
         if ($path != '/' && !$this->getClient()->folderExists($path)) {
+            $DIC->logger()->root()->log("C - path: " . $path);
             $this->getClient()->createFolder($path);
         }
     }
 
     public function createFolderById(int $id, string  $folder_name) : int
     {
+        global $DIC;
+
+        $DIC->logger()->root()->info("C - createFolderById " . (string) $id . " - " . $folder_name);
+
         $path = $this->idToPath($id, $folder_name);
+
+        $DIC->logger()->root()->info("C - path " . $path);
 
         $this->createFolder($path);
 
-        return $this->pathToId($path);
+        $ret = $this->pathToId($path);
+
+        $DIC->logger()->root()->info("C - ret " . (string) $ret);
+
+        return $ret;
     }
 
     public function putFile(string $tmp_name, string $file_name, string $path = '', ?ilCloudStorageFileTree $file_tree = null): void

@@ -10,77 +10,48 @@ declare(strict_types=1);
 class ilCloudStorageWebDavFile extends ilCloudStorageWebDavItem
 {
 
-    /**
-     * @var int
-     */
-    protected $type = self::TYPE_FILE;
-    /**
-     * @var int
-     */
-    protected $size = 0;
-    /**
-     * @var string
-     */
-    protected $content_url = '';
+    protected int $type = self::TYPE_FILE;
 
-    public function loadFromProperties(string $web_url, array $properties, int $parent_id, int $id, array $settings): void
+    protected int $size = 0;
+    
+    protected string $content_url = '';
+
+    public function loadFromProperties(string $parent_web_url, string $web_url, array $properties, ilCloudStorageWebDavClient $client): void
     {
-        parent::loadFromProperties($web_url, $properties, $parent_id, $id, $settings);
+        parent::loadFromProperties($parent_web_url, $web_url, $properties, $client);
         $this->setSize($properties["{DAV:}getcontentlength"]);
     }
 
-
-    /**
-     * @param $web_url    String
-     * @param $properties array
-     */
-    public function loadFromResponse($response, $path)
+    public function loadFromResponse(string $path): void
     {
         $this->setName(substr($path, strrpos($path, '/')));
         $this->setContentUrl($path);
     }
 
-
     /**
-     * @return mixed
+     * @return array|string
      */
     public function getSuffix()
     {
         return pathinfo($this->getName(), PATHINFO_EXTENSION);
     }
 
-
-    /**
-     * @return int
-     */
-    public function getSize()
+    public function getSize(): int
     {
         return $this->size;
     }
 
-
-    /**
-     * @param int $size
-     */
-    public function setSize($size)
+    public function setSize(int $size): void
     {
         $this->size = $size;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getContentUrl()
+    public function getContentUrl(): string
     {
         return $this->content_url;
     }
 
-
-    /**
-     * @param string $content_url
-     */
-    public function setContentUrl($content_url)
+    public function setContentUrl(string $content_url): void
     {
         $this->content_url = $content_url;
     }

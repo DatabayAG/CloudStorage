@@ -17,6 +17,7 @@ class ilCloudStorageOwnCloudItemFactory
      */
     public static function getInstancesFromResponse($response)
     {
+        global $DIC;
         $return = array();
         if (count($response) == 0) {
             return $return;
@@ -36,7 +37,7 @@ class ilCloudStorageOwnCloudItemFactory
                 $return[] = $exid_item;
             }
         }
-
+        $DIC->logger()->root()->info(var_export($return, true));
         return $return;
     }
 }

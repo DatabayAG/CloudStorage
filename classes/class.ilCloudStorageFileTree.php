@@ -90,21 +90,36 @@ class ilCloudStorageFileTree
 
     protected function createNode(string $path, int $id, bool $is_dir = false): ilCloudStorageFileNode
     {
+        global $DIC;
+        $DIC->logger()->root()->info("createNode(" . $path . ", " . (string) $id . "...)");
         $path = (empty($path)) ? "/" : $path;
-        $node = new ilCloudStorageFileNode(ilCloudStorageUtil::normalizePath($path), $id);
+        $DIC->logger()->root()->info("path2: " .$path);
+        $path = ilCloudStorageUtil::normalizePath($path);
+        $DIC->logger()->root()->info("path3: " .$path);
+        $node = new ilCloudStorageFileNode($path, $id);
+        $DIC->logger()->root()->info("node: " . var_export($node, true));
         $this->item_list[$node->getPath()] = $node;
+        $DIC->logger()->root()->info("itemlist: " . var_export($this->item_list, true));
         $this->id_to_path_map[$node->getId()] = $node->getPath();
+        $DIC->logger()->root()->info("id_to_path_map: " . var_export($this->id_to_path_map, true));
         $node->setIsDir($is_dir);
         return $node;
     }
 
     public function addNode(string $path, int $id, bool $is_Dir, int $modified = 0, $size = 0): ilCloudStorageFileNode
     {
+        global $DIC;
+        $DIC->logger()->root()->info("addNode:(" . $path . ", " . $id . ", " . (string)$is_Dir) . "...)";
         $path = ilCloudStorageUtil::normalizePath($path);
         $node = $this->getNodeFromPath($path);
 
         //node does not yet exist
         if (!$node) {
+            $DIC->logger()->root()->info("node does not exist");
+            if ($id == ilCloudStorageFileNode::ID_UNKOWN) {
+                $id = $this->getUniqueId();
+                $DIC->logger()->root()->info("create id: " . $id);
+            }
             if ($this->getNodeFromId($id)) {
                 throw new ilCloudStorageException(ilCloudStorageException::ID_ALREADY_EXISTS_IN_FILE_TREE_IN_SESSION);
             }
@@ -113,6 +128,7 @@ class ilCloudStorageFileTree
             if (!$node_parent) {
                 throw new ilCloudStorageException(ilCloudStorageException::PATH_DOES_NOT_EXIST_IN_FILE_TREE_IN_SESSION, "Parent: " . $path_of_parent);
             }
+            $DIC->logger()->root()->info("");
             $node = $this->createNode($path, $id, $is_Dir);
             $node->setParentId($node_parent->getId());
             $node_parent->addChild($node->getPath());
@@ -441,5 +457,9 @@ class ilCloudStorageFileTree
             $list[$node->getId()] = $node->getJSONEncode();
         }
         return $list;
+    }
+
+    public function getUniqueId() {
+        return count($this->id_to_path_map);
     }
 }

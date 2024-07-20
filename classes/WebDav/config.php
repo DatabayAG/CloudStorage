@@ -33,7 +33,7 @@ $ti = new ilTextInputGUI($pl->txt("webdav_path"), "webdav_path");
 $ti->setRequired(true);
 $ti->setMaxLength(255);
 $ti->setSize(60);
-$ti->setInfo(ilCloudStorageWebDav::getDefaultWebDavPath());
+//$ti->setInfo(ilCloudStorageWebDav::getDefaultWebDavPath());
 $this->form->addItem($ti);
 
 $ti = new ilTextInputGUI($pl->txt("base_directory"), "base_directory");

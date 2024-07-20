@@ -13,50 +13,31 @@ abstract class ilCloudStorageWebDavItem
     const TYPE_UNKNOWN = -1;
     const TYPE_FOLDER = 1;
     const TYPE_FILE = 2;
-    /**
-     * @var int
-     */
-    protected $id = 0;
-    /**
-     * @var string
-     */
-    protected $path = '';
-    /**
-     * @var string
-     */
-    protected $parent_id = '';
-    /**
-     * @var int
-     */
-    protected $type = self::TYPE_UNKNOWN;
-    /**
-     * @var string
-     */
-    protected $web_url = '';
-    /**
-     * @var string
-     */
-    protected $date_time_created = '';
-    /**
-     * @var string
-     */
-    protected $date_time_last_modified = '';
-    /**
-     * @var string
-     */
-    protected $name = '';
-    /**
-     * @var string
-     */
-    protected $last_modified_by = '';
-    /**
-     * @var string
-     */
-    protected $e_tag = '';
+    
+    protected int $parent_id = ilCloudStorageFileNode::ID_UNKOWN;
+    
+    protected int $id = ilCloudStorageFileNode::ID_UNKOWN;
+    
+    protected string $path = '';
 
+    protected int $type = self::TYPE_UNKNOWN;
 
+    protected string $web_url = '';
+
+    protected string $date_time_created = '';
+
+    protected string $date_time_last_modified = '';
+
+    protected string $name = '';
+    
+    protected string $last_modified_by = '';
+    
+    protected string $e_tag = '';
+
+    /*
     public function loadFromProperties(string $web_url, array $properties, int $parent_id, int $id, array $settings): void
     {
+
         $web_url = rawurldecode($web_url);
         $web_dav_path = $settings['webDavPath'];
         $this->setId($id);
@@ -72,218 +53,143 @@ abstract class ilCloudStorageWebDavItem
         $this->setDateTimeLastModified($properties["{DAV:}getlastmodified"]);
         //$this->setETag($properties["{DAV:}getetag"]);
     }
+    */
 
+    public function loadFromProperties(string $parent_web_url, string $web_url, array $properties, ilCloudStorageWebDavClient $client): void
+    {
+        $url = $client->getDecodedWebUrl($web_url);
+        
+        $this->setWebUrl($url);
 
-    /**
-     * @return string
-     */
-    public function getFullPath()
+        // path is the directory path component of the ressource dir_name/ not the full path to the ressource!
+        $path = $client->getPathFromWebUrl($web_url, $this->getType());        
+        $this->setPath($path);
+
+        // name is the name component of the ressource dir_name/ not the full path to the ressource!
+        $name = $client->getNameFromWebUrl($web_url, $this->getType());
+        //$DIC->logger()->root()->log("C - name: " . $name);
+        $this->setName($name);
+
+        $this->setDateTimeLastModified($properties["{DAV:}getlastmodified"]);
+        //$this->setETag($properties["{DAV:}getetag"]);
+    }
+
+    public function getFullPath(): string
     {
         $path = '';
         if ($this->getPath() AND $this->getPath() != '/') {
             $path = $this->getPath();
         }
 
-        return $path . '/' . $this->getName();
+        return rtrim($path,"/") . '/' . $this->getName();
     }
 
-
-    /**
-     * @return string
-     */
-    public function getEncodedFullPath()
+    public function getEncodedFullPath(): string
     {
         return $this->urlencode($this->getFullPath());
     }
 
-
-    /**
-     * @return int
-     */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-
-    /**
-     * @param int $id
-     */
-    public function setId($id)
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
 
-
-    /**
-     * @param string $path
-     */
-    public function setPath($path)
+    public function setPath(string $path): void
     {
         $this->path = $path;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getParentId()
+    public function getParentId(): int
     {
         return $this->parent_id;
     }
 
-
-    /**
-     * @param string $parent_id
-     */
-    public function setParentId($parent_id)
+    public function setParentId(int $parent_id): void
     {
         $this->parent_id = $parent_id;
     }
 
-
-    /**
-     * @return int
-     */
-    public function getType()
+    public function getType(): int
     {
         return $this->type;
     }
 
-
-    /**
-     * @param int $type
-     */
-    public function setType($type)
+    public function setType(int $type): void
     {
         $this->type = $type;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getWebUrl()
+    public function getWebUrl(): string
     {
         return $this->web_url;
     }
 
-
-    /**
-     * @param string $web_url
-     */
-    public function setWebUrl($web_url)
+    public function setWebUrl(string $web_url): void
     {
         $this->web_url = $web_url;
     }
-
-
-    /**
-     * @return string
-     */
-    public function getDateTimeCreated()
+    
+    public function getDateTimeCreated(): string
     {
         return $this->date_time_created;
     }
 
-
-    /**
-     * @param string $date_time_created
-     */
-    public function setDateTimeCreated($date_time_created)
+    public function setDateTimeCreated(string $date_time_created): void
     {
         $this->date_time_created = $date_time_created;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getDateTimeLastModified()
+    public function getDateTimeLastModified(): string
     {
         return $this->date_time_last_modified;
     }
 
-
-    /**
-     * @param string $date_time_last_modified
-     */
-    public function setDateTimeLastModified($date_time_last_modified)
+    public function setDateTimeLastModified(string $date_time_last_modified): void
     {
         $this->date_time_last_modified = $date_time_last_modified;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-
-    /**
-     * @param string $name
-     */
-    public function setName($name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getLastModifiedBy()
+    public function getLastModifiedBy(): string
     {
         return $this->last_modified_by;
     }
 
-
-    /**
-     * @param string $last_modified_by
-     */
-    public function setLastModifiedBy($last_modified_by)
+    public function setLastModifiedBy(string $last_modified_by): void
     {
         $this->last_modified_by = $last_modified_by;
     }
 
-
-    /**
-     * @return string
-     */
-    public function getETag()
+    public function getETag(): string
     {
         return $this->e_tag;
     }
 
-
-    /**
-     * @param string $e_tag
-     */
-    public function setETag($e_tag)
+    public function setETag(string $e_tag): void
     {
         $this->e_tag = $e_tag;
     }
 
-
-    /**
-     * @param      $str
-     * @param bool $capitalise_first_char
-     *
-     * @return string
-     */
-    public static function toCamelCase($str, $capitalise_first_char = false)
+    public static function toCamelCase(string $str, bool $capitalise_first_char = false): string
     {
         if ($capitalise_first_char) {
             $str[0] = strtoupper($str[0]);
@@ -296,13 +202,7 @@ abstract class ilCloudStorageWebDavItem
         return preg_replace_callback('/_([a-z])/', $func, $str);
     }
 
-
-    /**
-     * @param string $str
-     *
-     * @return string
-     */
-    protected static function fromCamelCase($str)
+    protected static function fromCamelCase(string $str): string
     {
         $str[0] = strtolower($str[0]);
         //$func = create_function('$c', 'return "_" . strtolower($c[1]);');
@@ -313,15 +213,7 @@ abstract class ilCloudStorageWebDavItem
         return preg_replace_callback('/([A-Z])/', $func, $str);
     }
 
-
-    /**
-     * urlencode without encoding slashes
-     *
-     * @param $str
-     *
-     * @return mixed
-     */
-    protected function urlencode($str)
+    protected function urlencode(string $str): string
     {
         return str_replace('%2F', '/', rawurlencode($str));
     }

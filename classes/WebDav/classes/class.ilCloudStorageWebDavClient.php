@@ -18,9 +18,7 @@ class ilCloudStorageWebDavClient
     
     protected ?ilCloudStorageWebDavRESTClient $rest_client = null;
     
-    protected ?ilCloudStorageWebDav $dav = null;
-
-    public static $unique_path_ids = array();
+    public ?ilCloudStorageWebDav $dav = null;
    
     const DEBUG = true;
 
@@ -49,8 +47,10 @@ class ilCloudStorageWebDavClient
     
     public function hasConnection(): bool
     {
+        global $DIC;
+        $DIC->logger()->root()->info("C - baseUri: " . $this->dav->getClientSettings()['baseUri']);
         try {   //sabredav version 1.8 throws exception on missing connection
-            $response = $this->getWebDAVClient()->request('PROPFIND', $this->dav->object->getRootFolder(), null, $this->dav->getHeaders());
+            $response = $this->getWebDAVClient()->request('PROPFIND', '', null, $this->dav->getHeaders());
         } catch (Exception $e) {
             return false;
         }
@@ -62,7 +62,7 @@ class ilCloudStorageWebDavClient
     {
         global $DIC;
         try {
-            $response = $this->getWebDAVClient()->request('PROPFIND', $this->dav->object->getRootFolder(), null, $this->dav->getHeaders());
+            $response = $this->getWebDAVClient()->request('PROPFIND', '', null, $this->dav->getHeaders());
         } catch (Exception $e) {
             $DIC->logger()->root()->error($e->getMessage());
             throw new ilCloudStorageException(ilCloudStorageException::NO_CONNECTION, $e->getMessage());
@@ -80,10 +80,11 @@ class ilCloudStorageWebDavClient
     public function listFolder($id)
     {
         global $DIC;
-        
+        /*
         if ($id == "/") {
             $id = $this->dav->object->getRootFolder();
         }
+        */
         $id = $this->urlencode(ltrim($id, '/'));
 
         $settings = $this->dav->getClientSettings();
@@ -103,7 +104,7 @@ class ilCloudStorageWebDavClient
             );
             //$DIC->logger()->root()->log(var_export($response,true));
             // $response = $client->propFind($settings['baseUri'] . $id, [], 1, $this->getAuth()->getHeaders());
-            $items = ilCloudStorageWebDavItemFactory::getInstancesFromResponse($response, $settings);
+            $items = ilCloudStorageWebDavItemFactory::getInstancesFromResponse($response, $this);
             //$DIC->logger()->root()->log(var_export($items,true));
             return $items;
         }
@@ -169,6 +170,8 @@ class ilCloudStorageWebDavClient
      */
     public function createFolder($path): bool
     {
+        global $DIC;
+        
         $path = $this->urlencode(rtrim(ltrim($path, '/'),'/')).'/';
         //see: https://github.com/seedvault-app/seedvault/issues/500
         $response = $this->getWebDAVClient()->request('MKCOL', $path, null, $this->dav->getHeaders());
@@ -248,7 +251,7 @@ class ilCloudStorageWebDavClient
     protected function itemExists($path)
     {
         try {
-            $request = $this->getWebDAVClient()->request('GET', ltrim($this->urlencode($path), '/'), null, $this->dav->getHeaders());
+            $request = $this->getWebDAVClient()->request('PROPFIND', ltrim($this->urlencode($path), '/'), null, $this->dav->getHeaders());
         } catch (Exception $e) {
             return false;
         }
@@ -303,34 +306,44 @@ class ilCloudStorageWebDavClient
     {
         global $DIC;
 
-        $settings = $this->dav->getClientSettings();
+        $DIC->logger()->root()->info("pathToId: " . $path);
+        // ToDo
 
-        $cache = self::getUniqueIdCache($settings['refId']);
+        return 0;
+        /*
+        global $DIC;
+
+        $settings = $this->dav->getClientSettings();
 
         $id = array_search($path, $cache);
 
-        if (!$id) {
-            $id = self::getUniqueId($cache);
-            $cache[$path] = $id;
-            self::storeUniqueIdCache($cache, $settings['refId']);
-        }
         return $id;
+        */
     }
 
-    public static function storeUniqueIdCache(array $uniqueId, int $refId): void {
+    public function getDecodedWebUrl(string $web_url): string {
+        return rawurldecode($web_url);
+    }
+
+    public function getPathFromWebUrl(string $web_url, int $type): string {
         global $DIC;
-        $_SESSION[(string)$refId."_uniqueid_cache"] = $uniqueId;
-        $DIC->logger()->root()->debug(var_export(self::getUniqueIdCache($refId),true));
-    }
-
-    public static function getUniqueIdCache(int $refId): array {
-        if (!isset($_SESSION[(string)$refId . "_uniqueid_cache"])) {
-            $_SESSION[(string)$refId."_uniqueid_cache"] = array();
+        $settings = $this->dav->getClientSettings();
+        $url = $this->getDecodedWebUrl($web_url);
+        $web_dav_path = $settings['webDavPath'];
+        if ($type == ilCloudStorageWebDavItem::TYPE_FOLDER) {
+            $url = substr($url, 0, -1);
         }
-        return $_SESSION[(string)$refId."_uniqueid_cache"];
+        $url = substr($url, 0, -(strlen($this->getNameFromWebUrl($web_url, $type))));
+        $url = substr($url, strpos($url, $web_dav_path) + strlen($web_dav_path));
+        return ltrim($url,"/");
     }
 
-    public static function getUniqueId($cache) {
-        return count($cache) + 1;
+    public function getNameFromWebUrl(string $web_url, int $type) {
+        $url = $this->getDecodedWebUrl($web_url);
+        if ($type == ilCloudStorageWebDavItem::TYPE_FOLDER) {
+            $url = substr($url, 0, -1);
+        }
+        return substr($url, strrpos($url, '/') + 1, strlen($url) - strrpos($url, '/'));
     }
+
 }
