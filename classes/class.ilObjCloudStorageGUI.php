@@ -63,6 +63,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $this->dic = $DIC;
 
         $this->lng->loadLanguageModule('rep_robj_xcls');
+        $this->lng->loadLanguageModule('file');
 
         $this->platform = $this->object instanceof ilObjCloudStorage ? ilCloudStorageConfig::getInstance($this->object->getConnId())->getServiceId() : $this->platform; #
 
@@ -900,7 +901,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $form->addCommandButton("cancelUploadFiles", $this->lng->txt("cancel"));
 
         $form->setTableWidth("100%");
-        $form->setTitle($this->lng->txt("upload_files_title"));
         //        $this->form->setTitleIcon(ilUtil::getImagePath('icon_file.gif'), $lng->txt('obj_file'));
         $form->setTitleIcon(self::getImagePath('icon_dcl_file.svg'), $this->lng->txt('obj_file'));
 
