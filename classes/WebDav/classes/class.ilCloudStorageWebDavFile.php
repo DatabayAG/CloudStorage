@@ -19,7 +19,7 @@ class ilCloudStorageWebDavFile extends ilCloudStorageWebDavItem
     public function loadFromProperties(string $parent_web_url, string $web_url, array $properties, ilCloudStorageWebDavClient $client): void
     {
         parent::loadFromProperties($parent_web_url, $web_url, $properties, $client);
-        $this->setSize($properties["{DAV:}getcontentlength"]);
+        $this->setSize((int) $properties["{DAV:}getcontentlength"]);
     }
 
     public function loadFromResponse(string $path): void
