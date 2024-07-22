@@ -71,7 +71,8 @@ class ilFileUploadGUI
     public function getHTML()
     {
         global $DIC;
-        $lng = $DIC['lng'];
+        $lng = $DIC->language();
+        $lng->loadLanguageModule('file');
         $ilCtrl = $DIC['ilCtrl'];
         $tpl = $DIC->ui()->mainTemplate();
         
@@ -172,7 +173,8 @@ class ilFileUploadGUI
     protected function getSharedHtml()
     {
         global $DIC;
-        $lng = $DIC['lng'];
+        $lng = $DIC->language();
+        $lng->loadLanguageModule('file');
         
         // already loaded?
         if (self::$shared_code_loaded) {
