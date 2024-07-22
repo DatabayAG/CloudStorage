@@ -304,21 +304,8 @@ class ilCloudStorageWebDavClient
      */
     public function pathToId(string $path) : int
     {
-        global $DIC;
-
-        $DIC->logger()->root()->info("pathToId: " . $path);
-        // ToDo
-
-        return 0;
-        /*
-        global $DIC;
-
-        $settings = $this->dav->getClientSettings();
-
-        $id = array_search($path, $cache);
-
-        return $id;
-        */
+        // in generic WebDav no id can be retrieved from storage
+        return ilCloudStorageFileNode::ID_UNKOWN;
     }
 
     public function getDecodedWebUrl(string $web_url): string {
