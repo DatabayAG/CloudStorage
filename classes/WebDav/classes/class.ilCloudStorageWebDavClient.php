@@ -48,7 +48,6 @@ class ilCloudStorageWebDavClient
     public function hasConnection(): bool
     {
         global $DIC;
-        $DIC->logger()->root()->info("C - baseUri: " . $this->dav->getClientSettings()['baseUri']);
         try {   //sabredav version 1.8 throws exception on missing connection
             $response = $this->getWebDAVClient()->request('PROPFIND', '', null, $this->dav->getHeaders());
         } catch (Exception $e) {

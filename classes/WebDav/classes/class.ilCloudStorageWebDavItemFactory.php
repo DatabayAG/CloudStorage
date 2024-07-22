@@ -26,7 +26,6 @@ class ilCloudStorageWebDavItemFactory
         
         // get first item as parent
         foreach ($response as $url => $props) {
-            $DIC->logger()->root()->info("C - parent: " . $url);
             $parent_web_url = $url;
             break;
         }

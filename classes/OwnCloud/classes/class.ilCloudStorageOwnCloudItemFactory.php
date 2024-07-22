@@ -37,7 +37,7 @@ class ilCloudStorageOwnCloudItemFactory
                 $return[] = $exid_item;
             }
         }
-        $DIC->logger()->root()->info(var_export($return, true));
+        //$DIC->logger()->root()->info(var_export($return, true));
         return $return;
     }
 }
