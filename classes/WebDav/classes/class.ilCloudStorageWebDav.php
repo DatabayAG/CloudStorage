@@ -322,35 +322,6 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
             default: 
                 //ToDo
         }
-        /*
-        if ($this->config->getOAuth2Active()) {
-            if ($this->config->getProxyURL() != '') {
-                return array(
-                    'baseUri' => $this->config->getFullWebDAVPath(),
-                    'proxy'   => $this->config->getProxyURL(),
-                );
-            } else {
-                return array(
-                    'baseUri' => $this->config->getFullWebDAVPath(),
-                );
-            }
-        } else {
-            if ($this->config->getProxyURL() != '') {
-                return array(
-                    'baseUri'  => $this->config->getFullWebDAVPath(),
-                    'userName' => $this->object->getUsername(),
-                    'password' => $this->object->getPassword(),
-                    'proxy'    => $this->config->getProxyURL(),
-                );
-            } else {
-                return array(
-                    'baseUri'  => $this->config->getFullWebDAVPath(),
-                    'userName' => $this->object->getUsername(),
-                    'password' => $this->object->getPassword(),
-                );
-            }
-        }
-        */
     }
 
     public function getToken(): ilCloudStorageWebDavToken
@@ -359,7 +330,6 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
         if (!$this->user_token) {
             $this->loadToken();
         }
-        //$this->dic->logger()->root()->debug(var_export($this->user_token,true));
         return $this->user_token;
     }
 
@@ -486,13 +456,10 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
     {
         $this->dic->logger()->root()->debug("addToFileTree");
         $files = $this->getClient()->listFolder($parent_folder);
-        //$this->dic->logger()->root()->info("C - files: " . var_export($files, true));
         foreach ($files as $k => $item) {
-            //$this->dic->logger()->root()->info(var_export($item, true));
             $size = ($item instanceof ilCloudStorageWebDavFile) ? $size = $item->getSize() : null;
             $is_dir = $item instanceof ilCloudStorageWebDavFolder;
             $fullPath = $item->getFullPath();
-            //$this->dic->logger()->root()->info("C - fullPath: " . $fullPath);
             $file_tree->addNode($item->getFullPath(), (int) $item->getId(), $is_dir, strtotime($item->getDateTimeLastModified()), $size);
         }
     }
@@ -506,7 +473,6 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
     public function getFile(string $path = "", ?ilCloudStorageFileTree $file_tree = null): void
     {
         global $DIC;
-        $DIC->logger()->root()->log("getFile: " . $path);
         $this->getClient()->deliverFile($path);
     }
 
@@ -517,33 +483,19 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
 
     public function createFolder(string $path = '', ?ilCloudStorageFileTree $file_tree = null): void
     {
-        global $DIC;
         if ($file_tree instanceof ilCloudStorageFileTree) {
             $path = ilCloudStorageUtil::joinPaths($file_tree->getRootPath(), $path);
         }
-        $DIC->logger()->root()->log("C - path: " . $path);
         if ($path != '/' && !$this->getClient()->folderExists($path)) {
-            $DIC->logger()->root()->log("C - path: " . $path);
             $this->getClient()->createFolder($path);
         }
     }
 
     public function createFolderById(int $id, string  $folder_name) : int
     {
-        global $DIC;
-
-        $DIC->logger()->root()->info("C - createFolderById " . (string) $id . " - " . $folder_name);
-
         $path = $this->idToPath($id, $folder_name);
-
-        $DIC->logger()->root()->info("C - path " . $path);
-
         $this->createFolder($path);
-
         $ret = $this->pathToId($path);
-
-        $DIC->logger()->root()->info("C - ret " . (string) $ret);
-
         return $ret;
     }
 
@@ -599,7 +551,6 @@ class ilCloudStorageWebDav implements ilCloudStorageServiceInterface
 
         if ($node === null) {
             $id = $this->getClient()->pathToId($path);
-
             $node = ilCloudStorageFileTree::getFileTreeFromSession($this->object->getRefId())->addNode($path, $id, true);
         }
 
