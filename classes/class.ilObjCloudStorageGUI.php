@@ -29,6 +29,10 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public const STRING = "string";
 
+    public const CFORM_FOLDER_EXISTING = 99;
+
+    public const CFORM_FOLDER_NEW = 98;
+
     // Sn:  read from pluginIni should only read and parse once, needs concept (see ilCloudStorageConfigGUI)
     private bool $debug = true;
 
@@ -244,7 +248,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                                         $this->object->setAuthComplete(false);
                                         $this->object->doUpdate();
                                         if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {
-                                            ilCloudStorageOwnCloudToken::deleteUserToken($this->object->getConnId());
+                                            ilCloudStorageOAuth2::deleteUserToken($this->object->getConnId());
                                             $this->serviceAuth();                    
                                         } else {
                                             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->object->txt('only_owner'), true);
@@ -345,12 +349,82 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public function initCreationForms(string $new_type): array
     {
         $forms = [
-            self::CFORM_NEW => $this->initCreateForm($new_type)
+            self::CFORM_FOLDER_EXISTING => $this->initCreateFormExisting($new_type),
+            self::CFORM_FOLDER_NEW => $this->initCreateFormNew($new_type),
         ];
         return $forms;
     }
     
-    public function initCreateForm($a_new_type): ilPropertyFormGUI
+    public function initCreateFormExisting($a_new_type): ilPropertyFormGUI
+    {
+        // check if conns are available
+        $availableConns = ilCloudStorageConfig::_getAvailableCloudStorageConn(true);
+        if (count($availableConns) == 0) {
+            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("no_active_conn"), true);
+            //ilObjectGUI::redirectToRefId($this->parent_id);
+            $this->redirectToRefId($this->parent_id);
+        }
+
+        // check if only one connection is available
+        if (count($availableConns) == 1) {
+            // check if user is already authenticated with that connection
+            
+        } else {
+
+        }
+
+        $form = parent::initCreateForm($a_new_type);
+
+        // hide default title and description
+        $form->removeItemByPostVar("title");
+        $form->removeItemByPostVar("desc");
+
+        $hiddenTitle = new ilHiddenInputGUI("title");
+        $hiddenTitle->setValue($this->txt("cld_add"));
+        
+        $form->addItem($hiddenTitle);
+        //$form->removeItemByPostVar("online");
+
+        /*
+        foreach ($form->getInputItemsRecursive() as $item) {
+            $this->dic->logger()->root()->log($item->);
+            //$item->setDisabled(true);
+        }
+        */
+        // CloudStorageConn RadioButtons
+
+        $form->setTitle($this->txt("create_existing_folder"));
+        /*
+        $rg = new ilRadioGroupInputGUI($this->txt("conn_id"),'conn_id');
+        $rg->setRequired(true);
+        foreach (ilCloudStorageConfig::_getAvailableCloudStorageConn(true) as $key => $value) {
+            $ro = new ilRadioOption($value, $key);
+            $config = ilCloudStorageConfig::getInstance($key);
+            if ($config->getAuthMethod() == ilCloudStorageConfig::AUTH_METHOD_BASIC) {
+                $ti = new ilTextInputGUI($this->txt("account_username"), "username_{$key}");
+                $ti->setRequired(true);
+                $ti->setMaxLength(1024);
+                $ti->setSize(60);
+                $ro->addSubItem($ti);
+
+                $pi = new ilPasswordInputGUI($this->txt("account_password"), "password_{$key}");
+                $pi->setRequired(true);
+                $pi->setMaxLength(1024);
+                $pi->setSize(60);
+                $ro->addSubItem($pi);
+            }
+            $rg->addOption($ro);
+        }
+        $form->addItem($rg);
+
+        // online
+        $cb = new ilCheckboxInputGUI($this->lng->txt("online"), "online");
+        $form->addItem($cb);
+        */
+        return $form;
+    }
+
+    public function initCreateFormNew($a_new_type): ilPropertyFormGUI
     {
         $availableConns = ilCloudStorageConfig::_getAvailableCloudStorageConn(true);
         if (count($availableConns) == 0) {

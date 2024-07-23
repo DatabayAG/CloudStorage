@@ -68,6 +68,7 @@ conf_availability_2#:#Neue erzeugbar
 untrashed_usages#:#Anzahl Verwendungen
 saving_invoked#:#Einstellungen gespeichert
 create_type#:#Neue Cloud-Anbindung definieren
+create_existing_folder#:#Bestehenden Cloud-Ordner anlegen
 add_type#:#Cloud-Anbindung hinzufügen
 delete_type#:#Cloud-Anbindung löschen
 delete_conn#:#Cloud-Anbindung löschen?

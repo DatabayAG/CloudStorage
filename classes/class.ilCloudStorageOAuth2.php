@@ -7,14 +7,14 @@ declare(strict_types=1);
 use League\OAuth2\Client\Token\AccessToken;
 
 /**
- * Class ilCloudStorageOwnCloudToken
+ * Class ilCloudStorageOAuth2
  *
  * @author  Stefan Schneider <eqsoft4@gmail.com>
  */
-class ilCloudStorageOwnCloudToken
+class ilCloudStorageOAuth2
 {
 
-    const DB_TABLE_NAME = 'rep_robj_xcls_ocld_tk';
+    const DB_TABLE_NAME = 'rep_robj_xcls_oauth2';
    
     private ?int $conn_id = 0;
 
@@ -28,17 +28,17 @@ class ilCloudStorageOwnCloudToken
 
     private function store(): void {
         global $DIC;
-        $query = $DIC->database()->query("SELECT user_id FROM rep_robj_xcls_ocld_tk WHERE conn_id = " . $this->getConnId() . " AND user_id = " . $this->getUserId());
+        $query = $DIC->database()->query("SELECT user_id FROM " . self::DB_TABLE_NAME . " WHERE conn_id = " . $this->getConnId() . " AND user_id = " . $this->getUserId());
         $ret = $DIC->database()->fetchAssoc($query);
         if (!is_null($ret)) {
             $DIC->database()->manipulateF(
-                'UPDATE rep_robj_xcls_ocld_tk SET access_token = %s, refresh_token = %s, valid_through = %s WHERE conn_id = %s AND user_id = %s',
+                'UPDATE ' . self::DB_TABLE_NAME . ' SET access_token = %s, refresh_token = %s, valid_through = %s WHERE conn_id = %s AND user_id = %s',
                 array('text', 'text', 'integer', 'integer', 'integer'),
                 array($this->getAccessToken(), $this->getRefreshToken(), $this->getValidThrough(), $this->getConnId(), $this->getUserId())
             );
         } else {
             $DIC->database()->manipulateF(
-                'INSERT INTO rep_robj_xcls_ocld_tk (conn_id, user_id, access_token, refresh_token, valid_through) VALUES (%s, %s, %s, %s, %s)',
+                'INSERT INTO ' . self::DB_TABLE_NAME . ' (conn_id, user_id, access_token, refresh_token, valid_through) VALUES (%s, %s, %s, %s, %s)',
                 array('integer', 'integer', 'text', 'text', 'integer'),
                 array($this->getConnId(), $this->getUserId(), $this->getAccessToken(), $this->getRefreshToken(), $this->getValidThrough())
             );
@@ -54,14 +54,14 @@ class ilCloudStorageOwnCloudToken
         $this->store();
     }
 
-    public static function getUserToken(int $conn_id, int $user_id = 0): ilCloudStorageOwnCloudToken
+    public static function getUserToken(int $conn_id, int $user_id = 0): ilCloudStorageOAuth2
     {
         global $DIC;
         if ($user_id == 0) {
             global $ilUser;
             $user_id = $ilUser->getId();
         }
-        $query = $DIC->database()->query("SELECT * FROM rep_robj_xcls_ocld_tk WHERE conn_id = " . $conn_id . " AND user_id = " . $user_id);
+        $query = $DIC->database()->query("SELECT * FROM " . self::DB_TABLE_NAME . " WHERE conn_id = " . $conn_id . " AND user_id = " . $user_id);
         $ret = $DIC->database()->fetchAssoc($query);
         if (is_null($ret)) {
             $token = new self();
@@ -85,7 +85,7 @@ class ilCloudStorageOwnCloudToken
             global $ilUser;
             $user_id = $ilUser->getId();
         }
-        $DIC->database()->manipulate("DELETE FROM rep_robj_xcls_ocld_tk WHERE conn_id = " . $conn_id . " AND user_id = " . $user_id);
+        $DIC->database()->manipulate("DELETE FROM " . self::DB_TABLE_NAME . " WHERE conn_id = " . $conn_id . " AND user_id = " . $user_id);
     }
 
     /* never used

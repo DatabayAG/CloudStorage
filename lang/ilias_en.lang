@@ -68,6 +68,7 @@ conf_availability_2#:#New ones can be created
 untrashed_usages#:#Number of usages
 saving_invoked#:#Settings saved
 create_type#:#Define new Cloud Connection
+create_existing_folder#:#Create existing Cloud Folder
 add_type#:#Add new Cloud Connection
 delete_type#:#Delete Cloud Connection
 delete_conn#:#Delete Cloud Connection?

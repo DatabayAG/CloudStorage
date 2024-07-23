@@ -823,7 +823,7 @@ class ilObjCloudStorage extends ilObjectPlugin
         $query = $DIC->database()->query("SELECT * FROM cld_cldh_owncld_token");
         while ($rec = $DIC->database()->fetchAssoc($query)) {
             $DIC->database()->manipulatef(
-                'INSERT INTO rep_robj_xcls_ocld_tk (conn_id, user_id, access_token, refresh_token, valid_through)
+                'INSERT INTO ' . ilCloudStorageOAuth2::DB_TABLE_NAME . ' (conn_id, user_id, access_token, refresh_token, valid_through)
                  VALUES(%s, %s, %s, %s, %s)',
                 array('integer','integer', 'text', 'text', 'integer'),
                 array($conn_id, $rec["user_id"], $rec["access_token"], $rec["refresh_token"], $rec["valid_through"])

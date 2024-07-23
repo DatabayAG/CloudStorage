@@ -271,3 +271,40 @@ if ($ilDB->tableExists('rep_robj_xcls_conn')) {
     }
 }
 ?>
+<#6>
+<?php
+if ($ilDB->tableExists('rep_robj_xcls_ocld_tk')) {
+    $ilDB->renameTable('rep_robj_xcls_ocld_tk', 'rep_robj_xcls_oauth2');
+}
+?>
+<#7>
+<?php
+if (!$ilDB->tableExists('rep_robj_xcls_bauth')) {
+    $fields_token = array(
+        'conn_id' => array(
+            'type' => 'integer',
+            'length' => 4,
+            'notnull' => true,
+        ),
+        'user_id' => array(
+            'type' => 'integer',
+            'length' => 8,
+            'notnull' => true
+        ),
+        'username' => array(
+            'type' => 'text',
+            'length' => 256,
+            'notnull' => true,
+            'default' => ''
+        ),
+        'password' => array(
+            'type' => 'text',
+            'length' => 256,
+            'notnull' => true,
+            'default' => ''
+        )
+    );
+    $ilDB->createTable("rep_robj_xcls_bauth", $fields_token);
+    $ilDB->addPrimaryKey("rep_robj_xcls_bauth", array("conn_id","user_id"));
+}
+?>

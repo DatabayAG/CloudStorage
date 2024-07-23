@@ -40,8 +40,12 @@ class ilCloudStoragePlugin extends ilRepositoryObjectPlugin
             $ilDB->dropTable('rep_robj_xcls_conn');
         }
 
-        if ($ilDB->tableExists('rep_robj_xcls_ocld_tk')) {
-            $ilDB->dropTable('rep_robj_xcls_ocld_tk');
+        if ($ilDB->tableExists(ilCloudStorageOAuth2::DB_TABLE_NAME)) {
+            $ilDB->dropTable(ilCloudStorageOAuth2::DB_TABLE_NAME);
+        }
+
+        if ($ilDB->tableExists(ilCloudStorageBasicAuth::DB_TABLE_NAME)) {
+            $ilDB->dropTable(ilCloudStorageBasicAuth::DB_TABLE_NAME);
         }
     }
 

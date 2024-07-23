@@ -40,7 +40,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
 
     public ?Container $dic = null;
 
-    public ?ilCloudStorageOwnCloudToken $user_token = null;
+    public ?ilCloudStorageOAuth2 $user_token = null;
 
     public ?ilCloudStorageOwnCloudClient $owncl_client = null;
 
@@ -344,7 +344,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         */
     }
 
-    public function getToken(): ilCloudStorageOwnCloudToken
+    public function getToken(): ilCloudStorageOAuth2
     {
         $this->dic->logger()->root()->debug("getToken");
         if (!$this->user_token) {
@@ -359,9 +359,9 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         $this->dic->logger()->root()->debug("loadToken");
         //global $ilUser;
         // at object creation, the object and owner id does not yet exist, therefore we take the current user's id
-        //$this->user_token = ilCloudStorageOwnCloudToken::getUserToken($ilOwnCloud ? $ilOwnCloud->object->getOwnerId() : $ilUser->getId());
+        //$this->user_token = ilCloudStorageOAuth2::getUserToken($ilOwnCloud ? $ilOwnCloud->object->getOwnerId() : $ilUser->getId());
         assert($this->object instanceof ilObjCloudStorage);
-        $this->user_token = ilCloudStorageOwnCloudToken::getUserToken($this->object->getConnId(), $this->object->getOwnerId());
+        $this->user_token = ilCloudStorageOAuth2::getUserToken($this->object->getConnId(), $this->object->getOwnerId());
     }
 
     public static function storeTokenToSession(League\OAuth2\Client\Token\AccessToken $access_token): void
@@ -389,7 +389,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
 
         if ($this->getToken()->isExpired()) {
             $atom_query = $this->dic->database()->buildAtomQuery();
-            $atom_query->addTableLock(ilCloudStorageOwnCloudToken::DB_TABLE_NAME);
+            $atom_query->addTableLock(ilCloudStorageOAuth2::DB_TABLE_NAME);
             $atom_query->addQueryCallable(function (ilDBInterface $ilDB) {
                 $this->loadToken(); // reload token and check again inside table lock to prevent race condition
                 if (!$this->getToken()->isExpired()) {
