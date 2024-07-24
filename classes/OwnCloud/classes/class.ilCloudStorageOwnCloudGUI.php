@@ -50,12 +50,20 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
     }
 
     public function editProperties(): void {
+        $this->dic->logger()->root()->log("service->editProperties()");
+
         $root_path = ($this->dic->http()->wrapper()->query()->has('root_path')) ? $this->dic->http()->wrapper()->query()->retrieve('root_path', $this->dic->refinery()->kindlyTo()->string()): '';
         if ($root_path != '') {
             $this->parent->setRootFolder($root_path);
             $this->clearParams();
         } else {
-            $action = ($this->dic->http()->wrapper()->query()->has('action')) ? $this->dic->http()->wrapper()->query()->retrieve('action', $this->dic->refinery()->kindlyTo()->string()): '';
+            //$this->dic->logger()->root()->log("xcls_create_folder_action: " . $_SESSION["xcls_create_folder_action"]);
+            if (isset($_SESSION['xcls_create_folder_action'])) {
+                $action = $_SESSION['xcls_create_folder_action'];
+            } else {
+                $action = ($this->dic->http()->wrapper()->query()->has('action')) ? $this->dic->http()->wrapper()->query()->retrieve('action', $this->dic->refinery()->kindlyTo()->string()): '';
+            }
+            $this->dic->logger()->root()->log("action: " . $action);
             switch ($action) {
                 case "choose_root":
                     if ($this->object->currentUserIsOwner()) {
@@ -64,8 +72,8 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
                         $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->object->txt('cld_only_owner_has_permission_to_change_root_path'), true);
                         $this->dic->ctrl()->redirect($this->parent, 'editProperties');
                     }
-                    $this->clearParams();
-                    $this->showTreeView();
+                    //$this->clearParams();
+                    //$this->showTreeView();
                     break;
                 default:
                     $this->parent->editProperties();
@@ -76,6 +84,7 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
     private function clearParams() {
         $this->dic->ctrl()->setParameter($this->parent, 'action', '');
         $this->dic->ctrl()->setParameter($this->parent, 'root_path', '');
+        unset($_SESSION['xcls_create_folder_action']);
     }
 
     public function updateProperties(): void
@@ -159,7 +168,7 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
     */
     public function showTreeView(): void
     {
-        $this->dic->logger()->root()->debug("showTreeView");
+        $this->dic->logger()->root()->log("showTreeView");
         $isAsync = false;
         if ($this->dic->http()->wrapper()->query()->has("cmdMode")) {
             if ($this->dic->http()->wrapper()->query()->retrieve("cmdMode",  $this->dic->refinery()->to()->string()) == "asynch") {
@@ -167,9 +176,10 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
             }
         }
         if (!$isAsync) {
-            $this->dic->logger()->root()->debug("showTreeView not async");
+            $this->dic->logger()->root()->log("showTreeView not async");
             $client = $this->service->getClient();
             if ($client->hasConnection()) {
+                $this->dic->logger()->root()->log("connection");
                 $tree = new ilCloudStorageOwnCloudTree($client);
                 $tree_gui = new ilCloudStorageOwnCloudTreeGUI('tree_expl', $this->parent, 'editProperties', $tree);
                 $this->dic->tabs()->clearTargets();
@@ -177,14 +187,16 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
                 $this->dic->ui()->mainTemplate()->setOnScreenMessage('info', $this->object->txt('choose_root'), true);
                 $this->dic->ctrl()->setParameter($this->parent, 'action', 'choose_root');
                 $this->dic->ui()->mainTemplate()->setContent($tree_gui->getHTML());
+                
             } else {
+                $this->dic->logger()->root()->log("no connection");
                 $this->dic->ctrl()->redirect($this->parent, 'editProperties');
             }
         } else {
-            $this->dic->logger()->root()->debug("showTreeView async");
+            $this->dic->logger()->root()->log("showTreeView async");
             $client = $this->service->getClient();
             if ($client->hasConnection()) {
-                $this->dic->logger()->root()->debug("showTreeView async hasConnection");
+                $this->dic->logger()->root()->log("showTreeView async hasConnection");
                 $tree = new ilCloudStorageOwnCloudTree($client);
                 $tree_gui = new ilCloudStorageOwnCloudTreeGUI('tree_expl', $this->parent, 'editProperties', $tree);
                 $tree_gui->handleCommand();
