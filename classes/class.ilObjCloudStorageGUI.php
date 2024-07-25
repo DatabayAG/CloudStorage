@@ -406,6 +406,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             // ToDo
         }
 
+        $form->setMode("subform");
 
         // hide default title and description
         $form->removeItemByPostVar("title");
@@ -629,12 +630,22 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         assert($this->object instanceof ilObjCloudStorage);
         if ($this->object->currentUserIsOwner()) {
             $this->object->setRootFolder(ilCloudStorageUtil::normalizePath($root_path));
+            if (isset($_SESSION['xcls_create_folder_action'])) {
+                $this->object->setTitle(basename($this->object->getRootFolder()));
+                $this->clearParams();
+            }
             $this->object->update();
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('success', $this->lng->txt('msg_obj_modified'), true);
         } else {
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt('cld_only_owner_has_permission_to_change_root_path'), true);
         }
         $this->dic->ctrl()->redirect($this,'editProperties');
+    }
+
+    private function clearParams() {
+        $this->dic->ctrl()->setParameter($this, 'action', '');
+        $this->dic->ctrl()->setParameter($this, 'root_path', '');
+        unset($_SESSION['xcls_create_folder_action']);
     }
 
     // Sn: from class.ilCloudPluginInitGUI.php

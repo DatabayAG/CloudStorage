@@ -55,9 +55,8 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
         $root_path = ($this->dic->http()->wrapper()->query()->has('root_path')) ? $this->dic->http()->wrapper()->query()->retrieve('root_path', $this->dic->refinery()->kindlyTo()->string()): '';
         if ($root_path != '') {
             $this->parent->setRootFolder($root_path);
-            $this->clearParams();
         } else {
-            //$this->dic->logger()->root()->log("xcls_create_folder_action: " . $_SESSION["xcls_create_folder_action"]);
+            // from create dialog existing folder
             if (isset($_SESSION['xcls_create_folder_action'])) {
                 $action = $_SESSION['xcls_create_folder_action'];
             } else {
@@ -72,19 +71,11 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
                         $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->object->txt('cld_only_owner_has_permission_to_change_root_path'), true);
                         $this->dic->ctrl()->redirect($this->parent, 'editProperties');
                     }
-                    //$this->clearParams();
-                    //$this->showTreeView();
                     break;
                 default:
                     $this->parent->editProperties();
             }
         }
-    }
-
-    private function clearParams() {
-        $this->dic->ctrl()->setParameter($this->parent, 'action', '');
-        $this->dic->ctrl()->setParameter($this->parent, 'root_path', '');
-        unset($_SESSION['xcls_create_folder_action']);
     }
 
     public function updateProperties(): void
