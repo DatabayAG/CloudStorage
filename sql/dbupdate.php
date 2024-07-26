@@ -308,3 +308,14 @@ if (!$ilDB->tableExists('rep_robj_xcls_bauth')) {
     $ilDB->addPrimaryKey("rep_robj_xcls_bauth", array("conn_id","user_id"));
 }
 ?>
+<#8>
+<?php
+if (!$ilDB->tableExists('rep_robj_xcls_data')) {
+    if ($ilDB->tableColumnExists('rep_robj_xcls_data', 'username')) {
+        $ilDB->dropTableColumn('rep_robj_xcls_data','username');
+    }
+    if ($ilDB->tableColumnExists('rep_robj_xcls_data', 'password')) {
+        $ilDB->dropTableColumn('rep_robj_xcls_data','password');
+    }
+}
+?>
