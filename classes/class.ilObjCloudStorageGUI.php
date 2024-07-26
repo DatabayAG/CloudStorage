@@ -359,6 +359,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     {
         // check if conns are available
         $form = parent::initCreateForm($a_new_type);
+
+        //foreach ($form->getCommandButtons() as $btn) {
+        $form->getCommandButtons()[0]["text"] = $this->txt('obj_xcls_select');
+        $this->dic->logger()->root()->log(var_export($form->getCommandButtons()[0]["text"], true));
+        //}
         $availableConns = ilCloudStorageConfig::_getAvailableCloudStorageConn(true);
         if (count($availableConns) == 0) {
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("no_active_conn"), true);
@@ -367,46 +372,76 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
         // check if only one connection is available
         if (count($availableConns) == 1) {
-            $this->dic->logger()->root()->log("only 1 cloud connection is available");
+            $this->dic->logger()->root()->log("only one cloud connection is available");
             foreach ($availableConns as $key => $value) {
                 $config = ilCloudStorageConfig::getInstance($key);
             }
-            switch ($config->getAuthMethod()) {
-                case ilCloudStorageConfig::AUTH_METHOD_OAUTH2:
-                    // check if user is already authenticated with that connection
-                    $this->dic->logger()->root()->log("oauth2");
-                    $token = ilCloudStorageOAuth2::getUserToken($config->getConnId(), $this->dic->user()->getId());
-                    $accessToken = $token->getAccessToken();
-                    $this->dic->logger()->root()->log("AccessToken: " . $accessToken);
-                    if ($accessToken != '') {
-                        $this->dic->logger()->root()->log("user has already an access token for cloud connection " . $config->getTitle());
-                        $authInfo = new ilNonEditableValueGUI("has_oauth2_token", "has_oauth2_token");
-                    } else {
-                        $this->dic->logger()->root()->log("user has no access token for cloud connection " . $config->getTitle());
-                        $authInfo = new ilNonEditableValueGUI("has_no_oauth2_token", "has_no_oauth2_token");
-                    }
-                    $form->addItem($authInfo);
-                    $hiddenConnId = new ilHiddenInputGUI("conn_id");
-                    $hiddenConnId->setValue((string) $config->getConnId());
-                    $form->addItem($hiddenConnId);
-                    /*
-                    $hiddenAction = new ilHiddenInputGUI("folder_action");
-                    $hiddenAction->setValue("choose_root");
-                    $form->addItem($hiddenAction);
-                    */
-                    $_SESSION["xcls_create_folder_action"] = "choose_root";
-                    //$this->dic->ctrl()->setParameterByClass("ilobjectplugingui", "action", "choose_root");
-                    break;
-                case ilCloudStorageConfig::AUTH_METHOD_BASIC:
-                    // check if user is already authenticated with that connection
-                    $this->dic->logger()->root()->log("basic auth");
-                    break;
-            }
+            
+            // check if user is already authenticated with that connection
+            // if the connection is valid or not will be checked later in the process, because we first need an object for that
+            $hasAccount = ilObjCloudStorageAccess::hasAccount($config->getConnId(), $this->dic->user()->getId());
+            $this->dic->logger()->root()->log("hasAccount: " . (string) $hasAccount);
+            $authInfo = ($hasAccount) ? "has_account" : "has_no_account";
+            $authInfo = new ilNonEditableValueGUI($this->txt($authInfo), $authInfo);
+            $form->addItem($authInfo);
+            $hiddenConnId = new ilHiddenInputGUI("conn_id");
+            $hiddenConnId->setValue((string) $config->getConnId());
+            $form->addItem($hiddenConnId);
+            $form->setMode("subform");
         } else {
-            // ToDo
+            $this->dic->logger()->root()->log("multiple cloud connections are available");
+            $rg = new ilRadioGroupInputGUI($this->txt("conn_id"),'conn_id');
+            $rg->setRequired(true);
+            foreach ($availableConns as $key => $value) {
+                $ro = new ilRadioOption($value, $key);
+                $config = ilCloudStorageConfig::getInstance($key);
+                $hasAccount = ilObjCloudStorageAccess::hasAccount($config->getConnId(), $this->dic->user()->getId());
+                $this->dic->logger()->root()->log("hasAccount: " . (string) $hasAccount);
+                $authInfo = ($hasAccount) ? "has_account" : "has_no_account";
+                $authInfo = new ilNonEditableValueGUI($this->txt($authInfo), $authInfo);
+                $ro->addSubItem($authInfo);
+                /*
+                switch ($config->getAuthMethod()) {
+                    case ilCloudStorageConfig::AUTH_METHOD_OAUTH2:
+                        $this->dic->logger()->root()->log("oauth2");
+                        $token = ilCloudStorageOAuth2::getUserToken($config->getConnId(), $this->dic->user()->getId());
+                        $accessToken = $token->getAccessToken();
+                        $this->dic->logger()->root()->log("AccessToken: " . $accessToken);
+                        if ($accessToken != '') {
+                            $this->dic->logger()->root()->log("user has already an access token for cloud connection " . $config->getTitle());
+                            $authInfo = new ilNonEditableValueGUI("has_oauth2_token", "has_oauth2_token");
+                        } else {
+                            $this->dic->logger()->root()->log("user has no access token for cloud connection " . $config->getTitle());
+                            $authInfo = new ilNonEditableValueGUI("has_no_oauth2_token", "has_no_oauth2_token");
+                        }
+                        $ro->addSubItem($authInfo);
+                        break;
+                    case ilCloudStorageConfig::AUTH_METHOD_BASIC:
+                        // ToDo
+                        break;
+                }
+                */
+                /*
+                if ($config->getAuthMethod() == ilCloudStorageConfig::AUTH_METHOD_BASIC) {
+                    $ti = new ilTextInputGUI($this->txt("account_username"), "username_{$key}");
+                    $ti->setRequired(true);
+                    $ti->setMaxLength(1024);
+                    $ti->setSize(60);
+                    $ro->addSubItem($ti);
+
+                    $pi = new ilPasswordInputGUI($this->txt("account_password"), "password_{$key}");
+                    $pi->setRequired(true);
+                    $pi->setMaxLength(1024);
+                    $pi->setSize(60);
+                    $ro->addSubItem($pi);
+                }
+                */
+                $rg->addOption($ro);
+            }
+            $form->addItem($rg);
         }
 
-        $form->setMode("subform");
+        $_SESSION["xcls_create_folder_action"] = "choose_root";
 
         // hide default title and description
         $form->removeItemByPostVar("title");
@@ -511,8 +546,15 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         //$newObj->setAuthUser($DIC->user()->getEmail());
         $connId = $form->getInput("conn_id");
         $newObj->setOwnerId($this->dic->user()->getId());
-        $newObj->setUsername($form->getInput("username_{$connId}"));
-        $newObj->setPassword($form->getInput("password_{$connId}"));
+        $config = ilCloudStorageConfig::getInstance((int) $connId);
+        if ($config->getAuthMethod() == ilCloudStorageConfig::AUTH_METHOD_BASIC) {
+            $username = $form->getInput("username_{$connId}");
+            $password = $form->getInput("password_{$connId}");
+            if (isset($username) && isset($password)) {
+                $account = ilCloudStorageBasicAuth::getUserAccount($connId, $this->dic->user()->getId());
+                $account->storeUserAccount($username, $password, $connId);
+            }
+        }
 
         $newObj->createFolder((int) $form->getInput("online"), $connId);
         $newObj->update();

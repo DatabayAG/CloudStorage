@@ -29,20 +29,20 @@ class ilCloudStorageBasicAuth
         $ret = $DIC->database()->fetchAssoc($query);
         if (!is_null($ret)) {
             $DIC->database()->manipulateF(
-                'UPDATE ' . self::DB_TABLE_NAME . ' SET username = %s, password = %s, valid_through = %s WHERE conn_id = %s AND user_id = %s',
-                array('text', 'text', 'integer', 'integer', 'integer'),
+                'UPDATE ' . self::DB_TABLE_NAME . ' SET username = %s, password = %s, WHERE conn_id = %s AND user_id = %s',
+                array('text', 'text', 'integer', 'integer'),
                 array($this->getUsername(), $this->getPassword(), $this->getConnId(), $this->getUserId())
             );
         } else {
             $DIC->database()->manipulateF(
                 'INSERT INTO ' . self::DB_TABLE_NAME . ' (conn_id, user_id, username, password) VALUES (%s, %s, %s, %s)',
-                array('integer', 'integer', 'text', 'text', 'integer'),
+                array('integer', 'integer', 'text', 'text'),
                 array($this->getConnId(), $this->getUserId(), $this->getUsername(), $this->getPassword())
             );
         }
     }
     
-    public function storeAccount(string $username, string $password, int $conn_id)
+    public function storeUserAccount(string $username, string $password, int $conn_id)
     {
         $this->setConnId($conn_id);
         $this->setUsername($username);
@@ -50,7 +50,7 @@ class ilCloudStorageBasicAuth
         $this->store();
     }
 
-    public static function getAccount(int $conn_id, int $user_id = 0): ilCloudStorageBasicAuth
+    public static function getUserAccount(int $conn_id, int $user_id = 0): ilCloudStorageBasicAuth
     {
         global $DIC;
         if ($user_id == 0) {
@@ -60,20 +60,20 @@ class ilCloudStorageBasicAuth
         $query = $DIC->database()->query("SELECT * FROM " . self::DB_TABLE_NAME . " WHERE conn_id = " . $conn_id . " AND user_id = " . $user_id);
         $ret = $DIC->database()->fetchAssoc($query);
         if (is_null($ret)) {
-            $token = new self();
-            $token->setConnId($conn_id);
-            $token->setUserId($user_id);
+            $account = new self();
+            $account->setConnId($conn_id);
+            $account->setUserId($user_id);
         } else {
-            $token = new self();
-            $token->setConnId($conn_id);
-            $token->setUserId($user_id);
-            $token->setUsername($ret['username']);
-            $token->setPassword($ret['password']);
+            $account = new self();
+            $account->setConnId($conn_id);
+            $account->setUserId($user_id);
+            $account->setUsername($ret['username']);
+            $account->setPassword($ret['password']);
         }
-        return $token;
+        return $account;
     }
 
-    public static function deleteBasicAuth(int $conn_id, int $user_id = 0): void
+    public static function deleteUserAccount(int $conn_id, int $user_id = 0): void
     {
         global $DIC;
         if ($user_id == 0) {

@@ -83,8 +83,8 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
         $root_folder = ($this->parent->form->getInput("root_folder") == "") ? $this->config->getBaseDirectory() : $this->parent->form->getInput("root_folder");
         $this->object->setRootFolder($root_folder);
         if ($this->parent->form->getInput("bauth_edit") == "1") {
-            $this->object->setUsername($this->parent->form->getInput("username"));
-            $this->object->setPassword($this->parent->form->getInput("password"));
+            //$this->object->setUsername($this->parent->form->getInput("username"));
+            //$this->object->setPassword($this->parent->form->getInput("password"));
         }
     }
 
@@ -119,6 +119,7 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
                 $this->parent->form->addItem($n);
                 break;
             case $this->config::AUTH_METHOD_BASIC:
+                /*
                 $cb = new ilCheckboxInputGUI($this->object->txt('bauth_edit'), 'bauth_edit');
 
                 $ti = new ilTextInputGUI($this->object->txt("account_username"), "username");
@@ -135,6 +136,7 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
                 $cb->addSubItem($pi);
 
                 $this->parent->form->addItem($cb);
+                */
                 break;
             default:
                 //ToDo
@@ -145,8 +147,8 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
     {
         $root_folder = ($this->object->getRootFolder() == "") ? $this->config->getBaseDirectory() : $this->object->getRootFolder();
         $values['root_folder'] = $root_folder;
-        $values['username'] = $this->object->getUsername();
-        $values['password'] = $this->object->getPassword();
+        //$values['username'] = $this->object->getUsername();
+        //$values['password'] = $this->object->getPassword();
     }
 
     /*

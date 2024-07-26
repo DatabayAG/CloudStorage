@@ -68,7 +68,7 @@ conf_availability_2#:#New ones can be created
 untrashed_usages#:#Number of usages
 saving_invoked#:#Settings saved
 create_type#:#Define new Cloud Connection
-create_existing_folder#:#Create existing Cloud Folder
+create_existing_folder#:#Link Cloud Folder
 add_type#:#Add new Cloud Connection
 delete_type#:#Delete Cloud Connection
 delete_conn#:#Delete Cloud Connection?
@@ -177,3 +177,4 @@ info_hint#:#The hint text is displayed in the info tab of the Cloud Folders.
 file_folder_not_visible#:#Permission denied.
 node_is_null#:#Ressource could not be found.
 please_wait#:#Please wait
+has_account#:#Your account is already linked to the Cloud Service. <br />Click "Select Cloud Folder".

@@ -50,10 +50,6 @@ class ilObjCloudStorage extends ilObjectPlugin
 
     private string $baseUri = '';
 
-    private string $username = '';
-
-    private string $password = '';
-
     private bool $authComplete = false;
 
     private int $ownerId = -1;
@@ -115,8 +111,6 @@ class ilObjCloudStorage extends ilObjectPlugin
             'root_folder'               => array('text', $this->getRootFolder()),
             'root_id'                   => array('text', $this->getRootId()),
             'base_uri'                  => array('text', $this->getBaseUri()),
-            'username'                  => array('text', $this->getUsername()),
-            'password'                  => array('text', $this->getPassword()),
             'auth_complete'             => array('integer', $this->ilBoolToInt($this->getAuthComplete())),
             'owner_id'                  => array('integer', $this->getOwnerId())
         );
@@ -138,8 +132,6 @@ class ilObjCloudStorage extends ilObjectPlugin
             $this->setRootFolder($record["root_folder"]);
             $this->setRootId($record["root_id"]);
             $this->setBaseUri($record["base_uri"]);
-            $this->setUsername($record["username"]);
-            $this->setPassword($record["password"]);
             $this->setAuthComplete($this->ilIntToBool($record["auth_complete"]));
             $this->setOwnerId((int)$record["owner_id"]);
         }
@@ -157,8 +149,6 @@ class ilObjCloudStorage extends ilObjectPlugin
             'root_folder'               => array('text', $this->getRootFolder()),
             'root_id'                   => array('text', $this->getRootId()),
             'base_uri'                  => array('text', $this->getBaseUri()),
-            'username'                  => array('text', $this->getUsername()),
-            'password'                  => array('text', $this->getPassword()),
             'auth_complete'             => array('integer', $this->ilBoolToInt($this->getAuthComplete())),
             'owner_id'				    => array('integer', $this->getOwnerId())
             
@@ -204,8 +194,6 @@ class ilObjCloudStorage extends ilObjectPlugin
             'root_folder'               => array('text', $this->getRootFolder()),
             'root_id'                   => array('text', $this->getRootId()),
             'base_uri'                  => array('text', $this->getBaseUri()),
-            'username'                  => array('text', $this->getUsername()),
-            'password'                  => array('text', $this->getPassword()),
             'auth_complete'             => array('integer', $this->ilBoolToInt($this->getAuthComplete())),
             'owner_id'				    => array('integer', $this->getOwnerId())
         );
@@ -305,26 +293,6 @@ class ilObjCloudStorage extends ilObjectPlugin
     public function setBaseUri(string $baseUri): void
     {
         $this->baseUri = $baseUri;
-    }
-
-    public function getUsername(): string
-    {
-        return $this->username;
-    }
-
-    public function setUsername(string $username): void
-    {
-        $this->username = $username;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): void
-    {
-        $this->password = $password;
     }
 
     public function getAuthComplete(): bool

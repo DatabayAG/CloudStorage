@@ -160,12 +160,16 @@ class ilObjCloudStorageAccess extends ilObjectPluginAccess
         global $DIC;
         $ilDB = $DIC->database();
 
+        try {
         $set = $ilDB->query(
             "SELECT is_online FROM rep_robj_xcls_data " .
             " WHERE id = " . $ilDB->quote($a_id, "integer")
         );
         $rec = $ilDB->fetchAssoc($set);
         return (bool) $rec["is_online"];
+        } catch(Exception $e) {
+            return false;
+        }
     }
 
     public static function checkConnAvailability(int $obj_id): bool
@@ -173,26 +177,31 @@ class ilObjCloudStorageAccess extends ilObjectPluginAccess
         global $DIC;
         $ilDB = $DIC->database();
 
-        $set = $ilDB->query(
-            "SELECT conn_id FROM rep_robj_xcls_data  " .
-            " WHERE id = " . $ilDB->quote($obj_id, "integer")
-        );
-        $data = $ilDB->fetchObject($set);
-
-        $set = $ilDB->query(
-            "SELECT availability FROM rep_robj_xcls_conn " .
-            " WHERE id = " . $ilDB->quote($data->conn_id, "integer")
-        );
-        $conn  = $ilDB->fetchObject($set);
-        //var_dump([(int)ilCloudStorageConfig::AVAILABILITY_NONE !== (int)$conn->availability, (int)$conn->availability]); exit;
-        return (int)ilCloudStorageConfig::AVAILABILITY_NONE !== (int)$conn->availability;
+        try {
+            $set = $ilDB->query(
+                "SELECT conn_id FROM rep_robj_xcls_data  " .
+                " WHERE id = " . $ilDB->quote($obj_id, "integer")
+            );
+            $data = $ilDB->fetchObject($set);
+            
+            
+            $set = $ilDB->query(
+                "SELECT availability FROM rep_robj_xcls_conn " .
+                " WHERE id = " . $ilDB->quote($data->conn_id, "integer")
+            );
+            $conn  = $ilDB->fetchObject($set);
+            //var_dump([(int)ilCloudStorageConfig::AVAILABILITY_NONE !== (int)$conn->availability, (int)$conn->availability]); exit;
+            return (int)ilCloudStorageConfig::AVAILABILITY_NONE !== (int)$conn->availability;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     public static function checkAuthStatus(int $a_id): bool
     {
         global $DIC;
         $ilDB = $DIC['ilDB'];
-
+        try {
         if (!isset(self::$access_cache[$a_id]["auth_status"])) {
             $set = $ilDB->query("SELECT auth_complete FROM rep_robj_xcls_data " . " WHERE id = " . $ilDB->quote($a_id, "integer"));
             $rec = $ilDB->fetchAssoc($set);
@@ -200,6 +209,25 @@ class ilObjCloudStorageAccess extends ilObjectPluginAccess
         }
 
         return self::$access_cache[$a_id]["auth_status"];
+        } catch(Exception $e) {
+            return false;
+        }
+    }
+
+    public static function hasAccount(int $connId, int $userId): bool {
+        $config = ilCloudStorageConfig::getInstance($connId);
+        $ret = false;
+        switch ($config->getAuthMethod()) {
+            case ilCloudStorageConfig::AUTH_METHOD_OAUTH2:
+                $account = ilCloudStorageOAuth2::getUserToken($connId, $userId);
+                $ret = ($account->getAccessToken() != '') ? true : false;
+                break;
+            case ilCloudStorageConfig::AUTH_METHOD_BASIC:
+                $account = ilCloudStorageBasicAuth::getUserAccount($connId, $userId);
+                $ret = ($account->getUsername() != '') ? true : false;
+                break;
+        }
+        return $ret;
     }
 
 }

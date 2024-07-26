@@ -68,7 +68,7 @@ conf_availability_2#:#Neue erzeugbar
 untrashed_usages#:#Anzahl Verwendungen
 saving_invoked#:#Einstellungen gespeichert
 create_type#:#Neue Cloud-Anbindung definieren
-create_existing_folder#:#Bestehenden Cloud-Ordner anlegen
+create_existing_folder#:#Cloud-Ordner verknüpfen
 add_type#:#Cloud-Anbindung hinzufügen
 delete_type#:#Cloud-Anbindung löschen
 delete_conn#:#Cloud-Anbindung löschen?
@@ -178,3 +178,4 @@ info_hint#:#Der Hinweistext wird im Info-Reiter der Cloud-Ordner angezeigt.
 file_folder_not_visible#:#Sie haben nicht die nötigen Berechtigungen.
 node_is_null#:#Die Ressource konnte nicht gefunden werden.
 please_wait#:#Bitte warten
+has_account#:#Ihr Account ist bereits mit dem Cloud-Service verknüpft.<br />Klicken Sie auf "Cloud-Ordner auswählen".

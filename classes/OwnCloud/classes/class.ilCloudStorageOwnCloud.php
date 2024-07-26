@@ -24,6 +24,8 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
     
     public const AUTH_BEARER = 'owncl_access_token';
 
+    public const AUTH_BASIC = 'owncl_user_account';
+
     public const OAUTH2_PROVIDER_OPTIONS = 'owncl_oauth2_provider_options';
 
     public const OAUTH2_TOKEN_REQUEST_AUTH = 'owncl_oauth2_token_request_auth';
@@ -41,6 +43,8 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
     public ?Container $dic = null;
 
     public ?ilCloudStorageOAuth2 $user_token = null;
+
+    public ?ilCloudStorageBasicAuth $user_account = null;
 
     public ?ilCloudStorageOwnCloudClient $owncl_client = null;
 
@@ -125,7 +129,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
                 break;
             case $this->config::AUTH_METHOD_BASIC:
                 try {
-                    $this->basicAuthenticate($callback_url);
+                    $this->basicAuthenticate();
                 } catch(ilCloudStorageException $e) {
                     $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), true);
                 }
@@ -133,21 +137,6 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
             default: 
                 //ToDo
         }
-        /*
-        if ($this->config->getOAuth2Active()) {
-            try {
-                $this->OAuth2Authenticate($callback_url);
-            } catch(ilCloudStorageException $e) {
-                $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), true);
-            }
-        } else {
-            try {
-                $this->basicAuthenticate($callback_url);
-            } catch(ilCloudStorageException $e) {
-                $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), true);
-            }
-        }
-        */
     }
 
     public function OAuth2Authenticate(string $callback_url): void 
@@ -172,10 +161,31 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         }
     }
 
-    public function basicAuthenticate(): void 
+    public function basicAuthenticate(): void
     {
         $this->dic->logger()->root()->debug("basicAuthenticate");
-        // Sn: ToDo
+        
+        //echo "BasicAuth";
+        //exit;
+        /*
+        $this->checkAndRefreshAuthentication();
+        if ($this->getAccount()->getUsername() && $this->owncl_client->hasConnection()) {
+            $this->dic->logger()->root()->debug("hasConnection");
+            header("Location: " . htmlspecialchars_decode($callback_url));
+        } else {
+            $this->dic->logger()->root()->debug("no connection");
+            if ($this->dic->user()->getId() != $this->object->getOwnerId()) {
+                $this->dic->logger()->root()->debug("user differs");
+                // Sn: ToDo language entry
+                throw new ilCloudStorageException(ilCloudStorageException::AUTHENTICATION_FAILED, 'Der Ordner kann zur Zeit nur vom Besitzer geöffnet werden.');
+            } else {
+                ilSession::set(self::CALLBACK_URL, ilObjCloudStorage::getHttpPath() . $callback_url);
+                ilSession::set(self::OAUTH2_PROVIDER_OPTIONS, $this->provider_options);
+                ilSession::set(self::OAUTH2_TOKEN_REQUEST_AUTH, $this->config->getOAuth2TokenRequestAuth());
+                $this->oauth2_provider->authorize(array('redirect_uri' => self::getRedirectUri()));
+            }
+        }
+        */
     }
 
     public function afterAuthService(): void
@@ -261,7 +271,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
                 break;
             case $this->config::AUTH_METHOD_BASIC:
                 return array(
-                    'Authorization' => 'Basic ' . base64_encode($this->object->getUsername() . ':' . $this->object->getPassword())
+                    'Authorization' => 'Basic ' . base64_encode($this->getAccount()->getUsername() . ':' . $this->getAccount()->getPassword())
                 );
                 break;
             default: 
@@ -295,18 +305,19 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
                 }
                 break;
             case $this->config::AUTH_METHOD_BASIC:
+                $account = ilCloudStorageBasicAuth::getUserAccount($this->config->getConnId(), $this->object->getOwner());
                 if ($this->config->getProxyURL() != '') {
                     return array(
                         'baseUri'  => $this->config->getFullWebDAVPath(),
-                        'userName' => $this->object->getUsername(),
-                        'password' => $this->object->getPassword(),
+                        'userName' => $account->getUsername(),
+                        'password' => $$account->getPassword(),
                         'proxy'    => $this->config->getProxyURL(),
                     );
                 } else {
                     return array(
                         'baseUri'  => $this->config->getFullWebDAVPath(),
-                        'userName' => $this->object->getUsername(),
-                        'password' => $this->object->getPassword(),
+                        'userName' => $account->getUsername(),
+                        'password' => $account->getPassword(),
                     );
                 }
                 break;
@@ -412,6 +423,40 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
             $atom_query->run();
         }
         return true;
+    }
+
+    public function getAccount(): ilCloudStorageBasicAuth
+    {
+        $this->dic->logger()->root()->debug("getAccount");
+        if (!$this->user_account) {
+            $this->loadAccount();
+        }
+        //$this->dic->logger()->root()->debug(var_export($this->user_token,true));
+        return $this->user_account;
+    }
+
+    public function loadAccount(): void
+    {
+        $this->dic->logger()->root()->debug("loadAccount");
+        //global $ilUser;
+        // at object creation, the object and owner id does not yet exist, therefore we take the current user's id
+        //$this->user_token = ilCloudStorageOAuth2::getUserToken($ilOwnCloud ? $ilOwnCloud->object->getOwnerId() : $ilUser->getId());
+        assert($this->object instanceof ilObjCloudStorage);
+        $this->user_account = ilCloudStorageBasicAuth::getUserAccount($this->object->getConnId(), $this->object->getOwnerId());
+    }
+
+    public static function storeAccountToSession(ilCloudStorageBasicAuth $account): void
+    {
+        global $DIC;
+        $DIC->logger()->root()->debug("storeAccountToSession");
+        ilSession::set(self::AUTH_BASIC, serialize($account));
+    }
+
+
+    protected function loadAccountFromSession(): ilCloudStorageBasicAuth
+    {
+        $this->dic->logger()->root()->debug("loadAccountFromSession");
+        return unserialize(ilSession::get(self::AUTH_BASIC));
     }
 
     /**
