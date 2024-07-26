@@ -360,8 +360,12 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         // check if conns are available
         $form = parent::initCreateForm($a_new_type);
 
-        //foreach ($form->getCommandButtons() as $btn) {
-        $form->getCommandButtons()[0]["text"] = $this->txt('obj_xcls_select');
+        
+        $cmdBtns = $form->getCommandButtons();
+        $form->clearCommandButtons();
+        $form->addCommandButton('save', $this->txt('obj_xcls_select'), '');
+        $form->addCommandButton($cmdBtns[1]['cmd'], $cmdBtns[1]['text'], '');
+
         $this->dic->logger()->root()->log(var_export($form->getCommandButtons()[0]["text"], true));
         //}
         $availableConns = ilCloudStorageConfig::_getAvailableCloudStorageConn(true);
@@ -672,10 +676,10 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         assert($this->object instanceof ilObjCloudStorage);
         if ($this->object->currentUserIsOwner()) {
             $this->object->setRootFolder(ilCloudStorageUtil::normalizePath($root_path));
-            if (isset($_SESSION['xcls_create_folder_action'])) {
+            //if (isset($_SESSION['xcls_create_folder_action'])) {
                 $this->object->setTitle(basename($this->object->getRootFolder()));
                 $this->clearParams();
-            }
+            //}
             $this->object->update();
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('success', $this->lng->txt('msg_obj_modified'), true);
         } else {
