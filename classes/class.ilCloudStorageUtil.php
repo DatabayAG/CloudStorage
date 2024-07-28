@@ -15,6 +15,8 @@ declare(strict_types=1);
  */
 class ilCloudStorageUtil
 {
+    const IV = '6459219348742938';
+
     public static function normalizePath(string $path): string
     {
         if ($path == "." || $path == "/" || $path == "") {
@@ -58,4 +60,39 @@ class ilCloudStorageUtil
     {
         return preg_match('/^\/.*/', $path);
     }
+
+    public static function encrypt(string $data): string {
+        global $DIC;
+        try {
+            $key = self::getSalt();
+            return openssl_encrypt($data, 'aes-256-cbc', $key, 0, self::IV);
+        } catch(Exception $e) {
+            $DIC->logger()->root()->error($e->getMessage());
+            return "";
+        }
+    }
+
+    public static function decrypt(string $data): string {
+        global $DIC;
+        try {
+            $key = self::getSalt();
+            return openssl_decrypt($data, 'aes-256-cbc', $key, 0, self::IV);
+        } catch(Exception $e) {
+            $DIC->logger()->root()->error($e->getMessage());
+            return "";
+        }
+    }
+
+    public static function getSalt(): string {
+        global $DIC;
+        try {
+            $bcrypt = new ilBcryptPasswordEncoder(["data_directory" => ilFileUtils::getDataDir()]);
+            //$bcrypt->setDataDirectory(ilFileUtils::getDataDir());
+            return $bcrypt->getClientSalt();
+        } catch(Exception $e) {
+            $DIC->logger()->root()->error($e->getMessage());
+            return "";
+        }
+    }
+
 }
