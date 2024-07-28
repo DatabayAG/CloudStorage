@@ -15,9 +15,9 @@ interface ilCloudStorageServiceInterface
 
     public static function getDefaultOAuth2Path(): string;
     
-    public function authService(string $callback_url = ""): void;
+    public function OAuth2Authenticate(string $callback): void;
 
-    public function afterAuthService(): void;
+    public function afterServiceAuth(): void;
 
     public function checkConnection(): void;
 

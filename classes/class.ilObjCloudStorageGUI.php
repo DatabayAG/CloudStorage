@@ -112,6 +112,15 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageServiceInterface);
         $this->dic->ui()->mainTemplate()->setAlertProperties($this->getAlertProperties());
+        //$this->dic->ui()->mainTemplate()->loadStandardTemplate();
+        
+        //$this->dic->ui()->mainTemplate()->touchBlock("basic_auth_modal");
+        //$this->dic->logger()->root()->log($this->dic->ui()->mainTemplate()->get("DEFAULT"));
+        //$this->dic->ui()->mainTemplate()->setContent($this->dic->ui()->mainTemplate()->get("DEFAULT"));
+        
+        //$tpl = $this->dic->ui()->mainTemplate()->get();
+        //$tpl->
+        //$this->dic->ui()->mainTemplate()->addBlockFile("ADM_CONTENT","adm_content",ilObjCloudStorage::PLUGIN_PATH."/templates/tpl.basic_auth_modal.html");
         
         switch ($this->config->getAuthMethod()) {
             case $this->config::AUTH_METHOD_OAUTH2:
@@ -133,16 +142,25 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 }
             break;
             case $this->config::AUTH_METHOD_BASIC:
+                //$this->dic->ui()->mainTemplate()->addBlockFile("ADM_CONTENT", "adm_content", ilObjCloudStorage::PLUGIN_PATH."/templates/tpl.basic_auth_modal.html");
+                //echo $this->dic->ui()->mainTemplate()->get();
+                //exit;
+                //$this->dic->ui()->mainTemplate()->addBlockFile("BASIC_AUTH_MODAL", $this->getBasicAuthModal(), ilObjCloudStorage::PLUGIN_PATH."/templates/tpl.basic_auth_modal.html");
                 if (!$this->dic->http()->wrapper()->query()->has('authMode')) { // required in BasicAuth Process?
+                    $this->dic->logger()->root()->log("no authMode");
                     if (!$this->object->getAuthComplete()) {
+                        $this->dic->logger()->root()->log("no authComplete");
                         if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {
+                            $this->dic->logger()->root()->debug("needs serviceAuth");
                             $this->serviceAuth($this->object);
                         } else {
                             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("only_owner"), true);
                             $this->redirectToRefId($this->parent_id);
                         }
                     } else {
+                        $this->dic->logger()->root()->log("authComplete");
                         try {
+                            $this->dic->logger()->root()->log("checkConnection");
                             $this->service->checkConnection();
                         } catch(ilCloudStorageException $e) {
                             $this->handleConnectionException($e, false);
@@ -164,11 +182,17 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $this->$cmd();
                 break;
             case "afterServiceAuth":
+                $this->dic->logger()->root()->log("XXXX afterServiceAuth");
                 $this->checkPermission("write");
-                $this->service->afterAuthService();
+                $this->afterServiceAuth();
+                //$this->service->afterAuthService();
                 break;
             case "showContent":
                 $this->checkPermission("read");
+                $this->$cmd();
+                break;
+            case "basicAuth":
+                $this->checkPermission("write");
                 $this->$cmd();
                 break;
             case "asyncGetBlock":
@@ -276,9 +300,49 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     {
         try {
             $this->dic->logger()->root()->debug("ilObjCloudStorageGUI serviceAuth");
-            $this->service->authService($this->dic->ctrl()->getLinkTarget($this, "afterServiceAuth") . "&authMode=true");
+            switch ($this->config->getAuthMethod()) {
+                case $this->config::AUTH_METHOD_OAUTH2: // ToDo: move to this GUI class
+                    $this->service->OAuth2Authenticate($this->dic->ctrl()->getLinkTarget($this, "afterServiceAuth") . "&authMode=true");
+                    break;
+                case $this->config::AUTH_METHOD_BASIC:
+                    $this->dic->logger()->root()->log("redirectToUrl " . $this->dic->ctrl()->getLinkTarget($this, $this->dic->ctrl()->getCmd()) . "&authMode=true");
+                    $this->dic->ctrl()->redirectToURL($this->dic->ctrl()->getLinkTarget($this, $this->dic->ctrl()->getCmd()) . "&authMode=true");
+                    break;
+            }        
+            //$this->service->authService($this->dic->ctrl()->getLinkTarget($this, "afterServiceAuth") . "&authMode=true");
         } catch (Exception $e) {
             $this->dic->logger()->root()->debug("ilObjCloudStorageGUI error serviceAuth " . $e->getMessage());
+            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("cld_auth_failed"), true);
+            $this->redirectToRefId($this->parent_id);
+        }
+    }
+
+    protected function afterServiceAuth()
+    {
+        try {
+            $this->dic->logger()->root()->log("ilObjCloudStorageGUI afterServiceAuth");
+            switch ($this->config->getAuthMethod()) {
+                case $this->config::AUTH_METHOD_OAUTH2: // ToDo: move to this GUI class
+                    $this->service->afterServiceAuth();
+                    break;
+                case $this->config::AUTH_METHOD_BASIC:
+                    // ToDo check values
+                    $lastCmd = $this->dic->http()->wrapper()->query()->retrieve('last_cmd', $this->dic->refinery()->kindlyTo()->string());
+                    $username = $this->dic->http()->wrapper()->post()->retrieve('form/busername', $this->dic->refinery()->kindlyTo()->string());
+                    $password = ilCloudStorageUtil::encrypt($this->dic->http()->wrapper()->post()->retrieve('form/bpassword', $this->dic->refinery()->kindlyTo()->string()));
+                    $account = ilCloudStorageBasicAuth::getUserAccount($this->config->getConnId(), $this->dic->user()->getId());
+                    //$account->setUsername($username);
+                    //$account->setPassword($password);
+                    $account->storeUserAccount($username, $password, $this->config->getConnId());
+                    //$this->dic->logger()->root()->log(var_export($_POST, true));
+                    //$this->dic->logger()->root()->log(var_export($_GET, true));
+                    $this->clearParams();
+                    $this->dic->ctrl()->redirect($this, $lastCmd);
+                    //$this->dic->ctrl()->redirectToURL($this->dic->ctrl()->getLinkTarget($this, $this->dic->ctrl()->getCmd()) . "&authMode=true");
+                    break;
+            }
+        } catch (Exception $e) {
+            $this->dic->logger()->root()->log("ilObjCloudStorageGUI error afterServiceAuth " . $e->getMessage());
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("cld_auth_failed"), true);
             $this->redirectToRefId($this->parent_id);
         }
@@ -360,20 +424,20 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         // check if conns are available
         $form = parent::initCreateForm($a_new_type);
 
-        
-        $cmdBtns = $form->getCommandButtons();
-        $form->clearCommandButtons();
-        $form->addCommandButton('save', $this->txt('obj_xcls_select'), '');
-        $form->addCommandButton($cmdBtns[1]['cmd'], $cmdBtns[1]['text'], '');
-
-        $this->dic->logger()->root()->log(var_export($form->getCommandButtons()[0]["text"], true));
-        //}
         $availableConns = ilCloudStorageConfig::_getAvailableCloudStorageConn(true);
         if (count($availableConns) == 0) {
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("no_active_conn"), true);
             $this->redirectToRefId($this->parent_id);
         }
-
+        
+        $cmdBtns = $form->getCommandButtons();
+        $form->clearCommandButtons();
+        // rename save command
+        $form->addCommandButton('save', $this->txt('obj_xcls_select'), '');
+        // copy cancel btn
+        $form->addCommandButton($cmdBtns[1]['cmd'], $cmdBtns[1]['text'], '');
+        
+        //$this->dic->ui()->mainTemplate()->addBlockFile("ADM_CONTENT", "adm_content", ilObjCloudStorage::PLUGIN_PATH."/templates/tpl.basic_auth_modal.html");
         // check if only one connection is available
         if (count($availableConns) == 1) {
             $this->dic->logger()->root()->log("only one cloud connection is available");
@@ -405,27 +469,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $authInfo = new ilNonEditableValueGUI($this->txt($authInfo), $authInfo);
                 $ro->addSubItem($authInfo);
                 /*
-                switch ($config->getAuthMethod()) {
-                    case ilCloudStorageConfig::AUTH_METHOD_OAUTH2:
-                        $this->dic->logger()->root()->log("oauth2");
-                        $token = ilCloudStorageOAuth2::getUserToken($config->getConnId(), $this->dic->user()->getId());
-                        $accessToken = $token->getAccessToken();
-                        $this->dic->logger()->root()->log("AccessToken: " . $accessToken);
-                        if ($accessToken != '') {
-                            $this->dic->logger()->root()->log("user has already an access token for cloud connection " . $config->getTitle());
-                            $authInfo = new ilNonEditableValueGUI("has_oauth2_token", "has_oauth2_token");
-                        } else {
-                            $this->dic->logger()->root()->log("user has no access token for cloud connection " . $config->getTitle());
-                            $authInfo = new ilNonEditableValueGUI("has_no_oauth2_token", "has_no_oauth2_token");
-                        }
-                        $ro->addSubItem($authInfo);
-                        break;
-                    case ilCloudStorageConfig::AUTH_METHOD_BASIC:
-                        // ToDo
-                        break;
-                }
-                */
-                /*
                 if ($config->getAuthMethod() == ilCloudStorageConfig::AUTH_METHOD_BASIC) {
                     $ti = new ilTextInputGUI($this->txt("account_username"), "username_{$key}");
                     $ti->setRequired(true);
@@ -442,6 +485,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 */
                 $rg->addOption($ro);
             }
+
             $form->addItem($rg);
         }
 
@@ -452,9 +496,12 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $form->removeItemByPostVar("desc");
 
         $hiddenTitle = new ilHiddenInputGUI("title");
-        $hiddenTitle->setValue($this->txt("cld_add"));
-        
+        $hiddenTitle->setValue($this->txt("cld_add"));        
         $form->addItem($hiddenTitle);
+
+        $hiddenOnline = new ilHiddenInputGUI("online");
+        $hiddenOnline->setValue("1");
+        $form->addItem($hiddenOnline);
         //$form->removeItemByPostVar("online");
 
         /*
@@ -544,26 +591,30 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     {
         $this->dic->logger()->root()->debug("afterSave");
         $form = $this->initCreateForm('xcls');
-        $form->checkInput();
-        assert($newObj instanceof ilObjCloudStorage);
-        // Sn: ToDo ?
-        //$newObj->setAuthUser($DIC->user()->getEmail());
-        $connId = $form->getInput("conn_id");
-        $newObj->setOwnerId($this->dic->user()->getId());
-        $config = ilCloudStorageConfig::getInstance((int) $connId);
-        if ($config->getAuthMethod() == ilCloudStorageConfig::AUTH_METHOD_BASIC) {
-            $username = $form->getInput("username_{$connId}");
-            $password = $form->getInput("password_{$connId}");
-            if (isset($username) && isset($password)) {
-                $account = ilCloudStorageBasicAuth::getUserAccount($connId, $this->dic->user()->getId());
-                $account->storeUserAccount($username, $password, $connId);
+        if ($form->checkInput()) {
+            assert($newObj instanceof ilObjCloudStorage);
+            // Sn: ToDo ?
+            //$newObj->setAuthUser($DIC->user()->getEmail());
+            $connId = $form->getInput("conn_id");
+            $newObj->setOwnerId($this->dic->user()->getId());
+            $config = ilCloudStorageConfig::getInstance((int) $connId);
+            if ($config->getAuthMethod() == ilCloudStorageConfig::AUTH_METHOD_BASIC) {
+                $username = $form->getInput("username_{$connId}");
+                $password = $form->getInput("password_{$connId}");
+                if (isset($username) && isset($password)) {
+                    $account = ilCloudStorageBasicAuth::getUserAccount($connId, $this->dic->user()->getId());
+                    $account->storeUserAccount($username, $password, $connId);
+                }
             }
-        }
 
-        $newObj->createFolder((int) $form->getInput("online"), $connId);
-        $newObj->update();
-        
-        parent::afterSave($newObj);
+            $newObj->createFolder((int) $form->getInput("online"), $connId);
+            $newObj->update();
+            
+            parent::afterSave($newObj);
+        } else {
+            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->dic->language()->txt("form_input_not_valid"), true);
+            $this->dic->ctrl()->redirect($this, 'editProperties');
+        }
     }
 
     /**
@@ -588,9 +639,31 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public function editProperties(): void
     {
         $this->dic->tabs()->activateTab("properties");
+        $password = "password";
+        $enc = ilCloudStorageUtil::encrypt($password);
+        $this->dic->logger()->root()->log("enc: " . $enc);
+        $dec = ilCloudStorageUtil::decrypt($enc);
+        $this->dic->logger()->root()->log("dec: " . $dec);
         $this->initPropertiesForm();
         $this->getPropertiesValues();
-        $this->dic->ui()->mainTemplate()->setContent($this->form->getHTML());
+        switch ($this->config->getAuthMethod()) {
+            case $this->config::AUTH_METHOD_OAUTH2:
+                $this->dic->ui()->mainTemplate()->setContent($this->form->getHTML());
+                break;
+            case $this->config::AUTH_METHOD_BASIC:
+                $this->dic->logger()->root()->log("editProperties(): basic Auth");
+                list($showSignal, $closeSignal, $modal) = $this->getBasicAuthModal();
+                // authMode: trigger modal on document load
+                if ($this->dic->http()->wrapper()->query()->has('authMode')) {
+                    $this->dic->logger()->root()->log("editProperties(): has authMode");
+                    $this->dic->ui()->mainTemplate()->addOnLoadCode("
+                    try {
+                        $(document).trigger('" . $showSignal->getId() ."', {});
+                    } catch (e) { console.log(e); }");
+                }
+                $this->dic->ui()->mainTemplate()->setContent($this->form->getHTML() . $modal);
+                break;
+        }
     }
 
     public function initPropertiesForm(): void
@@ -625,6 +698,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $cb = new ilCheckboxInputGUI($this->lng->txt("online"), "online");
         $this->form->addItem($cb);
 
+        //$modal = new il
+        
         // service
         $this->serviceGUI->initPropertiesForm();
 
@@ -676,10 +751,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         assert($this->object instanceof ilObjCloudStorage);
         if ($this->object->currentUserIsOwner()) {
             $this->object->setRootFolder(ilCloudStorageUtil::normalizePath($root_path));
-            //if (isset($_SESSION['xcls_create_folder_action'])) {
-                $this->object->setTitle(basename($this->object->getRootFolder()));
-                $this->clearParams();
-            //}
+            $this->object->setTitle(basename($this->object->getRootFolder()));
+            $this->clearParams();
             $this->object->update();
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('success', $this->lng->txt('msg_obj_modified'), true);
         } else {
@@ -698,7 +771,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public function showContent()
     {
         assert($this->object instanceof ilObjCloudStorage);
-
         // bug dirty hack: if comming from wrong locator entry in objectactivationgui or conditionhandlergui
         // it would be better to avoid the locator entry
         if ($this->dic->http()->wrapper()->query()->has('go_back')) {
@@ -794,6 +866,24 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), true);
         }
         
+    }
+
+    public function getBasicAuthModal(): array {
+        $factory = $this->dic->ui()->factory();
+        $renderer = $this->dic->ui()->renderer(); 
+        $modal = $factory->modal()->roundtrip(
+            $this->txt("Authentication"),
+            [],
+            [
+                $factory->input()->field()->text($this->txt("account_username"))->withDedicatedName("busername"),
+                $factory->input()->field()->password($this->txt("account_password"))->withDedicatedName("bpassword")
+            ],
+            $this->dic->ctrl()->getLinkTarget($this,"afterServiceAuth") . "&authMode=true&last_cmd=" . $this->dic->ctrl()->getCmd()
+        );
+        $showSignal = $modal->getShowSignal();
+        $closeSignal = $modal->getCloseSignal();
+        return array($showSignal, $closeSignal, $renderer->render($modal));
+
     }
 
     public function asyncGetBlock(): string

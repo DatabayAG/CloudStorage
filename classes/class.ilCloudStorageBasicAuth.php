@@ -29,7 +29,7 @@ class ilCloudStorageBasicAuth
         $ret = $DIC->database()->fetchAssoc($query);
         if (!is_null($ret)) {
             $DIC->database()->manipulateF(
-                'UPDATE ' . self::DB_TABLE_NAME . ' SET username = %s, password = %s, WHERE conn_id = %s AND user_id = %s',
+                'UPDATE ' . self::DB_TABLE_NAME . ' SET username = %s, password = %s WHERE conn_id = %s AND user_id = %s',
                 array('text', 'text', 'integer', 'integer'),
                 array($this->getUsername(), $this->getPassword(), $this->getConnId(), $this->getUserId())
             );

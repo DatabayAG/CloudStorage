@@ -64,6 +64,9 @@ class ilCloudStorageUtil
     public static function encrypt(string $data): string {
         global $DIC;
         try {
+            if ($data == '') {
+                return '';
+            }
             $key = self::getSalt();
             return openssl_encrypt($data, 'aes-256-cbc', $key, 0, self::IV);
         } catch(Exception $e) {
@@ -75,6 +78,9 @@ class ilCloudStorageUtil
     public static function decrypt(string $data): string {
         global $DIC;
         try {
+            if ($data == '') {
+                return '';
+            }
             $key = self::getSalt();
             return openssl_decrypt($data, 'aes-256-cbc', $key, 0, self::IV);
         } catch(Exception $e) {

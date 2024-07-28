@@ -115,6 +115,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
     /**
      * Authentication
      */
+    /*
     public function authService(string $callback_url = ""): void
     {
 
@@ -138,7 +139,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
                 //ToDo
         }
     }
-
+    */
     public function OAuth2Authenticate(string $callback_url): void 
     {
         $this->dic->logger()->root()->debug("OAuth2Authenticate");
@@ -164,6 +165,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
     public function basicAuthenticate(): void
     {
         $this->dic->logger()->root()->debug("basicAuthenticate");
+        $this->dic->ctrl()->redirectToURL($this->dic->ctrl()->getLinkTargetByClass(array('ilObjCloudStorageGUI'), $this->dic->ctrl()->getCmd()) . "&authMode=1");
         
         //echo "BasicAuth";
         //exit;
@@ -188,7 +190,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
         */
     }
 
-    public function afterAuthService(): void
+    public function afterServiceAuth(): void
     {
         $this->dic->logger()->root()->debug("afterAuthService");
         //$this->dic->ctrl()->setCmd('edit');
@@ -271,7 +273,7 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
                 break;
             case $this->config::AUTH_METHOD_BASIC:
                 return array(
-                    'Authorization' => 'Basic ' . base64_encode($this->getAccount()->getUsername() . ':' . $this->getAccount()->getPassword())
+                    'Authorization' => 'Basic ' . base64_encode($this->getAccount()->getUsername() . ':' . ilCloudStorageUtil::decrypt($this->getAccount()->getPassword()))
                 );
                 break;
             default: 
@@ -310,14 +312,14 @@ class ilCloudStorageOwnCloud implements ilCloudStorageServiceInterface
                     return array(
                         'baseUri'  => $this->config->getFullWebDAVPath(),
                         'userName' => $account->getUsername(),
-                        'password' => $$account->getPassword(),
+                        'password' => ilCloudStorageUtil::decrypt($account->getPassword()),
                         'proxy'    => $this->config->getProxyURL(),
                     );
                 } else {
                     return array(
                         'baseUri'  => $this->config->getFullWebDAVPath(),
                         'userName' => $account->getUsername(),
-                        'password' => $account->getPassword(),
+                        'password' => ilCloudStorageUtil::decrypt($account->getPassword()),
                     );
                 }
                 break;

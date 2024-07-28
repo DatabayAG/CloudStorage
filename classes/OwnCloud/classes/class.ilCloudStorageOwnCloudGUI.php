@@ -52,29 +52,44 @@ class ilCloudStorageOwnCloudGUI implements ilCloudStorageServiceGUIInterface
     public function editProperties(): void {
         $this->dic->logger()->root()->log("service->editProperties()");
 
-        $root_path = ($this->dic->http()->wrapper()->query()->has('root_path')) ? $this->dic->http()->wrapper()->query()->retrieve('root_path', $this->dic->refinery()->kindlyTo()->string()): '';
-        if ($root_path != '') {
-            $this->parent->setRootFolder($root_path);
-        } else {
-            // from create dialog existing folder
-            if (isset($_SESSION['xcls_create_folder_action'])) {
-                $action = $_SESSION['xcls_create_folder_action'];
-            } else {
-                $action = ($this->dic->http()->wrapper()->query()->has('action')) ? $this->dic->http()->wrapper()->query()->retrieve('action', $this->dic->refinery()->kindlyTo()->string()): '';
-            }
-            $this->dic->logger()->root()->log("action: " . $action);
-            switch ($action) {
-                case "choose_root":
-                    if ($this->object->currentUserIsOwner()) {
-                        $this->showTreeView();
+        switch ($this->config->getAuthMethod()) { // switch should be removed
+            case $this->config::AUTH_METHOD_OAUTH2:
+                $this->dic->logger()->root()->log("service->editProperties(): OAuth2");
+                $root_path = ($this->dic->http()->wrapper()->query()->has('root_path')) ? $this->dic->http()->wrapper()->query()->retrieve('root_path', $this->dic->refinery()->kindlyTo()->string()): '';
+                if ($root_path != '') {
+                    $this->parent->setRootFolder($root_path);
+                } else {
+                    // from create dialog existing folder
+                    if (isset($_SESSION['xcls_create_folder_action'])) {
+                        $action = $_SESSION['xcls_create_folder_action'];
                     } else {
-                        $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->object->txt('cld_only_owner_has_permission_to_change_root_path'), true);
-                        $this->dic->ctrl()->redirect($this->parent, 'editProperties');
+                        $action = ($this->dic->http()->wrapper()->query()->has('action')) ? $this->dic->http()->wrapper()->query()->retrieve('action', $this->dic->refinery()->kindlyTo()->string()): '';
                     }
-                    break;
-                default:
+                    $this->dic->logger()->root()->log("action: " . $action);
+                    switch ($action) {
+                        case "choose_root":
+                            if ($this->object->currentUserIsOwner()) {
+                                $this->showTreeView();
+                            } else {
+                                $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->object->txt('cld_only_owner_has_permission_to_change_root_path'), true);
+                                $this->dic->ctrl()->redirect($this->parent, 'editProperties');
+                            }
+                            break;
+                        default:
+                            $this->parent->editProperties();
+                    }
+                }
+                break;
+            case $this->config::AUTH_METHOD_BASIC:
+                $this->dic->logger()->root()->log("service->editProperties(): basic Auth");
+                if ($this->dic->http()->wrapper()->query()->has('authMode')) {
+                    $this->dic->logger()->root()->log("service->editProperties(): has authMode");
                     $this->parent->editProperties();
-            }
+                } else {
+                    $this->dic->logger()->root()->log("service->editProperties(): has no authMode");
+                    $this->parent->editProperties();
+                }
+                break;
         }
     }
 
