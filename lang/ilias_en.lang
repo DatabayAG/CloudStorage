@@ -8,6 +8,7 @@ obj_xcls_duplicate#:#Copy
 objs_xcls_duplicate#:#Copy Cloud Folder
 obj_xcls_select#:#Select Cloud Folder
 service_type_title#:#Cloud Type
+service_title#:#Cloud Service
 multifs#:#Cloud Folder
 xcls_multifs#:#Cloud Folder
 xcls_add#:#Add Cloud Folder
@@ -39,6 +40,10 @@ not_available#:#Not available
 no_connection
 no_active_conn#:#No Cloud Service available
 auth_failed#:#Authentication failed
+auth_login#:#Login
+oauth2_login_info#:#After successful login a personal token will be saved in ILIAS for accessing the Cloud Service. Username and password will not be saved in ILIAS.
+auth_cancel#:#Cancel
+must_not_empty#:#field must not be empty
 plugin_migration#:#Migration of Cloud Folders from ILIAS 7
 migrate_old#:#Migrate Cloud Folders from ILIAS 7
 migrate_desc#:#There are still incompatible Cloud Folders from ILIAS 7 in the installation that need to be migrated.
@@ -68,7 +73,8 @@ conf_availability_2#:#New ones can be created
 untrashed_usages#:#Number of usages
 saving_invoked#:#Settings saved
 create_type#:#Define new Cloud Connection
-create_existing_folder#:#Link Cloud Folder
+select_type#:#Select Cloud Connection
+create_existing_folder#:#Select Cloud Folder
 add_type#:#Add new Cloud Connection
 delete_type#:#Delete Cloud Connection
 delete_conn#:#Delete Cloud Connection?
@@ -113,8 +119,10 @@ post_body#:#Post Body
 default_info#:#Default: %s
 info_token_expires#:#Access Token expires
 root_folder#:#Folder
+authentication_required#:#Authentication required
 authentication#:#Authentication
 not_authorized#:#Authentication failed. Please reload the page to be redirected to the authentication authority.
+successful_authenticated#:#Authentication successful
 only_owner#:#Only the person who created the Cloud Folder can currently open it.
 open_in_ownCloud#:#Open in external editor
 cld_add#:#New Cloud Folder
@@ -178,3 +186,5 @@ file_folder_not_visible#:#Permission denied.
 node_is_null#:#Ressource could not be found.
 please_wait#:#Please wait
 has_account#:#Your account is already linked to the Cloud Service. <br />Click "Select Cloud Folder".
+root_folder_name#:#Root
+new_folder_add_info#:#The new Cloud Folder will be created in %s

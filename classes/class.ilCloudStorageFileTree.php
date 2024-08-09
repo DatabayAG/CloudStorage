@@ -252,7 +252,7 @@ class ilCloudStorageFileTree
                 throw new ilCloudStorageException(ilCloudStorageException::ID_DOES_NOT_EXIST_IN_FILE_TREE_IN_SESSION, (string) $folder_id);
             }
             $service = ilCloudStorageConfig::getServiceFromConfig($this->refId, $this->connId);
-            assert($service instanceof ilCloudStorageServiceInterface);
+            assert($service instanceof ilCloudStorageGenericService);
             $service->addToFileTree($this, $node->getPath());
         } catch (Exception $e) {
             if ($e instanceof ilCloudStorageException) {
@@ -301,7 +301,7 @@ class ilCloudStorageFileTree
             $this->storeFileTreeToSession();
 
             $service = ilCloudStorageConfig::getServiceFromConfig($this->refId, $this->connId);
-            assert($service instanceof ilCloudStorageServiceInterface);
+            assert($service instanceof ilCloudStorageGenericService);
 
             $new_folder_id = $service->createFolderById($id, $folder_name);
             $new_node = null;

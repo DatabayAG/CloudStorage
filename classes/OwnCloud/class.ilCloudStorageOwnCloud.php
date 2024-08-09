@@ -1,0 +1,47 @@
+<?php
+
+declare(strict_types=1);
+
+class ilCloudStorageOwnCloud extends ilCloudStorageGenericService
+{
+    public const SERVICE_ID = "ocld";
+
+    public const SERVICE_NAME = "OwnCloud";
+    
+    public function getServiceId(): string
+    {
+        return self::SERVICE_ID;
+    }
+
+    public function getServiceName(): string
+    {
+        return self::SERVICE_NAME;
+    }
+
+    public static function getDefaultWebDavPath(): string
+    {
+        return "remote.php/webdav";
+    }
+
+    public static function getDefaultOAuth2Path(): string
+    {
+        return "index.php/apps/oauth2";
+    }
+
+    public function hasCollaborationAppSupport(): bool
+    {
+        return true;
+    }
+
+    // for tree only nor required
+    // maybe required for collaboration app link
+    public function parentIdField(): string
+    {
+        return "{http://owncloud.org/ns}id";
+    }
+
+    public function fileIdField(): string
+    {
+        return "{http://owncloud.org/ns}fileid";
+    }
+}

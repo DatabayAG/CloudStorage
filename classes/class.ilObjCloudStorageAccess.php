@@ -64,10 +64,10 @@ class ilObjCloudStorageAccess extends ilObjectPluginAccess
             $obj_ids = $object->getAllWithSameOwnerAndConnection();
             $service = ilCloudStorageConfig::getServiceFromConfig($a_ref_id, $object->getConnId());
             $config = ilCloudStorageConfig::getInstance($object->getConnId());
-            assert($service instanceof ilCloudStorageServiceInterface);
+            assert($service instanceof ilCloudStorageGenericService);
             switch ($config->getAuthMethod()) {
                 case ilCloudStorageConfig::AUTH_METHOD_OAUTH2:
-                    if (!$service->checkAndRefreshAuthentication()) {
+                    if (!ilCloudStorageOAuth2::checkAndRefreshAuthentication($object->getOwnerId(), $config)) {
                         foreach ($obj_ids as $obj_id) {
                             $ref_ids = ilObject::_getAllReferences($obj_id);
                             foreach ($ref_ids as $ref_id) {

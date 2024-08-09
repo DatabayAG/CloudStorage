@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @author  Theodor Truffer <tt@studer-raimann.ch>
  */
-class ilCloudStorageWebDavFile extends ilCloudStorageWebDavItem
+class ilCloudStorageFile extends ilCloudStorageItem
 {
 
     protected int $type = self::TYPE_FILE;
@@ -16,9 +16,9 @@ class ilCloudStorageWebDavFile extends ilCloudStorageWebDavItem
     
     protected string $content_url = '';
 
-    public function loadFromProperties(string $parent_web_url, string $web_url, array $properties, ilCloudStorageWebDavClient $client): void
+    public function loadFromProperties(string $parent_web_url, string $web_url, array $properties, ilCloudStorageGenericService $service): void
     {
-        parent::loadFromProperties($parent_web_url, $web_url, $properties, $client);
+        parent::loadFromProperties($parent_web_url, $web_url, $properties, $service);
         $this->setSize((int) $properties["{DAV:}getcontentlength"]);
     }
 

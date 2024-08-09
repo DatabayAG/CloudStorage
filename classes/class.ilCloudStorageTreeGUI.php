@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Class ilCloudStorageWebDavTreeGUI
+ * Class ilCloudStorageTreeGUI
  *
  * @author  Theodor Truffer <tt@studer-raimann.ch>
  */
@@ -11,7 +11,7 @@ declare(strict_types=1);
 
 // use ILIAS\DI\Container;
 
-class ilCloudStorageWebDavTreeGUI extends ilCloudStorageWebDavTreeExplorerLegacyGUI
+class ilCloudStorageTreeGUI extends ilCloudStorageTreeExplorerLegacyGUI
 {
 
     //private Container $dic;
@@ -21,12 +21,11 @@ class ilCloudStorageWebDavTreeGUI extends ilCloudStorageWebDavTreeExplorerLegacy
     // protected $log;
 
     // Sn: ToDo does this really work? 
-    // parent constructor ilTreeExplorerGUI needs ilTree so i extended ilCloudStorageWebDavTree from ilTree (?)
-    public function __construct(string $a_expl_id, ilObjCloudStorageGUI $a_parent_obj, string $a_parent_cmd, ilCloudStorageWebDavTree $tree)
+    // parent constructor ilTreeExplorerGUI needs ilTree so i extended ilCloudStorageTree from ilTree (?)
+    public function __construct(string $a_expl_id, ilObjCloudStorageGUI $a_parent_obj, string $a_parent_cmd, ilCloudStorageTree $tree)
     {
         global $tpl, $ilLog;
-        global $DIC;
-
+        //global $DIC;
         parent::__construct($a_expl_id, $a_parent_obj, $a_parent_cmd, $tree);
         $this->setSkipRootNode(false);
         $this->setPreloadChilds(false);
@@ -54,7 +53,7 @@ class ilCloudStorageWebDavTreeGUI extends ilCloudStorageWebDavTreeExplorerLegacy
 
     function getNodeIcon($a_node): string
     {
-        if ($a_node->getType() == ilCloudStorageWebDavItem::TYPE_FILE) {
+        if ($a_node->getType() == ilCloudStorageItem::TYPE_FILE) {
             $img = 'icon_dcl_file.svg';
         } else {
             $img = 'icon_dcl_fold.svg';
@@ -70,7 +69,7 @@ class ilCloudStorageWebDavTreeGUI extends ilCloudStorageWebDavTreeExplorerLegacy
     function getNodeContent($node): string
     {   
         assert($this->parent_obj instanceof ilObjCloudStorageGUI);
-        $node->getName() ? $name = $node->getName() : $name = $this->parent_obj->object->getTitle();
+        $node->getName() ? $name = $node->getName() : $name = $this->parent_obj->getRootName();
         return htmlspecialchars($name);
     }
 
@@ -99,7 +98,7 @@ class ilCloudStorageWebDavTreeGUI extends ilCloudStorageWebDavTreeExplorerLegacy
 
     function isNodeClickable($node): bool
     {
-        return ($node->getType() == ilCloudStorageWebDavItem::TYPE_FOLDER);
+        return ($node->getType() == ilCloudStorageItem::TYPE_FOLDER);
     }
 
 
@@ -109,11 +108,11 @@ class ilCloudStorageWebDavTreeGUI extends ilCloudStorageWebDavTreeExplorerLegacy
      * Please note that the class does not make any requirements how
      * nodes are represented (array or object)
      *
-     * @return davFolder root node object/array
+     * @return ownclFolder root node object/array
      */
     function getRootNode()
     {
-        assert($this->tree instanceof ilCloudStorageWebDavTree);
+        assert($this->tree instanceof ilCloudStorageTree);
         return $this->tree->getRootNode();
     }
 

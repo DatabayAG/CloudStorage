@@ -3,58 +3,35 @@
 declare(strict_types=1);
 
 /**
- * Class ownclFolder
+ * Class davFolder
  *
  * @author  Theodor Truffer <tt@studer-raimann.ch>
  */
-class ilCloudStorageOwnCloudFolder extends ilCloudStorageOwnCloudItem
+class ilCloudStorageFolder extends ilCloudStorageItem
 {
 
-    /**
-     * @var int
-     */
-    protected $type = self::TYPE_FOLDER;
-    /**
-     * @var int
-     */
-    protected $child_count = 0;
-    /**
-     * @var array
-     */
-    protected $childs;
+    protected int $type = self::TYPE_FOLDER;
+    
+    protected int $child_count = 0;
+    
+    protected array $childs = array();
 
-
-    /**
-     * @return int
-     */
-    public function getChildCount()
+    public function getChildCount(): int
     {
         return $this->child_count;
     }
 
-
-    /**
-     * @param int $child_count
-     */
-    public function setChildCount($child_count)
+    public function setChildCount(int $child_count): void
     {
         $this->child_count = $child_count;
     }
 
-
-    /**
-     * @return int
-     */
-    public function getType()
+    public function getType(): int
     {
         return $this->type;
     }
 
-
-    /**
-     * @param int $type
-     */
-    public function setType($type)
+    public function setType(int $type): void
     {
         $this->type = $type;
     }

@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use Sabre\DAV\Client;
+use Sabre\HTTP;
+use Sabre\Xml\Service;
+
 /* Copyright (c) 1998-2009 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 /**
@@ -22,7 +26,48 @@ class ilCloudStorageBasicAuth
 
     private ?string $password = '';
 
+    // object model
+    public function setConnId(int $conn_id): void
+    {
+        $this->conn_id = $conn_id;
+    }
 
+    public function getConnId(): int
+    {
+        return $this->conn_id;
+    }
+
+    public function getUserId(): int
+    {
+        return $this->user_id;
+    }
+
+    public function setUserId(int $user_id): void
+    {
+        $this->user_id = $user_id;
+    }
+
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): void
+    {
+        $this->username = $username;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    // object functions
     private function store(): void {
         global $DIC;
         $query = $DIC->database()->query("SELECT user_id FROM " . self::DB_TABLE_NAME . " WHERE conn_id = " . $this->getConnId() . " AND user_id = " . $this->getUserId());
@@ -83,45 +128,60 @@ class ilCloudStorageBasicAuth
         $DIC->database()->manipulate("DELETE FROM " . self::DB_TABLE_NAME . " WHERE conn_id = " . $conn_id . " AND user_id = " . $user_id);
     }
 
+    // specific basic auth functions
 
-    public function setConnId(int $conn_id): void
+    public static function getHeaders(int $conn_id, int $user_id): array
     {
-        $this->conn_id = $conn_id;
+        $account = self::getUserAccount($conn_id, $user_id);
+        return array(
+            'Authorization' => 'Basic ' . base64_encode($account->getUsername() . ':' . ilCloudStorageUtil::decrypt($account->getPassword()))
+        );
     }
 
-    public function getConnId(): int
+    // generic auth connection functions
+    public static function checkConnection(int $conn_id, int $user_id, ilCloudStorageConfig $config): void
     {
-        return $this->conn_id;
+        $status = self::getHTTPStatus($conn_id, $user_id, $config);
+        
+        // unauthorized
+        if ($status == 401) {
+            throw new ilCloudStorageException(ilCloudStorageException::NOT_AUTHORIZED);
+        }
+
+        // everything else
+        if ($status > 401) {
+            throw new ilCloudStorageException(ilCloudStorageException::NO_CONNECTION);
+        }
     }
 
-    public function getUserId(): int
+    public static function getHTTPStatus(int $conn_id, int $user_id, ilCloudStorageConfig $config): int
     {
-        return $this->user_id;
+        global $DIC;
+        try {
+            $client = new Client(self::getClientSettings($config));
+            $response = $client->request('PROPFIND', '', null, self::getHeaders($conn_id, $user_id));
+        } catch (Exception $e) {
+            $DIC->logger()->root()->error($e->getMessage());
+            throw new ilCloudStorageException(ilCloudStorageException::NO_CONNECTION, $e->getMessage());
+            return -1;
+        }
+        return $response['statusCode'];
     }
 
-    public function setUserId(int $user_id): void
+    public static function getClientSettings(ilCloudStorageConfig $config): array
     {
-        $this->user_id = $user_id;
+        if ($config->getProxyURL() != '') {
+            return array(
+                'baseUri' => $config->getFullWebDAVPath(),
+                'webDavPath' => $config->getWebDavPath(),
+                'proxy'   => $config->getProxyURL(),
+            );
+        } else {
+            return array(
+                'baseUri' => $config->getFullWebDAVPath(),
+                'webDavPath' => $config->getWebDavPath(),
+            );
+        }
     }
-
-    public function getUsername(): string
-    {
-        return $this->username;
-    }
-
-    public function setUsername(string $username): void
-    {
-        $this->username = $username;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): void
-    {
-        $this->password = $password;
-    }
-
+    
 }

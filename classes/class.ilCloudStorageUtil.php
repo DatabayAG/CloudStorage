@@ -68,6 +68,9 @@ class ilCloudStorageUtil
                 return '';
             }
             $key = self::getSalt();
+            if ($key == "") {
+                return "";
+            }
             return openssl_encrypt($data, 'aes-256-cbc', $key, 0, self::IV);
         } catch(Exception $e) {
             $DIC->logger()->root()->error($e->getMessage());
@@ -101,4 +104,23 @@ class ilCloudStorageUtil
         }
     }
 
+    public static function getStringParam(string $param): ?string {
+        global $DIC;
+        return ($DIC->http()->wrapper()->query()->has($param)) ? $DIC->http()->wrapper()->query()->retrieve($param, $DIC->refinery()->kindlyTo()->string()): '';
+    }
+
+    public static function getIntParam(string $param): ?int {
+        global $DIC;
+        return ($DIC->http()->wrapper()->query()->has($param)) ? $DIC->http()->wrapper()->query()->retrieve($param, $DIC->refinery()->kindlyTo()->int()): -1;
+    }
+
+    public static function getStringPost(string $param): ?string {
+        global $DIC;
+        return ($DIC->http()->wrapper()->post()->has($param)) ? $DIC->http()->wrapper()->post()->retrieve($param, $DIC->refinery()->kindlyTo()->string()): '';
+    }
+
+    public static function getIntPost(string $param): ?int {
+        global $DIC;
+        return ($DIC->http()->wrapper()->post()->has($param)) ? $DIC->http()->wrapper()->post()->retrieve($param, $DIC->refinery()->kindlyTo()->int()): -1;
+    }
 }

@@ -18,9 +18,10 @@ class ilCloudStorageConfig
     
     #region PROPERTIES
     public const PLUGIN_ID = 'xcls';
+
     public const AVAILABLE_FS_CONN = [
         'ocld'		=> 'OwnCloud',
-        'dav'      => 'WebDav'
+        'dav'       => 'WebDav'
     ];
     public const AVAILABLE_XCLS_SERVICES = [
         'ocld'     => 'ilCloudStorageOwnCloud',
@@ -35,7 +36,7 @@ class ilCloudStorageConfig
 
     public const AUTH_METHOD_BASIC = 'basic';
     public const AUTH_METHOD_OAUTH2 = 'oauth2';
-    public const AUTH_METHOD_OICD = 'iocd';
+    public const AUTH_METHOD_OICD = 'oicd';
 
     private Container $dic;
     private ilDBInterface $db;
@@ -57,7 +58,6 @@ class ilCloudStorageConfig
     #'xls,xlsx,doc,docx,dot,dotx,odt,ott,rtf,txt,pdf,pdfa,html,epub,xps,djvu,djv,ppt,pptx';
     private string $collaborationAppMappingField = 'login';
     private string $collaborationAppUrl = '';
-    private bool $oauth2Active = true;
     private string $oauth2ClientId = '';
     private string $oauth2ClientSecret = '';
     private string $oauth2Path = '';
@@ -181,7 +181,6 @@ class ilCloudStorageConfig
         $this->collaborationAppFormats = $this->getCollaborationAppFormats(true);
         $this->collaborationAppMappingField = 'login';
         $this->collaborationAppUrl = '';
-        $this->oauth2Active = true;
         $this->oauth2ClientId = '';
         $this->oauth2ClientSecret = '';
         $this->oauth2Path = $this->getOAuth2Path(true);
@@ -587,8 +586,7 @@ class ilCloudStorageConfig
         $this->authMethod = $authMethod;
     }
 
-
-    public static function getServiceFromConfig(int $refId, int $connId): ilCloudStorageServiceInterface
+    public static function getServiceFromConfig(int $refId, int $connId): ilCloudStorageGenericService
     {
         $serviceId = ilCloudStorageConfig::getInstance($connId)->getServiceId();
         $serviceClass = ilCloudStorageConfig::AVAILABLE_XCLS_SERVICES[$serviceId];

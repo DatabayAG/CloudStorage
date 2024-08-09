@@ -8,6 +8,7 @@ obj_xcls_duplicate#:#Kopieren
 objs_xcls_duplicate#:#Cloud-Ordner kopieren
 obj_xcls_select#:#Cloud-Ordner auswählen
 service_type_title#:#Cloud-Typ
+service_title#:#Cloud-Service
 multifs#:#Cloud-Ordner
 xcls_multifs#:#Cloud-Ordner
 xcls_add#:#Cloud-Ordner hinzufügen
@@ -39,6 +40,11 @@ not_available#:#Nicht verfügbar
 no_connection
 no_active_conn#:#Kein Cloud-Service verfügbar
 auth_failed#:#Authentifizierung fehlgeschlagen
+auth_login#:#Anmelden
+oauth2_login_info#:#Nach erfolgreicher Anmeldung wird in ILIAS ein persönliches Token für den Zugriff auf den Cloud-Service gespeichert. Benutzername und Passwort werden nicht in ILIAS gespeichert.
+bauth_login_info#:#Nach erfolgreicher Anmeldung werden Benutzername und Password für den Zugriff auf den Cloud-Service in ILIAS gespeichert.
+auth_cancel#:#Abbrechen
+must_not_empty#:#Das Feld darf nicht leer sein
 plugin_migration#:#Migration von Cloud-Ordnern aus ILIAS 7
 migrate_old#:#Cloud-Ordner aus ILIAS 7 migrieren
 migrate_desc#:#Es existieren noch inkompatible Cloud-Ordner aus ILIAS 7 in der Installation, die migriert werden müssen.
@@ -68,7 +74,8 @@ conf_availability_2#:#Neue erzeugbar
 untrashed_usages#:#Anzahl Verwendungen
 saving_invoked#:#Einstellungen gespeichert
 create_type#:#Neue Cloud-Anbindung definieren
-create_existing_folder#:#Cloud-Ordner verknüpfen
+select_type#:#Cloud-Anbindung auswählen
+create_existing_folder#:#Cloud-Ordner auswählen
 add_type#:#Cloud-Anbindung hinzufügen
 delete_type#:#Cloud-Anbindung löschen
 delete_conn#:#Cloud-Anbindung löschen?
@@ -114,8 +121,10 @@ post_body#:#Post Body
 default_info#:#Default: %s
 info_token_expires#:#Access-Token läuft aus
 root_folder#:#Ordner
+authentication_required#:#Authentifizierung erforderlich
 authentication#:#Authentifizierung
 not_authorized#:#Authentifizierung fehlgeschlagen. Bitte Laden Sie die Seite erneut, um an die Authentifizierungsstelle weitergeleitet zu werden.
+successful_authenticated#:#Authentifizierung erfolgreich
 only_owner#:#Nur die Person, die den Cloud-Ordner angelegt hat, kann diesen aktuell öffnen.
 open_in_owncloud#:#In externem Editor öffnen
 cld_add#:#Neuer Cloud-Ordner
@@ -179,3 +188,5 @@ file_folder_not_visible#:#Sie haben nicht die nötigen Berechtigungen.
 node_is_null#:#Die Ressource konnte nicht gefunden werden.
 please_wait#:#Bitte warten
 has_account#:#Ihr Account ist bereits mit dem Cloud-Service verknüpft.<br />Klicken Sie auf "Cloud-Ordner auswählen".
+root_folder_name#:#Wurzelverzeichnis
+new_folder_add_info#:#Der neue Cloud-Ordner wird im Verzeichnis %s angelegt

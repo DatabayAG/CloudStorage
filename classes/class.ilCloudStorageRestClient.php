@@ -7,11 +7,11 @@ use GuzzleHttp\Exception\GuzzleException;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * Class ilCloudStorageOwnCloudRESTClient
+ * Class ilCloudStorageWebDavRESTClient
  *
  * @author Theodor Truffer <tt@studer-raimann.ch>
  */
-class ilCloudStorageOwnCloudRESTClient
+class ilCloudStorageRestClient
 {
 
     protected ?Client $http_client = null;
@@ -27,9 +27,9 @@ class ilCloudStorageOwnCloudRESTClient
     }
 
 
-    public function shareAPI(ilCloudStorageOwnCloud $a_owncl)
+    public function shareAPI(ilCloudStorageWebDav $a_dav)
     {
-        return new ilCloudStorageOwnCloudShareAPI($this->http_client, $a_owncl);
+        return new ilCloudStorageWebDavShareAPI($this->http_client, $a_dav);
     }
 
 

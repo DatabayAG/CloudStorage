@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @author  Theodor Truffer <tt@studer-raimann.ch>
  */
-abstract class ilCloudStorageWebDavItem
+abstract class ilCloudStorageItem
 {
 
     const TYPE_UNKNOWN = -1;
@@ -54,19 +54,19 @@ abstract class ilCloudStorageWebDavItem
         //$this->setETag($properties["{DAV:}getetag"]);
     }
     */
-
-    public function loadFromProperties(string $parent_web_url, string $web_url, array $properties, ilCloudStorageWebDavClient $client): void
+    
+    public function loadFromProperties(string $parent_web_url, string $web_url, array $properties, ilCloudStorageGenericService $service): void
     {
-        $url = $client->getDecodedWebUrl($web_url);
+        $url = $service->getDecodedWebUrl($web_url);
         
         $this->setWebUrl($url);
 
         // path is the directory path component of the ressource dir_name/ not the full path to the ressource!
-        $path = $client->getPathFromWebUrl($web_url, $this->getType());        
+        $path = $service->getPathFromWebUrl($web_url, $this->getType());        
         $this->setPath($path);
 
         // name is the name component of the ressource dir_name/ not the full path to the ressource!
-        $name = $client->getNameFromWebUrl($web_url, $this->getType());
+        $name = $service->getNameFromWebUrl($web_url, $this->getType());
         //$DIC->logger()->root()->log("C - name: " . $name);
         $this->setName($name);
 
