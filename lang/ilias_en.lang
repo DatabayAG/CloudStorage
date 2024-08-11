@@ -41,6 +41,7 @@ no_connection
 no_active_conn#:#No Cloud Service available
 auth_failed#:#Authentication failed
 auth_login#:#Login
+login_to_service#:#Login to %s
 oauth2_login_info#:#After successful login a personal token will be saved in ILIAS for accessing the Cloud Service. Username and password will not be saved in ILIAS.
 auth_cancel#:#Cancel
 must_not_empty#:#field must not be empty
@@ -124,7 +125,7 @@ authentication#:#Authentication
 not_authorized#:#Authentication failed. Please reload the page to be redirected to the authentication authority.
 successful_authenticated#:#Authentication successful
 only_owner#:#Only the person who created the Cloud Folder can currently open it.
-open_in_ownCloud#:#Open in external editor
+open_in_platform#:#Open in external editor
 cld_add#:#New Cloud Folder
 cld_add_download_failed#:#Download failed
 cld_add_file#:#File

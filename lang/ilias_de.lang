@@ -41,6 +41,7 @@ no_connection
 no_active_conn#:#Kein Cloud-Service verfügbar
 auth_failed#:#Authentifizierung fehlgeschlagen
 auth_login#:#Anmelden
+login_to_service#:#Bei %s anmelden
 oauth2_login_info#:#Nach erfolgreicher Anmeldung wird in ILIAS ein persönliches Token für den Zugriff auf den Cloud-Service gespeichert. Benutzername und Passwort werden nicht in ILIAS gespeichert.
 bauth_login_info#:#Nach erfolgreicher Anmeldung werden Benutzername und Password für den Zugriff auf den Cloud-Service in ILIAS gespeichert.
 auth_cancel#:#Abbrechen
@@ -126,7 +127,7 @@ authentication#:#Authentifizierung
 not_authorized#:#Authentifizierung fehlgeschlagen. Bitte Laden Sie die Seite erneut, um an die Authentifizierungsstelle weitergeleitet zu werden.
 successful_authenticated#:#Authentifizierung erfolgreich
 only_owner#:#Nur die Person, die den Cloud-Ordner angelegt hat, kann diesen aktuell öffnen.
-open_in_owncloud#:#In externem Editor öffnen
+open_in_platform#:#In externem Editor öffnen
 cld_add#:#Neuer Cloud-Ordner
 cld_add_download_failed#:#Download fehlgeschlagen
 cld_add_file#:#Datei
