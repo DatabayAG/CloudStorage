@@ -1619,16 +1619,16 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
         if ($_POST["extract"]) {
             $this->dic->logger()->root()->debug("extract");
-            $newdir = ilFileUtils::ilTempnam();
+            $newdir = ilFileUtilsLegacy::ilTempnam();
 
             $this->dic->logger()->root()->debug("handleFileUpload tempdir " . $newdir);
-            ilFileUtils::makeDir($newdir);
+            ilFileUtilsLegacy::makeDir($newdir);
             try {
-                ilFileUtils::processZipFile($newdir, $file_upload["tmp_name"], $_POST["keep_structure"]);
+                ilFileUtilsLegacy::processZipFile($newdir, $file_upload["tmp_name"], $_POST["keep_structure"]);
             } catch (Exception $e) {
                 $this->dic->logger()->root()->debug("handleFileUpload error " . $e->getMessage());
                 $response->error = $e->getMessage();
-                ilFileUtils::delDir($newdir);
+                ilFileUtilsLegacy::delDir($newdir);
                 exit;
             }
 
@@ -1636,11 +1636,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $this->uploadDirectory($newdir, $_SESSION["cld_folder_id"], $file_tree, $_POST["keep_structure"]);
             } catch (Exception $e) {
                 $response->error = $e->getMessage();
-                ilFileUtils::delDir($newdir);
+                ilFileUtilsLegacy::delDir($newdir);
                 exit;
             }
 
-            ilFileUtils::delDir($newdir);
+            ilFileUtilsLegacy::delDir($newdir);
 
             return $response;
         } else {
