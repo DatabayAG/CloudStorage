@@ -422,7 +422,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->dic->ui()->mainTemplate()->setLeftContent($renderer->render([$hidden]));
             $this->dic->ui()->mainTemplate()->setRightContent($renderer->render([$hidden]));
             $this->dic->ui()->mainTemplate()->setContent($renderer->render([$panel]));
-            //$this->dic->ui()->mainTemplate()->setContent($renderer->render([$panel]));
         } else {
             $panel = $factory->panel()->standard(
                 $this->txt("select_type"),
@@ -474,7 +473,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $this->dic->tabs()->setBackTarget($this->txt('back'), $this->dic->ctrl()->getLinkTargetByClass('ilrepositorygui'));
         $hidden = $factory->input()->field()->hidden()->withValue("just_for_layout");
         $this->dic->ui()->mainTemplate()->setLeftContent($renderer->render([$hidden]));
-        $this->dic->ui()->mainTemplate()->setRightContent($renderer->render([$hidden]));
+        //$this->dic->ui()->mainTemplate()->setRightContent($renderer->render([$hidden]));
         $this->dic->ui()->mainTemplate()->setContent($renderer->render([$panel]));
     }
 
@@ -503,7 +502,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         } else {
             $this->dic->logger()->root()->log("no login");
         }
-        return [$connItem,$button];
+        return [$connItem, $button];
     }
 
     public function processBasicAuth(
@@ -524,24 +523,26 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         }, $this->txt("must_not_empty"));
 
         $username = $factory->input()->field()->text($this->txt("account_username"))
-            ->withValue("")
+            ->withMaxLength(24)
             ->withRequired(true, $not_empty);
 
         // ToDo: field or section length?
         $password = $factory->input()->field()->password($this->txt("account_password"))
             ->withRevelation(true)
-            ->withValue("")
             ->withRequired(true, $not_empty);
 
-        $form = $factory->input()->container()->form()->standard("#", ['username' => $username, 'password' => $password]);
+        $section = $factory->input()->field()->section(['username' => $username, 'password' => $password], sprintf($this->txt('login_to_service'), $config->getTitle()));
+
+        //$form = $factory->input()->container()->form()->standard("#", ['username' => $username, 'password' => $password]);
+        $form = $factory->input()->container()->form()->standard("#", [$section]);
         $form = $form->withSubmitLabel($this->txt("auth_login"));
         if ($request->getMethod() == "POST") {
             $form = $form->withRequest($request);
             $result = $form->getData();
             $this->dic->logger()->root()->log(var_export($result, true));
             if ($result) {
-                $username = $result['username'];
-                $password = ilCloudStorageUtil::encrypt($result['password']->toString());
+                $username = $result[0]['username'];
+                $password = ilCloudStorageUtil::encrypt($result[0]['password']->toString());
                 $account = ilCloudStorageBasicAuth::getUserAccount($conn_id, $user_id);
                 $account->storeUserAccount($username, $password, $conn_id); // ToDo: static function for no persistent connection check
                 try {
@@ -559,7 +560,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 //$this->dic->ui()->mainTemplate()->setContent($renderer->render([$form]));
             }
         }
-        return [$form];
+        return [$connItem, $form];
     }
 
     public function getRefId(): int {
@@ -1116,7 +1117,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         } else {
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt('cld_only_owner_has_permission_to_change_root_path'), true);
         }
-        $this->dic->ctrl()->redirect($this,'editProperties');
+        $this->dic->ctrl()->redirect($this,'showContent');
     }
 
     private function clearParams() {
@@ -2063,7 +2064,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->dic->ctrl()->setParameter($this, self::ITEM_ID, $node->getId());
             $this->dic->ctrl()->setParameter($this, self::ITEM_PATH, urlencode($node->getPath()));
             $selection_list->addItem(
-                $this->txt('open_in_davoud'),
+                $this->txt('open_in_platform'),
                 '',
                 $this->dic->ctrl()->getLinkTarget($this, self::CMD_OPEN_IN_PLATFORM),
                 '',
@@ -2102,7 +2103,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         }
         $path = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_PATH, $this->dic->refinery()->kindlyTo()->string());
         $id = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_ID, $this->dic->refinery()->kindlyTo()->string());
-        $this->service->checkAndRefreshAuthentication();
+        //$this->checkAndRefreshAuthentication();
         //$client = $this->service->getClient();
         $this->service->shareItem($path, $this->dic->user());
 
