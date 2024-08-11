@@ -33,15 +33,26 @@ class ilCloudStorageOwnCloud extends ilCloudStorageGenericService
         return true;
     }
 
-    // for tree only nor required
+    // for tree only not required
     // maybe required for collaboration app link
-    public function parentIdField(): string
+    public function getParentIdField(): string
     {
         return "{http://owncloud.org/ns}id";
     }
 
-    public function fileIdField(): string
+    public function getFileIdField(): string
     {
         return "{http://owncloud.org/ns}fileid";
+    }
+
+    public function folderPropFind(): array {
+        return [
+            $this->getParentIdField(),
+            $this->getFileIdField(),
+            '{DAV:}getcontenttype',
+            '{DAV:}getcontentlength',
+            '{DAV:}getlastmodified',
+            '{DAV:}getetag'
+        ];
     }
 }

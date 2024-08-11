@@ -14,9 +14,9 @@ abstract class ilCloudStorageItem
     const TYPE_FOLDER = 1;
     const TYPE_FILE = 2;
     
-    protected int $parent_id = ilCloudStorageFileNode::ID_UNKOWN;
+    protected int $parent_id = ilCloudStorageFileNode::ID_UNKNOWN;
     
-    protected int $id = ilCloudStorageFileNode::ID_UNKOWN;
+    protected int $id = ilCloudStorageFileNode::ID_UNKNOWN;
     
     protected string $path = '';
 
@@ -70,8 +70,19 @@ abstract class ilCloudStorageItem
         //$DIC->logger()->root()->log("C - name: " . $name);
         $this->setName($name);
 
+        if ($service->hasParentId()) {
+            $this->setParentId((int) $properties[$service->getParentIdField()]);
+        }
+
+        if ($service->hasFileId()) {
+            $this->setId((int) $properties[$service->getFileIdField()]);
+        }
+
         $this->setDateTimeLastModified($properties["{DAV:}getlastmodified"]);
-        //$this->setETag($properties["{DAV:}getetag"]);
+
+        if (isset($properties["{DAV:}getetag"])) {
+            $this->setETag($properties["{DAV:}getetag"]);
+        }
     }
 
     public function getFullPath(): string

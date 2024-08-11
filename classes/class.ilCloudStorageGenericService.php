@@ -70,16 +70,16 @@ abstract class ilCloudStorageGenericService extends Client
     
     abstract function hasCollaborationAppSupport(): bool;
 
-    abstract function parentIdField(): string;
+    abstract function getParentIdField(): string;
 
-    abstract function fileIdField(): string;
+    abstract function getFileIdField(): string;
 
     public function hasParentId(): bool {
-        return ($this->parentIdField() != "");
+        return ($this->getParentIdField() != "");
     }
 
     public function hasFileId(): bool {
-        return ($this->fileIdField() != "");
+        return ($this->getFileIdField() != "");
     }
     
     public function getSessionName(string $session_name): string {
@@ -622,7 +622,20 @@ abstract class ilCloudStorageGenericService extends Client
     public function davPathToId(string $path) : int
     {
         // in generic WebDav no id can be retrieved from storage
-        return ilCloudStorageFileNode::ID_UNKOWN;
+        $id = ilCloudStorageFileNode::ID_UNKNOWN;
+        if ($this->hasFileId()) {
+            $settings = $this->getClientSettings();
+            $response = $this->propFind(
+                $settings['baseUri'] . $this->urlencode($path),
+                [
+                    $this->getFileIdField()
+                ],
+                0,
+                $this->getHeaders()
+            );
+            $id = (int) (current($response));
+        }
+        return $id;
     }
 
     public function getDecodedWebUrl(string $web_url): string {

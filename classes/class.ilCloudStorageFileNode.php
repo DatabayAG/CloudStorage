@@ -15,7 +15,7 @@ declare(strict_types=1);
 class ilCloudStorageFileNode
 {
 
-    const ID_UNKOWN = -999999;
+    const ID_UNKNOWN = -999999;
 
     protected int $id = 0;
     

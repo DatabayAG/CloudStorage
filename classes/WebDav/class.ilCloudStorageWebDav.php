@@ -23,12 +23,12 @@ class ilCloudStorageWebDav extends ilCloudStorageGenericService
         return false;
     }
 
-    public function parentIdField(): string
+    public function getParentIdField(): string
     {
         return "";
     }
 
-    public function fileIdField(): string
+    public function getFileIdField(): string
     {
         return "";
     }

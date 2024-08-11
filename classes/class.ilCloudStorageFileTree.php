@@ -108,7 +108,7 @@ class ilCloudStorageFileTree
 
         //node does not yet exist
         if (!$node) {
-            if ($id == ilCloudStorageFileNode::ID_UNKOWN) {
+            if ($id == ilCloudStorageFileNode::ID_UNKNOWN) {
                 $id = $this->getUniqueId();
             }
             if ($this->getNodeFromId($id)) {
