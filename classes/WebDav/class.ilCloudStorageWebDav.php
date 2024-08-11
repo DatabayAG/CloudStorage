@@ -32,4 +32,14 @@ class ilCloudStorageWebDav extends ilCloudStorageGenericService
     {
         return "";
     }
+
+    public function getAccessTokenExpiration(): string
+    {
+        return "";
+    }
+
+    public function getRefreshTokenExpiration(): string
+    {
+        return "";
+    }
 }

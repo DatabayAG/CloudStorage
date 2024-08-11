@@ -1030,7 +1030,17 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         switch ($this->config->getAuthMethod()) {
             case $this->config::AUTH_METHOD_OAUTH2:
                 $n = new ilNonEditableValueGUI($this->object->txt('info_token_expires'));
-                $n->setValue(date('d.m.Y - H:i:s', $this->service->getToken()->getValidThrough()));
+
+                $validThrough = $this->service->getToken()->getValidThrough();
+                $this->dic->logger()->root()->debug("accesstoken valid through: " . date('d.m.Y - H:i:s', $validThrough));
+
+                $created = strtotime('-'. $this->service->getAccessTokenExpiration(),  $validThrough);
+                $this->dic->logger()->root()->debug("accesstoken created: " . date('d.m.Y - H:i:s', $created));
+
+                $refreshValidThrough = strtotime('+'.$this->service->getRefreshTokenExpiration(), $created);
+                $this->dic->logger()->root()->debug("refresh token valid through: " . date('d.m.Y - H:i:s', $refreshValidThrough));
+
+                $n->setValue(date('d.m.Y - H:i:s', $refreshValidThrough));
                 $this->form->addItem($n);
                 break;
             case $this->config::AUTH_METHOD_BASIC:

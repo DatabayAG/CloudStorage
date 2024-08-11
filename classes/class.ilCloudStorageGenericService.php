@@ -74,6 +74,10 @@ abstract class ilCloudStorageGenericService extends Client
 
     abstract function getFileIdField(): string;
 
+    abstract function getAccessTokenExpiration(): string;
+
+    abstract function getRefreshTokenExpiration(): string;
+
     public function hasParentId(): bool {
         return ($this->getParentIdField() != "");
     }

@@ -8,6 +8,10 @@ class ilCloudStorageOwnCloud extends ilCloudStorageGenericService
 
     public const SERVICE_NAME = "OwnCloud";
     
+    public const ACCESS_TOKEN_EXPIRATION = "1 hour";
+
+    public const REFRESH_TOKEN_EXPIRES = "6 month";
+
     public function getServiceId(): string
     {
         return self::SERVICE_ID;
@@ -54,5 +58,15 @@ class ilCloudStorageOwnCloud extends ilCloudStorageGenericService
             '{DAV:}getlastmodified',
             '{DAV:}getetag'
         ];
+    }
+
+    public function getAccessTokenExpiration(): string
+    {
+        return "1 hour";
+    }
+
+    public function getRefreshTokenExpiration(): string
+    {
+        return "6 month";
     }
 }
