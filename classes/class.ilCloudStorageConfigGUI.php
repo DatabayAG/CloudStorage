@@ -481,15 +481,15 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
 
         // set confirm/cancel commands
         $c_gui->setFormAction($DIC->ctrl()->getFormAction($this, "overviewUses"));
-        $c_gui->setHeaderText($DIC->language()->txt("rep_robj_xcls_info_delete_fs_sure"));
+        $c_gui->setHeaderText($DIC->language()->txt("rep_robj_xcls_info_delete_folder"));
         $c_gui->setCancel($DIC->language()->txt("cancel"), "overviewUses");
         $c_gui->setConfirm($DIC->language()->txt("confirm"), "deleteUsesCloudStorageConn");
 
         // add items to delete
         //include_once('Modules/Course/classes/class.ilCourseFile.php');
         $cGuiItemContent = $DIC->http()->wrapper()->query()->retrieve('cGuiItemContent', $DIC->refinery()->kindlyTo()->string());
-        $c_gui->addItem("item_ref_id", $item_ref_id, $cGuiItemContent);
-        $c_gui->addHiddenItem('parent_ref_id', $parent_ref_id);
+        $c_gui->addItem("item_ref_id", (string) $item_ref_id, $cGuiItemContent);
+        $c_gui->addHiddenItem('parent_ref_id', (string) $parent_ref_id);
         $DIC->ui()->mainTemplate()->setContent($c_gui->getHTML());
 
     }

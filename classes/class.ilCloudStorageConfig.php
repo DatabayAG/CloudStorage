@@ -597,7 +597,7 @@ class ilCloudStorageConfig
 
     public static function _getCloudStorageConnOverviewUses(): array
     {
-        global $DIC; /** @var Container $DIC */
+        global $DIC;
         $ilDB = $DIC->database();
 
         // Get Conn Title
@@ -607,9 +607,10 @@ class ilCloudStorageConfig
         while($row = $ilDB->fetchAssoc($result)) {
             $data0[$row['id']] = $row;
         }
+        // $DIC->logger()->root()->log(var_export($data0, true));
         // Get conn uses
-        $query = "select object_reference.ref_id xclsRefId, rep_robj_xcls_data.conn_id xclsConnId, rep_robj_xcls_data.id as xclsObjId," .
-                " object_data.title xclsObjTitle, not isnull(object_reference.deleted) as isInTrash, rep_robj_xcls_data.is_online
+        $query = "select object_reference.ref_id as xclsRefId, rep_robj_xcls_data.conn_id as xclsConnId, rep_robj_xcls_data.id as xclsObjId," .
+                " object_data.title xclsObjTitle, not isnull(object_reference.deleted) as isInTrash, rep_robj_xcls_data.is_online, rep_robj_xcls_data.auth_complete
                  FROM rep_robj_xcls_data, object_data, object_reference
                  WHERE object_data.obj_id=rep_robj_xcls_data.id
                  AND object_reference.obj_id=rep_robj_xcls_data.id
@@ -621,7 +622,7 @@ class ilCloudStorageConfig
             $row['connTitle'] = $data0[$row['xclsConnId']]['title'];
             $data[$row['xclsRefId']] = $row;
         }
-
+        // $DIC->logger()->root()->log(var_export($data, true));
         // Get repo data to conn uses
         $query = "select tree.child, tree.parent parentRefId, object_data.title parentTitle
                  FROM tree, object_data, object_reference
@@ -633,13 +634,13 @@ class ilCloudStorageConfig
         while($row = $ilDB->fetchAssoc($result)) {
             $data2[$row['child']] = $row;
         }
-
+        // $DIC->logger()->root()->log(var_export($data2, true));
         // merge all together
         $returnArr = [];
         foreach ($data as $refId => $row) {
             $returnArr[] = array_merge($data[$refId], $data2[$refId]);
         } // EOF foreach ($data as $datum)
-
+        //$DIC->logger()->root()->log(var_export($returnArr, true));
         return $returnArr;
     }
 

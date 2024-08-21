@@ -35,6 +35,8 @@ back#:#Back
 Cloudstorage#:#Content
 content#:#Content
 status#:#Status
+obj_status#:#Object Status
+auth_status#:#Authentication
 offline#:#Offline
 not_available#:#Not available
 no_connection
@@ -72,6 +74,7 @@ conf_availability_0#:#Not available
 conf_availability_1#:#Existing allowed
 conf_availability_2#:#New ones can be created
 untrashed_usages#:#Number of usages
+info_delete_folder#:#Delete Cloud Folder?
 saving_invoked#:#Settings saved
 create_type#:#Define new Cloud Connection
 select_type#:#Select Cloud Connection

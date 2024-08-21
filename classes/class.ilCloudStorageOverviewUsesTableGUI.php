@@ -49,14 +49,16 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $ilCtrl = $DIC->ctrl();
         $lng = $DIC->language();
 
-        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_plugin_configuration'), 'plugin_configuration', '');
-        $this->addColumn($lng->txt('repository'), 'repository', '');
-        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_obj_xcls'), 'obj_xcls', '');
-        $this->addColumn($lng->txt('object_id'), 'obj_id', '7%');
+        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_plugin_configuration'), 'connTitle', '');
+        $this->addColumn($lng->txt('repository'), 'parentTitle', '');
+        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_obj_xcls'), 'xclsObjTitle', '');
+        $this->addColumn($lng->txt('object_id'), 'xclsObjId', '7%');
+        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_status'), 'isInTrash', '5%');
+        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_auth_status'), 'auth_complete', '10%');
         $this->addColumn($lng->txt('actions'), '', '5%');
-        $this->addColumn($lng->txt('status'), 'status', '5%');
         $this->setEnableHeader(true);
-        $this->disable('sort');
+        
+        //$this->disable('sort');
         $this->setEnableNumInfo(false);
         $this->setRowTemplate('tpl.uses_row.html', 'Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage');
     }
@@ -71,7 +73,7 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         #var_dump($a_set); exit;
         $ilCtrl->setParameter($this->parent_obj, 'conn_id', $a_set['xclsConnId']);
 
-        $this->tpl->setVariable('xcls_CONN_TITLE', $a_set['connTitle']);
+        $this->tpl->setVariable('XCLS_CONN_TITLE', $a_set['connTitle']);
 
         // Link to Container
         $this->tpl->setVariable('TXT_PARENT', $a_set['isInTrash'] ? $a_set['parentTitle'] : '
@@ -85,6 +87,14 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
 
         // Object ID
         $this->tpl->setVariable('OBJ_ID', $a_set['xclsObjId']);
+
+        // Status
+        $StatusHtml = !(bool)$a_set['isInTrash'] ? (bool)$a_set['is_online'] ? 'online' : 'offline' : '<img src="templates/default/images/standard/icon_trash.svg" style="height: 24px; width: auto; margin:0 5px 4px" />';
+        $this->tpl->setVariable('TXT_OBJ_STATUS', '<span class="small">' . $StatusHtml . '</span>');
+        
+        // Auth Status
+        $AuthStatusHtml = (bool)$a_set['auth_complete'] ? $this->dic->language()->txt('rep_robj_xcls_cld_authenticated') : $this->dic->language()->txt('rep_robj_xcls_cld_not_authenticated');
+        $this->tpl->setVariable('TXT_AUTH_STATUS', '<span class="small">' . $AuthStatusHtml . '</span>');
 
         // Action
         $linkText = $lng->txt('delete');
@@ -101,10 +111,6 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
             . '" title="' . $linkTitle . '">' .
             $linkText . '</a>'
         );
-
-        // Status
-        $StatusHtml = !(bool)$a_set['isInTrash'] ? (bool)$a_set['is_online'] ? 'online' : 'offline' : '<img src="templates/default/images/icon_trash.svg" style="height: 16px; width: auto; margin:0 5px 4px" />';
-        $this->tpl->setVariable('TXT_STATUS', '<span class="small">' . $StatusHtml . '</span>');
 
     }
 
