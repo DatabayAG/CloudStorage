@@ -215,23 +215,34 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $this->form->addItem($ti);
         
         // availability
-        $item = new ilSelectInputGUI($this->plugin_object->txt('conf_availability'), 'cb_availability');
-        $item->setOptions(
-            array(
-                ilCloudStorageConfig::AVAILABILITY_CREATE => $this->plugin_object->txt('conf_availability_' . ilCloudStorageConfig::AVAILABILITY_CREATE),
-                ilCloudStorageConfig::AVAILABILITY_EXISTING => $this->plugin_object->txt('conf_availability_' . ilCloudStorageConfig::AVAILABILITY_EXISTING),
-                ilCloudStorageConfig::AVAILABILITY_NONE => $this->plugin_object->txt('conf_availability_' . ilCloudStorageConfig::AVAILABILITY_NONE)
+
+        $rg = new ilRadioGroupInputGUI($this->plugin_object->txt("conf_availability"), "availability");
+        $rg->setRequired(true);
+        $rg->setInfo($this->plugin_object->txt('info_availability'));
+        $ros = array(
+            ilCloudStorageConfig::AVAILABILITY_CREATE => array(
+                'text' => $this->plugin_object->txt('conf_availability_' . ilCloudStorageConfig::AVAILABILITY_CREATE),
+                'info' => $this->plugin_object->txt('conf_availability_info_' . ilCloudStorageConfig::AVAILABILITY_CREATE)
+            ),
+            ilCloudStorageConfig::AVAILABILITY_EXISTING => array(
+                'text' => $this->plugin_object->txt('conf_availability_' . ilCloudStorageConfig::AVAILABILITY_EXISTING),
+                'info' => $this->plugin_object->txt('conf_availability_info_' . ilCloudStorageConfig::AVAILABILITY_EXISTING)
+            ),
+            ilCloudStorageConfig::AVAILABILITY_NONE => array(
+                'text' => $this->plugin_object->txt('conf_availability_' . ilCloudStorageConfig::AVAILABILITY_NONE),
+                'info' => $this->plugin_object->txt('conf_availability_info_' . ilCloudStorageConfig::AVAILABILITY_NONE)
             )
         );
-        $item->setInfo($this->plugin_object->txt('info_availability'));
-        $item->setRequired(true);
-        $this->form->addItem($item);
+        foreach ($ros as $key => $value) {
+            $ro = new ilRadioOption($value['text'], (string) $key, $value['info']);
+            $rg->addOption($ro);
+        }
+        $this->form->addItem($rg);
 
         // Hint TextArea
         //$ti = new ilTextInputGUI($pl->txt("hint"), "hint");
         //$ti->setInfo($pl->txt("info_hint"));
         //$this->form->addItem($ti);
-        
 
         $hi = new ilHiddenInputGUI("hint");
         $hi->setValue("not supported");
@@ -309,7 +320,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $values["conn_id"]                  = $this->object->getConnId();
         $values["title"]                    = $this->object->getTitle();
         $values["hint"]                     = $this->object->getHint();
-        $values["cb_availability"]          = $this->object->getAvailability();
+        $values["availability"]          = $this->object->getAvailability();
         $values['account']                  = $this->object->getAccount();
         $values['account_username']         = $this->object->getAccountUsername();
         $values['account_password']         = $this->object->getAccountPassword();
@@ -357,7 +368,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
             $this->object->setConnId(!!(bool)($connId = (int) $form->getInput("conn_id")) ? $connId : null);
             $this->object->setTitle($form->getInput("title"));
             $this->object->setHint((string)$this->object->removeUnsafeChars($form->getInput("hint")));
-            $this->object->setAvailability((int) $form->getInput("cb_availability"));
+            $this->object->setAvailability((int) $form->getInput("availability"));
             $this->object->setAccount((bool) ($form->getInput("account")));
             $this->object->setAccountUsername($form->getInput("account_username"));
             $this->object->setAccountPassword($form->getInput("account_password"));
@@ -397,7 +408,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $values = [];
         $values['conn_id']                  = $this->object->getConnId();
         $values['title']                    = $this->object->getTitle();
-        $values['cb_availability']          = $this->object->getAvailability();
+        $values['availability']          = $this->object->getAvailability();
         $values['hint']                     = $this->object->getHint();
         $values['account']                  = $this->object->getAccount();
         $values['account_username']         = $this->object->getAccountUsername();
@@ -445,7 +456,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
             $rows[$key]['link'] = ilLink::_getLink($row['xclsRefId']);
         } // EOF foreach ($rows as $key => $row)
         #var_dump($rows); exit;
-
+        
         $table_gui = new ilCloudStorageOverviewUsesTableGUI($this, $cmd);
         $table_gui->setData($rows);
         $table_gui->init($this);
