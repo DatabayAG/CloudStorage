@@ -6,6 +6,7 @@ $ti = new ilTextInputGUI($pl->txt("server_url"), "server_url");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);
 $ti->setSize(60);
+$ti->setInfo($pl->txt("server_url_info"));
 $this->form->addItem($ti);
 
 /*
