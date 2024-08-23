@@ -31,9 +31,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public const STRING = "string";
 
-    public const CFORM_FOLDER_NEW = 99;
-    
     public const CFORM_FOLDER_EXISTING = 98;
+
+    public const CFORM_FOLDER_NEW = 99;
 
     // it might be a better solution to force setCreationMode(true)?
     private const COMMAND_MODE_PRE_CREATION = 0;
@@ -626,8 +626,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public function initCreationForms(string $new_type): array
     {
         $forms = [
-            self::CFORM_FOLDER_NEW => $this->initCreateFormNew($new_type),
-            self::CFORM_FOLDER_EXISTING => $this->initCreateFormExisting($new_type)
+            self::CFORM_FOLDER_EXISTING => $this->initCreateFormExisting($new_type),
+            self::CFORM_FOLDER_NEW => $this->initCreateFormNew($new_type)
         ];
         return $forms;
     }
