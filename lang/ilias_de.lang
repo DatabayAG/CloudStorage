@@ -66,14 +66,22 @@ col_app_mapping_field_info#:#Bestimmt, in welchem Feld der OwnCloud-Anmeldename 
 plugin_configuration#:#Konfiguration
 config_help_begin#:#Die Erläuterung unter Einstellungen lautet:
 showcontent#:#Cloud-Anbindung
+repository_object#:#Magazin-Objekt
+show_trash#:#Gelöschte Objekte im Papierkorb anzeigen
+in_trash#:#Im Papierkorb
+purge#:#aus dem System entfernen
+purge_confirm#:#Cloud-Ordner unwiderruflich aus dem System enfernen?
 title#:#Titel
 conf_title#:#Titel
 info_title#:#Dieser Titel wird zur Auswahl des Cloud-Services bei neuen Ordnern angezeigt.
 conf_availability#:#Verfügbarkeit
-info_availability#:#Hiermit legen Sie fest, ob und wie diese Cloud-Anbindung genutzt werden kann. "Nicht verfügbar" = Cloud-Anbindung und Cloud-Ordner dieser Anbindung nicht verfügbar; "Bestehende erlaubt" = existierende Cloud-Ordner dieser Anbindung erlaubt, für neue Cloud-Ordner ist Anbindung nicht auswählbar; "Neue erzeugbar" = Anbindung ist für neue Cloud-Ordner auswählbar 
+info_availability#:#Hiermit legen Sie fest, ob und wie diese Cloud-Anbindung genutzt werden kann.
 conf_availability_0#:#Nicht verfügbar
+conf_availability_info_0#:#Cloud-Anbindung und Cloud-Ordner dieser Anbindung sind nicht verfügbar
 conf_availability_1#:#Bestehende erlaubt
+conf_availability_info_1#:#Existierende Cloud-Ordner dieser Anbindung sind erlaubt
 conf_availability_2#:#Neue erzeugbar
+conf_availability_info_2#:#Anbindung ist für neue Cloud-Ordner auswählbar
 untrashed_usages#:#Anzahl Verwendungen
 info_delete_folder#:#Cloud-Ordner löschen?
 saving_invoked#:#Einstellungen gespeichert
@@ -101,6 +109,7 @@ base_directory#:#Basis-Verzeichnis
 base_directory_info#:#Dieses Verzeichnis wird bei neu erstellten Objekten als Basis-Ordner gewählt. Dies soll verhindern, dass bei neuen Objekten die gesamte OwnCloud eingebunden wird. Der Basis-Ordner kann später trotzdem angepasst werden.
 hint#:#Hinweistext
 server_url#:#Server-URL
+server_url_info#:#Beispiel: http(s)://SERVER_HOST oder falls der Server nicht über Standardports erreichbar ist zum Beispiel: http(s)://SERVER_HOST:8080
 proxy_url#:#Proxy-URL
 proxy_url_info#:#Die Proxy-URL wird beim Anlegen einer neuen Cloud-Anbindung aus den ILIAS Setup Einstellungen eingefügt.
 webdav_url#:#WebDav-Server-URL

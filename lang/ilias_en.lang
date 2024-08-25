@@ -65,14 +65,22 @@ col_app_mapping_field_info#:#Determines which field contains the OwnCloud login 
 plugin_configuration#:#Configuration
 config_help_begin#:#The explanation under settings is:
 showcontent#:#Cloud Connection
+repository_object#:#Repository Object
+show_trash#:#Show Trash Objects
+in_trash#:#In Trash
+purge#:#Delete from System
+purge_confirm#:#Delete Cloud-Folder from System? This is not recoverable!
 title#:#Title
 conf_title#:#Title
 info_title#:#This title is displayed to select the Cloud Service for new Folders.
 conf_availability#:#Availability
-info_availability#:#This is where you define whether and how this Cloud Connection can be used. "Not available" = Cloud Connection and Cloud Folder of this connection not available; "Existing allowed" = existing Cloud Folders of this connection allowed, connection cannot be selected for new Cloud Folders; "New ones can be created" = connection can be selected for new Cloud Folders 
+info_availability#:#This is where you define whether and how this Cloud Connection can be used.
 conf_availability_0#:#Not available
+conf_availability_info_0#:#Cloud Connection and Cloud Folder of this connection are not available
 conf_availability_1#:#Existing allowed
+conf_availability_info_1#:#existing Cloud Folders of this connection are allowed, connection cannot be selected for new Cloud Folders
 conf_availability_2#:#New ones can be created
+conf_availability_info_2#:#connection can be selected for new Cloud Folders
 untrashed_usages#:#Number of usages
 info_delete_folder#:#Delete Cloud Folder?
 saving_invoked#:#Settings saved
@@ -99,7 +107,9 @@ no_connection_short#:#A connection to the Cloud Service could not be established
 base_directory#:#Base directory
 base_directory_info#:#This directory is selected as the Base Folder for newly created objects. This is intended to prevent the entire OwnCloud from being integrated into new objects. However, the Base Folder can be customized later.
 hint#:#Hint text
-server_url#:#Server URLproxy_url#:#Proxy URL
+server_url#:#Server URL
+server_url_info#:#Example: http(s)://SERVER_HOST or if Server not accessible by default ports: http(s)://SERVER_HOST:8080
+proxy_url#:#Proxy URL
 proxy_url_info#:#The proxy URL is inserted from the ILIAS setup settings when a new Cloud Connection is created.
 webdav_url#:#WebDav server URL
 webdav_url_info#:#WebDav server URL if different from the server URL. This is the case, for example, if the Cloud Service is hosted in the same infrastructure and must be accessed via the internal address. Example: http://SERVER_HOST:8080

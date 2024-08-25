@@ -78,6 +78,8 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
                 $this->$cmd();
                 break;
             case "overviewUses":
+            case "applyFilter":
+            case "resetFilter":
                 $this->initTabs();
                 $this->initOverviewUsesTableGUI($cmd);
                 break;
@@ -441,10 +443,11 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $ilTabs = $this->dic->tabs();
 
         $ilTabs->activateTab('overview_uses');
-
-        $rows = ilCloudStorageConfig::_getCloudStorageConnOverviewUses();
+        
+        $table_gui = new ilCloudStorageOverviewUsesTableGUI($this, $cmd);
+        $table_gui->init($this);
+        $rows = ilCloudStorageConfig::_getCloudStorageConnOverviewUses($table_gui->filter);
         foreach ($rows as $key => $row) {
-
             if((bool)$row['isInTrash']) {
                 if(ilObject::_isInTrash($row['xclsRefId'])) {
                     $row['parentRefId'] = $row['xclsRefId'];
@@ -455,11 +458,8 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
             $rows[$key]['parentLink'] = ilLink::_getLink($row['parentRefId']);
             $rows[$key]['link'] = ilLink::_getLink($row['xclsRefId']);
         } // EOF foreach ($rows as $key => $row)
-        #var_dump($rows); exit;
-        
-        $table_gui = new ilCloudStorageOverviewUsesTableGUI($this, $cmd);
         $table_gui->setData($rows);
-        $table_gui->init($this);
+        #var_dump($rows); exit;
         $tpl->setContent($table_gui->getHTML());
 
         if(!$html) {
@@ -490,9 +490,11 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
 
         $c_gui = new ilConfirmationGUI();
 
+        $header = ($this->dic->http()->wrapper()->query()->has('purge')) ? $DIC->language()->txt("rep_robj_xcls_purge_confirm") : $DIC->language()->txt("rep_robj_xcls_info_delete_folder");
+        
         // set confirm/cancel commands
         $c_gui->setFormAction($DIC->ctrl()->getFormAction($this, "overviewUses"));
-        $c_gui->setHeaderText($DIC->language()->txt("rep_robj_xcls_info_delete_folder"));
+        $c_gui->setHeaderText($header);
         $c_gui->setCancel($DIC->language()->txt("cancel"), "overviewUses");
         $c_gui->setConfirm($DIC->language()->txt("confirm"), "deleteUsesCloudStorageConn");
 

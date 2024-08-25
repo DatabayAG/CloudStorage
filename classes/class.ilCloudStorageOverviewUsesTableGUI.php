@@ -19,6 +19,7 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
 {
     private Container $dic;
 
+    public ?array $filter;
     /**
      * Constructor
      *
@@ -26,12 +27,16 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
      * @param string $a_parent_cmd
      * @param string $a_template_context
      */
-    public function __construct(object $a_parent_obj, string $a_parent_cmd = '', string $a_template_context = '')
+    public function __construct(object $a_parent_obj, string $a_parent_cmd = '')
     {
         global $DIC;
         $this->dic = $DIC;
-
-        parent::__construct($a_parent_obj, $a_parent_cmd, $a_template_context);
+        $this->filter = [];
+        parent::__construct($a_parent_obj, $a_parent_cmd);
+        $this->setDefaultFilterVisiblity(true);
+        $this->setDisableFilterHiding(true);
+        $this->setFormAction($DIC->ctrl()->getFormAction($a_parent_obj, $a_parent_cmd));
+        $this->setRowTemplate('tpl.uses_row.html', 'Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage');
     }
 
     /**
@@ -49,20 +54,74 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $ilCtrl = $DIC->ctrl();
         $lng = $DIC->language();
 
-        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_plugin_configuration'), 'connTitle', '');
-        $this->addColumn($lng->txt('repository'), 'parentTitle', '');
+        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_conn_id'), 'connTitle', '');
+        $this->addColumn($lng->txt('rep_robj_xcls_repository_object'), 'parentTitle', '');
         $this->addColumn($this->dic->language()->txt('rep_robj_xcls_obj_xcls'), 'xclsObjTitle', '');
         $this->addColumn($lng->txt('object_id'), 'xclsObjId', '7%');
-        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_status'), 'isInTrash', '5%');
+        $this->addColumn($this->dic->language()->txt('rep_robj_xcls_status'), 'isInTrash', '10%');
         $this->addColumn($this->dic->language()->txt('rep_robj_xcls_auth_status'), 'auth_complete', '10%');
         $this->addColumn($lng->txt('actions'), '', '5%');
-        $this->setEnableHeader(true);
+
+        //$this->setFilterCommand('applyFilter');
+        //$this->setEnableHeader(true);
         
         //$this->disable('sort');
-        $this->setEnableNumInfo(false);
-        $this->setRowTemplate('tpl.uses_row.html', 'Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage');
+        //$this->setEnableNumInfo(false);
+        
+        $this->initFilter();
+
+        switch ($this->getParentCmd()) {
+            case "applyFilter":
+                $this->applyFilter();
+                break;
+            case "resetFilter":
+                $this->_resetFilter();
+                break;
+        }
     }
 
+    public function initFilter(): void
+    {
+     
+        // cloud connections
+        $conns = ilCloudStorageConfig::_getAvailableCloudStorageConn();
+        $this->resetFilter();
+        $conns["-1"] = "";
+        asort($conns);
+        $title = new ilSelectInputGUI($this->dic->language()->txt('rep_robj_xcls_conn_id'), 'connTitle');
+        $title->setOptions($conns);
+        $this->addFilterItem($title);
+        $title->readFromSession();
+        $this->filter['connTitle'] = $title->getValue();
+
+        $showTrash = new ilCheckboxInputGUI($this->dic->language()->txt('rep_robj_xcls_show_trash'), 'showTrash');
+        $this->addFilterItem($showTrash);
+        $showTrash->readFromSession();
+        $this->filter['showTrash'] = $showTrash->getChecked();
+
+        /*
+        $keyword = new ilTextInputGUI($DIC->language()->txt('tbl_lti_prov_keyword'), 'keyword');
+        $keyword->setMaxLength(64);
+        $keyword->setSize(20);
+        $this->addFilterItem($keyword);
+        $keyword->readFromSession();
+        $this->filter['keyword'] = $keyword->getValue();
+        */
+    }
+
+    public function applyFilter(): void
+    {
+        $this->resetOffset();
+        $this->writeFilterToSession();
+        $this->dic->ctrl()->redirectByClass(ilCloudStorageConfigGUI::class, "overviewUses");
+    }
+
+    public function _resetFilter(): void
+    {
+        $this->resetOffset();
+        $this->resetFilter();
+        $this->dic->ctrl()->redirectByClass(ilCloudStorageConfigGUI::class, "overviewUses");
+    }
     /**
      * Fill a single data row.
      */
@@ -89,7 +148,12 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $this->tpl->setVariable('OBJ_ID', $a_set['xclsObjId']);
 
         // Status
-        $StatusHtml = !(bool)$a_set['isInTrash'] ? (bool)$a_set['is_online'] ? 'online' : 'offline' : '<img src="templates/default/images/standard/icon_trash.svg" style="height: 24px; width: auto; margin:0 5px 4px" />';
+        if ((bool)$a_set['isInTrash']) {
+            $StatusHtml = $this->dic->language()->txt('rep_robj_xcls_in_trash');
+        } else {
+            $StatusHtml = ((bool) $a_set['is_online']) ? 'online' : 'offline';
+        }
+        
         $this->tpl->setVariable('TXT_OBJ_STATUS', '<span class="small">' . $StatusHtml . '</span>');
         
         // Auth Status
@@ -97,16 +161,18 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $this->tpl->setVariable('TXT_AUTH_STATUS', '<span class="small">' . $AuthStatusHtml . '</span>');
 
         // Action
-        $linkText = $lng->txt('delete');
+        $linkText = ((bool)$a_set['isInTrash']) ? $this->dic->language()->txt('rep_robj_xcls_purge') : $lng->txt('delete');
         $linkTitle = $this->dic->language()->txt('rep_robj_xcls_obj_xcls') . " (";
         $linkTitle .= $a_set['isInTrash'] ? $lng->txt('trash') : $lng->txt('repository');
         $linkTitle .= ")";
+        $purge = ((bool)$a_set['isInTrash']) ? "&purge=1" : "";
         $this->tpl->setVariable(
             'TXT_ACTION',
             '<a class="il_ContainerItemCommand" href="' .
             $ilCtrl->getLinkTarget($this->parent_obj, 'confirmDeleteUsesCloudStorageConn') .
             '&parent_ref_id=' . $a_set['parentRefId'] .
             '&item_ref_id=' . $a_set['xclsRefId'] .
+            $purge . 
             '&cGuiItemContent=' . rawurlencode($a_set['xclsObjTitle'] . ' &nbsp;<span class="small">(' . $a_set['connTitle'] . ')</span> ')
             . '" title="' . $linkTitle . '">' .
             $linkText . '</a>'
