@@ -554,4 +554,8 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         return $this->dic->http()->wrapper()->query()->retrieve('conn_id', $this->dic->refinery()->kindlyTo()->int());
     }
 
+    public function txt(string $text): string
+    {
+        return $this->plugin_object->txt($text);
+    }
 }

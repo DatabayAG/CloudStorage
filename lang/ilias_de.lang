@@ -177,8 +177,10 @@ cld_new#:#Neues Cloud Objekt hinzufügen
 cld_no_service_active#:#Leider ist kein Cloud-Plugin aktiviert
 cld_no_service_selected#:#Es wurde kein Cloud-Service ausgewählt.
 cld_not_authenticated_offline#:#Nicht authentifiziert - Offline
-cld_not_authenticated#:#Nicht authentifiziert
-cld_authenticated#:#authentifiziert
+not_authenticated#:#Nicht authentifiziert
+authenticated#:#Authentifiziert
+online#:#Online
+offline#:#Offline
 cld_object_added#:#Ein neuer Cloud-Ordner wurde hinzugefügt
 cld_only_owner_has_permission_to_change_root_path#:#Nur die Person, die den Cloud-Ordner angelegt hat, kann diese Angabe ändern.
 cld_path_does_not_exist_in_file_tree_in_session#:#Pfad existiert in der Session nicht:

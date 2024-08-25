@@ -176,6 +176,10 @@ cld_new#:#Add new Cloud Folder
 cld_no_service_active#:#Unfortunately, no cloud plugin is activated
 cld_no_service_selected#:#No Cloud Service has been selected.
 cld_not_authenticated_offline#:#Not authenticated - offline
+not_authenticated#:#Not authenticated
+authenticated#:#Authenticated
+online#:#Online
+offline#:#Offline
 cld_object_added#:#A new Cloud Folder has been added
 cld_only_owner_has_permission_to_change_root_path#:#Only the person who created the Cloud Folder can change this specification.
 cld_path_does_not_exist_in_file_tree_in_session#:#Path does not exist in the session:

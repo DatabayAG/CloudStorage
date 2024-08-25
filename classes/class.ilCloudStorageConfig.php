@@ -612,8 +612,18 @@ class ilCloudStorageConfig
                         $filterArr[] = "isnull(object_reference.deleted)";
                     }
                 break;
+                case "auth_complete":
+                    $DIC->logger()->root()->log("auth value {$value}");
+                    if ($value == "1") {
+                        $filterArr[] = "rep_robj_xcls_data.auth_complete=1";
+                    }
+                    if ($value == "2") {
+                        $filterArr[] = "rep_robj_xcls_data.auth_complete=0";
+                    }
+                break;
+                
             }
-            //$DIC->logger()->root()->log("filter: " . $key . ":" . $value);
+            $DIC->logger()->root()->log("filter: " . $key . ":" . $value);
         }
 
         if (count($filterArr) > 0) {
@@ -640,7 +650,7 @@ class ilCloudStorageConfig
                  {$queryFilter}
                  ORDER by conn_id, xclsObjTitle
                  ";
-        //$DIC->logger()->root()->log("queryFilter: " . $query); 
+        $DIC->logger()->root()->log("queryFilter: " . $query); 
         $result = $ilDB->query($query);
         $data = [];
         while ($row = $ilDB->fetchAssoc($result)) {

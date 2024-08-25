@@ -85,7 +85,6 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
      
         // cloud connections
         $conns = ilCloudStorageConfig::_getAvailableCloudStorageConn();
-        $this->resetFilter();
         $conns["-1"] = "";
         asort($conns);
         $title = new ilSelectInputGUI($this->dic->language()->txt('rep_robj_xcls_conn_id'), 'connTitle');
@@ -93,6 +92,17 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $this->addFilterItem($title);
         $title->readFromSession();
         $this->filter['connTitle'] = $title->getValue();
+
+        $auths = array(
+            "-1" => "",
+            "1" => $this->txt('authenticated'),
+            "2" => $this->txt('not_authenticated')
+        );
+        $auth = new ilSelectInputGUI($this->txt('auth_status'), 'auth_complete');
+        $auth->setOptions($auths);
+        $this->addFilterItem($auth);
+        $auth->readFromSession();
+        $this->filter['auth_complete'] = (string) $auth->getValue();
 
         $showTrash = new ilCheckboxInputGUI($this->dic->language()->txt('rep_robj_xcls_show_trash'), 'showTrash');
         $this->addFilterItem($showTrash);
@@ -149,15 +159,15 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
 
         // Status
         if ((bool)$a_set['isInTrash']) {
-            $StatusHtml = $this->dic->language()->txt('rep_robj_xcls_in_trash');
+            $StatusHtml = $this->txt('in_trash');
         } else {
-            $StatusHtml = ((bool) $a_set['is_online']) ? 'online' : 'offline';
+            $StatusHtml = ((bool) $a_set['is_online']) ? $this->txt('online') : $this->txt('offline');
         }
         
         $this->tpl->setVariable('TXT_OBJ_STATUS', '<span class="small">' . $StatusHtml . '</span>');
         
         // Auth Status
-        $AuthStatusHtml = (bool)$a_set['auth_complete'] ? $this->dic->language()->txt('rep_robj_xcls_cld_authenticated') : $this->dic->language()->txt('rep_robj_xcls_cld_not_authenticated');
+        $AuthStatusHtml = (bool)$a_set['auth_complete'] ? $this->txt('authenticated') : $this->txt('not_authenticated');
         $this->tpl->setVariable('TXT_AUTH_STATUS', '<span class="small">' . $AuthStatusHtml . '</span>');
 
         // Action
@@ -179,5 +189,9 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         );
 
     }
-
+    
+    private function txt(string $text): string
+    {
+        return $this->parent_obj->txt($text);
+    }
 }
