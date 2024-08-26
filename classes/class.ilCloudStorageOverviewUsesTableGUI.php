@@ -93,6 +93,33 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $title->readFromSession();
         $this->filter['connTitle'] = $title->getValue();
 
+        $rep = new ilTextInputGUI($this->txt('repository_object'), 'parentTitle');
+        $rep->setMaxLength(64);
+        $rep->setSize(20);
+        $this->addFilterItem($rep);
+        $rep->readFromSession();
+        $this->filter['parentTitle'] = $rep->getValue();
+
+        $obj = new ilTextInputGUI($this->txt('obj_xcls'), 'xclsObjTitle');
+        $obj->setMaxLength(64);
+        $obj->setSize(20);
+        $this->addFilterItem($obj);
+        $obj->readFromSession();
+        $this->filter['xclsObjTitle'] = $obj->getValue();
+
+        $statusArr = array(
+            "-1" => "",
+            "1" => $this->txt('online'),
+            "2" => $this->txt('offline'),
+            "3" => $this->txt('in_trash'),
+        );
+        ksort($statusArr);
+        $status = new ilSelectInputGUI($this->txt('status'), 'isInTrash');
+        $status->setOptions($statusArr);
+        $this->addFilterItem($status);
+        $status->readFromSession();
+        $this->filter['isInTrash'] = (string) $status->getValue();
+
         $auths = array(
             "-1" => "",
             "1" => $this->txt('authenticated'),
@@ -107,16 +134,13 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $showTrash = new ilCheckboxInputGUI($this->dic->language()->txt('rep_robj_xcls_show_trash'), 'showTrash');
         $this->addFilterItem($showTrash);
         $showTrash->readFromSession();
+        if ($this->filter['isInTrash'] == "3") {
+            $showTrash->setChecked(true);
+            //$this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt('filter_show_trash_required'), true);
+        } else {
+            $showTrash->setChecked(false);
+        }
         $this->filter['showTrash'] = $showTrash->getChecked();
-
-        /*
-        $keyword = new ilTextInputGUI($DIC->language()->txt('tbl_lti_prov_keyword'), 'keyword');
-        $keyword->setMaxLength(64);
-        $keyword->setSize(20);
-        $this->addFilterItem($keyword);
-        $keyword->readFromSession();
-        $this->filter['keyword'] = $keyword->getValue();
-        */
     }
 
     public function applyFilter(): void

@@ -600,6 +600,7 @@ class ilCloudStorageConfig
         global $DIC;
         $ilDB = $DIC->database();
         $filterArr = [];
+        $parentFilter = "";
         foreach ($filter as $key => $value) {
             switch ($key) {
                 case "connTitle":
@@ -613,12 +614,32 @@ class ilCloudStorageConfig
                     }
                 break;
                 case "auth_complete":
-                    $DIC->logger()->root()->log("auth value {$value}");
                     if ($value == "1") {
                         $filterArr[] = "rep_robj_xcls_data.auth_complete=1";
                     }
                     if ($value == "2") {
                         $filterArr[] = "rep_robj_xcls_data.auth_complete=0";
+                    }
+                break;
+                case "parentTitle":
+                    if ($value != "") {
+                        $parentFilter = "AND object_data.title LIKE '" . $value . "%'";
+                    }
+                break;
+                case "xclsObjTitle":
+                    if ($value != "") {
+                        $filterArr[] = "object_data.title LIKE '" . $value ."%'";
+                    }
+                break;
+                case "isInTrash":
+                    if ($value == "1") {
+                        $filterArr[] = "rep_robj_xcls_data.is_online=1";
+                    }
+                    if ($value == "2") {
+                        $filterArr[] = "rep_robj_xcls_data.is_online=0";
+                    }
+                    if ($value == "3" && $filter['showTrash']) {
+                        $filterArr[] = "not isnull(object_reference.deleted)";
                     }
                 break;
                 
@@ -663,19 +684,21 @@ class ilCloudStorageConfig
                  FROM tree, object_data, object_reference
                  WHERE object_data.obj_id=object_reference.obj_id
                  AND object_reference.ref_id = tree.parent
-                 AND " . $ilDB->in('tree.child', array_keys($data), false, 'integer'); # object_reference.ref_id in (272)
+                 {$parentFilter}
+                 AND " . $ilDB->in('tree.child', array_keys($data), false, 'integer');
         $result = $ilDB->query($query);
         $data2 = [];
         while($row = $ilDB->fetchAssoc($result)) {
             $data2[$row['child']] = $row;
         }
-        // $DIC->logger()->root()->log(var_export($data2, true));
         // merge all together
         $returnArr = [];
+
         foreach ($data as $refId => $row) {
-            $returnArr[] = array_merge($data[$refId], $data2[$refId]);
-        } // EOF foreach ($data as $datum)
-        //$DIC->logger()->root()->log(var_export($returnArr, true));
+            if (isset($data2[$refId])) {
+                $returnArr[] = array_merge($data[$refId], $data2[$refId]);
+            }
+        }
         return $returnArr;
     }
 
