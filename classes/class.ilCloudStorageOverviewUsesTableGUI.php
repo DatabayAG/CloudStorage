@@ -163,6 +163,14 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
     {
         $lng = $this->dic->language();
         $ilCtrl = $this->dic->ctrl();
+
+        $pathAlt = $lng->txt('repository');
+        $nodeArr = $this->dic['tree']->getPathFull((int) $a_set['parentRefId']);
+        array_shift($nodeArr);
+        foreach ($nodeArr as $node) {
+            $pathAlt = $pathAlt . " > " . $node['title'];
+        }
+        
         #var_dump($a_set); exit;
         $ilCtrl->setParameter($this->parent_obj, 'conn_id', $a_set['xclsConnId']);
 
@@ -170,7 +178,7 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
 
         // Link to Container
         $this->tpl->setVariable('TXT_PARENT', $a_set['isInTrash'] ? $a_set['parentTitle'] : '
-        <a href="' . $a_set['parentLink'] . '" target="_blank">' . $a_set['parentTitle'] . '</a>
+        <a href="' . $a_set['parentLink'] . '" target="_blank" title="' . $pathAlt . '">' . $a_set['parentTitle'] . '</a>
         ');
 
         // Link to CloudStorage Object
