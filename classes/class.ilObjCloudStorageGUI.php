@@ -176,6 +176,10 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         }
 
         switch ($cmd) {
+            case "cancelCreation":
+                $this->checkPermission("write");
+                $this->cancelCreation();
+                break;
             case "processAuth":    
             case "processConnectionSelection":
                 $this->$cmd();
@@ -405,7 +409,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $form = $factory->input()->container()->form()->standard('#', ['conn_id' => $radio]);
         $form = $form->withSubmitLabel($this->txt("select_type"));
         
-        $hidden = $factory->input()->field()->hidden()->withValue("just_for_layout");
+        //$hidden = $factory->input()->field()->hidden()->withValue("just_for_layout");
 
         if ($request->getMethod() == "POST") {
             $form = $form->withRequest($request);
@@ -427,6 +431,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $this->txt("select_type"),
                 $form
             );
+            $this->dic->tabs()->clearTargets();
+            $this->dic->ctrl()->setParameterByClass('ilrepositorygui', 'ref_id', $this->parent_id);
+            $this->dic->tabs()->setBackTarget($this->txt('back'), $this->dic->ctrl()->getLinkTargetByClass('ilrepositorygui'));
             //$this->dic->ui()->mainTemplate()->setLeftContent($renderer->render([$hidden]));
             //$this->dic->ui()->mainTemplate()->setRightContent($renderer->render([$hidden]));
             $this->dic->ui()->mainTemplate()->setContent($renderer->render([$panel]));
@@ -839,6 +846,14 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         return null;
     }
 
+    public function cancelCreation(): void {
+        $this->dic->logger()->root()->log("ilObjCloudStorageGUI cancelCreation");
+        $this->dic->logger()->root()->log("object refId: " . $this->object->getRefId());
+        assert($this->object instanceof ilObjCloudStorage);
+        $objId = $this->object->getConnId();
+        $this->object->delete();
+        $this->redirectToCreate($this->parent_id, $objId);
+    }
     /**
      * @param ilObject $newObj
      * @global $DIC
@@ -917,7 +932,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         switch ($action) {
             case "choose_root":
                 if ($this->object->currentUserIsOwner()) {
-                    $this->showTreeView();
+                    $this->showTreeView(true);
                     return true;
                 } else {
                     $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->object->txt('cld_only_owner_has_permission_to_change_root_path'), true);
@@ -1235,7 +1250,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         
     }
 
-    public function showTreeView(): void
+    public function showTreeView(bool $afterCreation = false): void
     {
         $this->dic->logger()->root()->log("showTreeView");
         assert($this->object instanceof ilObjCloudStorage);
@@ -1255,7 +1270,12 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $tree = new ilCloudStorageTree($this->service);
                 $tree_gui = new ilCloudStorageTreeGUI('tree_expl', $this, 'editProperties', $tree);
                 $this->dic->tabs()->clearTargets();
-                $this->dic->tabs()->setBackTarget($this->object->txt('back'), $this->dic->ctrl()->getLinkTarget($this, 'editProperties'));
+                if (!$afterCreation) {
+                    $this->dic->tabs()->setBackTarget($this->object->txt('back'), $this->dic->ctrl()->getLinkTarget($this, 'editProperties'));
+                } else {
+                    $this->dic->tabs()->setBackTarget($this->object->txt('back'), $this->dic->ctrl()->getLinkTarget($this, 'cancelCreation'));
+                }
+                
                 $this->dic->ui()->mainTemplate()->setOnScreenMessage('info', $this->object->txt('choose_root'), true);
                 $this->dic->ctrl()->setParameter($this, 'action', 'choose_root');
                 $this->dic->ui()->mainTemplate()->setContent($tree_gui->getHTML());
