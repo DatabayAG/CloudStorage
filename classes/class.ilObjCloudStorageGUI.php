@@ -469,7 +469,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         );
         
         $this->dic->tabs()->clearTargets();
-        $this->dic->ctrl()->setParameterByClass('ilrepositorygui', 'ref_id', $ref_id);
+        $this->dic->ctrl()->setParameterByClass('ilrepositorygui', 'ref_id', $this->parent_id);
         $this->dic->tabs()->setBackTarget($this->txt('back'), $this->dic->ctrl()->getLinkTargetByClass('ilrepositorygui'));
         //$hidden = $factory->input()->field()->hidden()->withValue("just_for_layout");
         //$this->dic->ui()->mainTemplate()->setLeftContent($renderer->render([$hidden]));
