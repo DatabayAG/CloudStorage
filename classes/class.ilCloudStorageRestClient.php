@@ -27,9 +27,9 @@ class ilCloudStorageRestClient
     }
 
 
-    public function shareAPI(ilCloudStorageWebDav $a_dav)
+    public function shareAPI(ilCloudStorageGenericService $a_dav)
     {
-        return new ilCloudStorageWebDavShareAPI($this->http_client, $a_dav);
+        return new ilCloudStorageShareAPI($this->http_client, $a_dav);
     }
 
 
