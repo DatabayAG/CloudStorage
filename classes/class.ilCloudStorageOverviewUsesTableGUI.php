@@ -134,12 +134,16 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $showTrash = new ilCheckboxInputGUI($this->dic->language()->txt('rep_robj_xcls_show_trash'), 'showTrash');
         $this->addFilterItem($showTrash);
         $showTrash->readFromSession();
-        if ($this->filter['isInTrash'] == "3") {
-            $showTrash->setChecked(true);
-            //$this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt('filter_show_trash_required'), true);
-        } else {
-            $showTrash->setChecked(false);
+
+        if ($this->filter['isInTrash'] != "-1") {
+            if ($this->filter['isInTrash'] == "3") {
+                $showTrash->setChecked(true);
+                //$this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt('filter_show_trash_required'), true);
+            } else {
+                $showTrash->setChecked(false);
+            }
         }
+        
         $this->filter['showTrash'] = $showTrash->getChecked();
     }
 
