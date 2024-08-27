@@ -138,7 +138,6 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         if ($this->filter['isInTrash'] != "-1") {
             if ($this->filter['isInTrash'] == "3") {
                 $showTrash->setChecked(true);
-                //$this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt('filter_show_trash_required'), true);
             } else {
                 $showTrash->setChecked(false);
             }
