@@ -6,7 +6,13 @@
   "autoload": {
     "classmap": [
       "./classes/",
-      "./classes/OwnCloud/classes/"
+      "./classes/OwnCloud/"
     ]
+  },
+  "replace": {
+    "psr/http-message": "*",
+    "guzzlehttp/guzzle": "*",
+    "psr/http-client": "*",
+    "psr/http-factory": "*"
   }
 }
