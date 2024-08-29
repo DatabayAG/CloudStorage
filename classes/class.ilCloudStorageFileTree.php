@@ -396,7 +396,7 @@ class ilCloudStorageFileTree
     public function storeFileTreeToSession(): void
     {
         $_SESSION['ilCloudStorageFileTree_' . $this->refId] = null;
-        $_SESSION['ilCloudStorageFileTree_' . $this->refId] = serialize($this);
+        $_SESSION['ilCloudStorageFileTree_' . $this->refId] = base64_encode(serialize($this));
     }
 
     /**
@@ -405,7 +405,7 @@ class ilCloudStorageFileTree
     public static function getFileTreeFromSession(int $refId): ?ilCloudStorageFileTree
     {
         if (isset($_SESSION['ilCloudStorageFileTree_' . $refId])) {
-            return unserialize($_SESSION['ilCloudStorageFileTree_' . $refId]);
+            return unserialize(base64_decode($_SESSION['ilCloudStorageFileTree_' . $refId]));
         } else {
             return null;
         }
