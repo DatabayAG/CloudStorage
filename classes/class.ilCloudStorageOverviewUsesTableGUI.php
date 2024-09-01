@@ -180,7 +180,7 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $this->tpl->setVariable('XCLS_CONN_TITLE', $a_set['connTitle']);
 
         // Link to Container
-        $this->tpl->setVariable('TXT_PARENT', $a_set['isInTrash'] ? $a_set['parentTitle'] : '
+        $this->tpl->setVariable('TXT_PARENT', $a_set['isInTrash'] ? '<span title="' . $pathAlt . '">' . $a_set['parentTitle'] . '</span>' : '
         <a href="' . $a_set['parentLink'] . '" target="_blank" title="' . $pathAlt . '">' . $a_set['parentTitle'] . '</a>
         ');
 
