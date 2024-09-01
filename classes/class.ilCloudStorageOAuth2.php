@@ -369,24 +369,30 @@ class ilCloudStorageOAuth2
     public static function redirect(): void {
         global $DIC;
         $DIC->logger()->root()->log("redirect");
-        $code = $DIC->http()->wrapper()->query()->retrieve(
-            "code",
-            $DIC->refinery()->to()->string()
-        );
-        //$oauth2_provider_options = ilSession::get(self::OAUTH2_PROVIDER_OPTIONS);
-        //$option_provider = self::getOptionProvider(ilSession::get(self::SESSION_OAUTH2_TOKEN_REQUEST_AUTH));
-        $conn_id = ilSession::get(self::SESSION_CONN_ID);
+        try {
+            $code = $DIC->http()->wrapper()->query()->retrieve(
+                "code",
+                $DIC->refinery()->to()->string()
+            );
+            //$oauth2_provider_options = ilSession::get(self::OAUTH2_PROVIDER_OPTIONS);
+            //$option_provider = self::getOptionProvider(ilSession::get(self::SESSION_OAUTH2_TOKEN_REQUEST_AUTH));
+            $conn_id = ilSession::get(self::SESSION_CONN_ID);
 
-        //$last_cmd = ilSession::get(self::SESSION_LAST_CMD);
-        $config = ilCloudStorageConfig::getInstance((int) $conn_id);
-        $oauth2_provider = self::getOAuth2Provider($config);
+            //$last_cmd = ilSession::get(self::SESSION_LAST_CMD);
+            $config = ilCloudStorageConfig::getInstance((int) $conn_id);
+            $oauth2_provider = self::getOAuth2Provider($config);
 
-        //$oauth2_provider = new GenericProvider($oauth2_provider_options,['optionProvider' => $option_provider]);
-        self::storeTokenToSession($oauth2_provider->getAccessToken('authorization_code', array(
-            'code'         => $code,
-            'redirect_uri' => self::getRedirectUri($conn_id)
-        )));
-        $DIC->ctrl()->redirectToURL(ilSession::get(self::SESSION_CALLBACK_URL));
+            //$oauth2_provider = new GenericProvider($oauth2_provider_options,['optionProvider' => $option_provider]);
+            self::storeTokenToSession($oauth2_provider->getAccessToken('authorization_code', array(
+                'code'         => $code,
+                'redirect_uri' => self::getRedirectUri($conn_id)
+            )));
+            $DIC->ctrl()->redirectToURL(ilSession::get(self::SESSION_CALLBACK_URL));
+        } 
+        catch (Exception $e) 
+        {
+            $DIC->logger()->root()->error($e->getMessage());
+        }
     }
 
     public static function storeTokenToSession(League\OAuth2\Client\Token\AccessToken $access_token): void
