@@ -310,12 +310,20 @@ if (!$ilDB->tableExists('rep_robj_xcls_bauth')) {
 ?>
 <#8>
 <?php
-if (!$ilDB->tableExists('rep_robj_xcls_data')) {
+if ($ilDB->tableExists('rep_robj_xcls_data')) {
     if ($ilDB->tableColumnExists('rep_robj_xcls_data', 'username')) {
         $ilDB->dropTableColumn('rep_robj_xcls_data','username');
     }
     if ($ilDB->tableColumnExists('rep_robj_xcls_data', 'password')) {
         $ilDB->dropTableColumn('rep_robj_xcls_data','password');
+    }
+}
+?>
+<#9>
+<?php
+if ($ilDB->tableExists('rep_robj_xcls_data')) {
+    if ($ilDB->tableColumnExists('rep_robj_xcls_data', 'base_uri')) {
+        $ilDB->dropTableColumn('rep_robj_xcls_data','base_uri');
     }
 }
 ?>

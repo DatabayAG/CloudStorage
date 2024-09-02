@@ -67,7 +67,7 @@ abstract class ilCloudStorageItem
 
         // name is the name component of the ressource dir_name/ not the full path to the ressource!
         $name = $service->getNameFromWebUrl($web_url, $this->getType());
-        //$DIC->logger()->root()->log("C - name: " . $name);
+
         $this->setName($name);
 
         if ($service->hasParentId()) {

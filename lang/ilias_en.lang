@@ -136,6 +136,7 @@ root_folder#:#Folder
 authentication_required#:#Authentication required
 authentication#:#Authentication
 not_authorized#:#Authentication failed. Please reload the page to be redirected to the authentication authority.
+cloud_provider_not_online#:#Cloud Provider not available. Please contact technical support for more information.
 successful_authenticated#:#Authentication successful
 only_owner#:#Only the person who created the Cloud Folder can currently open it.
 open_in_platform#:#Open in external editor

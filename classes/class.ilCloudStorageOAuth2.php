@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 /* Copyright (c) 1998-2009 ILIAS open source, Extended GPL, see docs/LICENSE */
 
-use \League\OAuth2\Client\Token\AccessToken;
 use \League\OAuth2\Client\Provider\GenericProvider;
 use \League\OAuth2\Client\OptionProvider\HttpBasicAuthOptionProvider;
 use \League\OAuth2\Client\OptionProvider\PostAuthOptionProvider;
 
 
 use Sabre\DAV\Client;
-use Sabre\HTTP;
-use Sabre\Xml\Service;
 
 /**
  * Class ilCloudStorageOAuth2
@@ -171,12 +168,12 @@ class ilCloudStorageOAuth2
     public static function checkAndRefreshAuthentication(int $user_id, ilCloudStorageConfig $config): bool
     {
         global $DIC;
-        $DIC->logger()->root()->log("checkAndRefreshAuthentication");
+        $DIC->logger()->root()->debug("checkAndRefreshAuthentication");
         $conn_id = $config->getConnId();
 
         $token = self::getUserToken($conn_id, $user_id);
         if (!$token->getAccessToken() && !$token->getRefreshToken()) {
-            $DIC->logger()->root()->log("No access or refresh token found for user with id " . $token->getUserId());
+            $DIC->logger()->root()->debug("No access or refresh token found for user with id " . $token->getUserId());
             return false;
         } else {
             if ($token->isExpired()) {
@@ -192,13 +189,13 @@ class ilCloudStorageOAuth2
                     try {
                         self::refreshToken($conn_id,$user_id, $config);
                         $msg = 'Token successfully refreshed for user with id ' . $token->getUserId() . ' with refresh token ' . $refresh_token;
-                        $DIC->logger()->root()->log($msg);
+                        $DIC->logger()->root()->debug($msg);
                         return true;
                     } catch (Exception $e) {
                         $msg = 'Exception: Token refresh for user with id ' . $token->getUserId()
                         . ' and refresh token ' . $refresh_token
                         . ' failed with message: ' . $e->getMessage();
-                        $DIC->logger()->root()->log($msg);
+                        $DIC->logger()->root()->debug($msg);
                         return false;
                     }
                 });
@@ -258,7 +255,7 @@ class ilCloudStorageOAuth2
     public static function getOAuth2Provider(ilCloudStorageConfig $config): GenericProvider {
         global $DIC;
         $options = self::getOAuth2ProviderOptions($config);
-        //$DIC->logger()->root()->log(var_export($options, true));
+        //$DIC->logger()->root()->debug(var_export($options, true));
         return new GenericProvider($options,['optionProvider' => self::getOptionProvider($config->getOAuth2TokenRequestAuth())]);
     }
 
@@ -318,48 +315,23 @@ class ilCloudStorageOAuth2
     public static function Authenticate(int $user_id, ilCloudStorageConfig $config): void 
     { 
         global $DIC;
-        $DIC->logger()->root()->log("OAuth2: Authenticate");
+        $DIC->logger()->root()->debug("OAuth2: Authenticate");
         $serviceName = ilCloudStorageConfig::AVAILABLE_FS_CONN[$config->getServiceId()];
-        //$DIC->logger()->root()->log($serviceName);
         $redirectURI = self::getRedirectUri($config->getConnId());
-        //$DIC->logger()->root()->log($redirectURI);
         $DIC->ctrl()->setParameterByClass('ilObjCloudStorageGUI','cmd','afterServiceAuth');
         $DIC->ctrl()->setParameterByClass('ilObjCloudStorageGUI','auth_mode','true');
         $callbackUrl = $DIC->ctrl()->getLinkTargetByClass('ilObjCloudStorageGUI');
-        $DIC->logger()->root()->log($callbackUrl);
+        $DIC->logger()->root()->debug($callbackUrl);
         if (!self::checkAndRefreshAuthentication($user_id, $config)) {
-            $DIC->logger()->root()->log("checkAndRefreshAuthentication failed");
+            $DIC->logger()->root()->debug("checkAndRefreshAuthentication failed");
             $provider = self::getOAuth2Provider($config);
-            //$DIC->logger()->root()->log(var_export($provider,true));
             ilSession::set(self::SESSION_CALLBACK_URL, ilObjCloudStorage::getHttpPath() . $callbackUrl);
-            //ilSession::set(self::getSessionName(self::SESSION_OAUTH2_PROVIDER_OPTIONS, $config->getConnId()), $provider);
-            //ilSession::set(self::SESSION_OAUTH2_TOKEN_REQUEST_AUTH, $config->getOAuth2TokenRequestAuth());
             ilSession::set(self::SESSION_CONN_ID, $config->getConnId());
-            //ilSession::set(self::SESSION_LAST_CMD, $DIC->ctrl()->getCmd());
-
             $provider->authorize(array('redirect_uri' => $redirectURI));
         } else {
-            $DIC->logger()->root()->log("hasConnection");
+            $DIC->logger()->root()->debug("hasConnection");
             header("Location: " . htmlspecialchars_decode($callbackUrl));
         }
-        /*
-        if ($this->getToken()->getAccessToken() && $this->hasConnection()) {
-            $this->dic->logger()->root()->log("hasConnection");
-            header("Location: " . htmlspecialchars_decode($callback_url));
-        } else {
-            $this->dic->logger()->root()->log("no connection");
-            if ($this->dic->user()->getId() != $this->object->getOwnerId()) {
-                $this->dic->logger()->root()->log("user differs");
-                // Sn: ToDo language entry
-                throw new ilCloudStorageException(ilCloudStorageException::AUTHENTICATION_FAILED, 'Der Ordner kann zur Zeit nur vom Besitzer geöffnet werden.');
-            } else {
-                ilSession::set($this->getSessionName(self::SESSION_CALLBACK_URL), ilObjCloudStorage::getHttpPath() . $callback_url);
-                ilSession::set($this->getSessionName(self::SESSION_OAUTH2_PROVIDER_OPTIONS), $this->provider_options);
-                ilSession::set($this->getSessionName(self::SESSION_OAUTH2_TOKEN_REQUEST_AUTH), $this->config->getOAuth2TokenRequestAuth());
-                $this->oauth2_provider->authorize(array('redirect_uri' => self::getRedirectUri()));
-            }
-        }
-        */
     }
 
     public static function getSessionName(string $session_name): string {
@@ -368,21 +340,15 @@ class ilCloudStorageOAuth2
 
     public static function redirect(): void {
         global $DIC;
-        $DIC->logger()->root()->log("redirect");
+        $DIC->logger()->root()->debug("redirect");
         try {
             $code = $DIC->http()->wrapper()->query()->retrieve(
                 "code",
                 $DIC->refinery()->to()->string()
             );
-            //$oauth2_provider_options = ilSession::get(self::OAUTH2_PROVIDER_OPTIONS);
-            //$option_provider = self::getOptionProvider(ilSession::get(self::SESSION_OAUTH2_TOKEN_REQUEST_AUTH));
             $conn_id = ilSession::get(self::SESSION_CONN_ID);
-
-            //$last_cmd = ilSession::get(self::SESSION_LAST_CMD);
             $config = ilCloudStorageConfig::getInstance((int) $conn_id);
             $oauth2_provider = self::getOAuth2Provider($config);
-
-            //$oauth2_provider = new GenericProvider($oauth2_provider_options,['optionProvider' => $option_provider]);
             self::storeTokenToSession($oauth2_provider->getAccessToken('authorization_code', array(
                 'code'         => $code,
                 'redirect_uri' => self::getRedirectUri($conn_id)
@@ -398,7 +364,7 @@ class ilCloudStorageOAuth2
     public static function storeTokenToSession(League\OAuth2\Client\Token\AccessToken $access_token): void
     {
         global $DIC;
-        $DIC->logger()->root()->log("storeTokenToSession");
+        $DIC->logger()->root()->debug("storeTokenToSession");
         ilSession::set(self::SESSION_AUTH_BEARER, serialize($access_token));
     }
 
@@ -406,7 +372,7 @@ class ilCloudStorageOAuth2
     protected function loadTokenFromSession(): League\OAuth2\Client\Token\AccessToken
     {
         global $DIC;
-        $DIC->logger()->root()->log("loadTokenFromSession");
+        $DIC->logger()->root()->debug("loadTokenFromSession");
         return unserialize(ilSession::get(self::SESSION_AUTH_BEARER));
     }
 }

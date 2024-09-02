@@ -644,7 +644,6 @@ class ilCloudStorageConfig
                 break;
                 
             }
-            $DIC->logger()->root()->log("filter: " . $key . ":" . $value);
         }
 
         if (count($filterArr) > 0) {
@@ -653,7 +652,6 @@ class ilCloudStorageConfig
             $queryFilter = "";
         }
         
-        //$DIC->logger()->root()->log("queryFilter: " . $queryFilter); 
         // Get Conn Title
         $query = "SELECT id, title from rep_robj_xcls_conn";
         $result = $ilDB->query($query);
@@ -661,7 +659,7 @@ class ilCloudStorageConfig
         while($row = $ilDB->fetchAssoc($result)) {
             $data0[$row['id']] = $row;
         }
-        // $DIC->logger()->root()->log(var_export($data0, true));
+
         // Get conn uses
         $query = "select object_reference.ref_id as xclsRefId, rep_robj_xcls_data.conn_id as xclsConnId, rep_robj_xcls_data.id as xclsObjId," .
                 " object_data.title xclsObjTitle, not isnull(object_reference.deleted) as isInTrash, rep_robj_xcls_data.is_online, rep_robj_xcls_data.auth_complete
@@ -671,14 +669,12 @@ class ilCloudStorageConfig
                  {$queryFilter}
                  ORDER by conn_id, xclsObjTitle
                  ";
-        $DIC->logger()->root()->log("queryFilter: " . $query); 
         $result = $ilDB->query($query);
         $data = [];
         while ($row = $ilDB->fetchAssoc($result)) {
             $row['connTitle'] = $data0[$row['xclsConnId']]['title'];
             $data[$row['xclsRefId']] = $row;
         }
-        // $DIC->logger()->root()->log(var_export($data, true));
         // Get repo data to conn uses
         $query = "select tree.child, tree.parent parentRefId, object_data.title parentTitle
                  FROM tree, object_data, object_reference

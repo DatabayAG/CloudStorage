@@ -124,7 +124,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function performCommand(string $cmd): void
     {
-        $this->dic->logger()->root()->log("cmd " . $cmd);
+        $this->dic->logger()->root()->debug("cmd " . $cmd);
 
         if ($this->commandMode == self::COMMAND_MODE_OBJECT) {
             assert($this->object instanceof ilObjCloudStorage);
@@ -153,7 +153,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                     if (!$this->dic->http()->wrapper()->query()->has('auth_mode')) {
                         if (!$this->object->getAuthComplete()) {
                             if ($this->checkPermissionBool("write") && $this->object->currentUserIsOwner()) {
-                                $this->dic->logger()->root()->log("needs serviceAuth");
+                                $this->dic->logger()->root()->debug("needs serviceAuth");
                                 $this->serviceAuth();
                             } else {
                                 $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("only_owner"), true);
@@ -163,7 +163,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                             try {
                                 $this->service->checkConnection();
                                 $root_folder = $this->object->getRootFolder();
-                                $this->dic->logger()->root()->log("root_folder: " . $root_folder);
+                                $this->dic->logger()->root()->debug("root_folder: " . $root_folder);
                             } catch(ilCloudStorageException $e) {
                                 $this->handleConnectionException($e, false);
                             }
@@ -310,12 +310,12 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->dic->ctrl()->setParameter($this, 'auth_mode', 'true');
             $this->dic->ctrl()->setParameter($this, 'conn_id', (string) $conn_id);
             $this->dic->ctrl()->setParameter($this, 'last_cmd', $cmd);
-            $this->dic->logger()->root()->log("ilObjCloudStorageGUI serviceAuth: " . $cmd);
+            $this->dic->logger()->root()->debug("ilObjCloudStorageGUI serviceAuth: " . $cmd);
             $url = $this->dic->ctrl()->getLinkTarget($this, "processAuth");
-            $this->dic->logger()->root()->log("redirectToUrl " . $url);
+            $this->dic->logger()->root()->debug("redirectToUrl " . $url);
             $this->dic->ctrl()->redirectToURL($url);
         } catch (Exception $e) {
-            $this->dic->logger()->root()->debug("ilObjCloudStorageGUI error serviceAuth " . $e->getMessage());
+            $this->dic->logger()->root()->error("ilObjCloudStorageGUI error serviceAuth " . $e->getMessage());
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("cld_auth_failed"), true);
             $this->redirectToRefId($this->parent_id);
         }
@@ -324,7 +324,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     protected function afterServiceAuth()
     {
         try {
-            $this->dic->logger()->root()->log("ilObjCloudStorageGUI afterServiceAuth");
+            $this->dic->logger()->root()->debug("ilObjCloudStorageGUI afterServiceAuth");
             $conn_id = $this->getConnId();
             $ref_id = $this->getRefId();
             $last_cmd = ilCloudStorageUtil::getStringParam('last_cmd');
@@ -357,7 +357,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $this->dic->ctrl()->setParameter($this, 'auth_mode', '');
                 
                 if (!$this->service->folderExists($config->getBaseDirectory())) {
-                    $this->dic->logger()->root()->log("root_folder not exists...create");
+                    $this->dic->logger()->root()->debug("root_folder not exists...create");
                     $this->service->createFolder($config->getBaseDirectory());
                 }
                 $this->dic->ctrl()->setParameter($this, 'cmd', $last_cmd);
@@ -375,7 +375,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             //        break;
             // }
         } catch (Exception $e) {
-            $this->dic->logger()->root()->log("ilObjCloudStorageGUI error afterServiceAuth " . $e->getMessage());
+            $this->dic->logger()->root()->debug("ilObjCloudStorageGUI error afterServiceAuth " . $e->getMessage());
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("cld_auth_failed"), true);
             $this->redirectToRefId($this->parent_id);
         }
@@ -417,7 +417,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             if ($result) {
                 $this->redirectToCreate($ref_id, (int) $result['conn_id']);
             } else {
-                $this->dic->logger()->root()->log("no result");
+                $this->dic->logger()->root()->debug("no result");
             }
             $panel = $factory->panel()->standard(
                 $this->txt("select_type"),
@@ -470,6 +470,13 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             break;
         }
         
+        if (!is_array($ret)) 
+        {
+            $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("cloud_provider_not_online"), true);
+            $this->redirectToRefId($this->parent_id);
+            return;
+        }
+
         $panel = $factory->panel()->standard(
             $this->txt("authentication_required"),
             $ret
@@ -507,7 +514,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             ilCloudStorageOAuth2::Authenticate($user_id, $config);
             return null;
         } else {
-            $this->dic->logger()->root()->log("no login");
+            $this->dic->logger()->root()->debug("no login");
         }
         return [$connItem, $button];
     }
@@ -546,7 +553,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         if ($request->getMethod() == "POST") {
             $form = $form->withRequest($request);
             $result = $form->getData();
-            $this->dic->logger()->root()->log(var_export($result, true));
             if ($result) {
                 $username = $result[0]['username'];
                 $password = ilCloudStorageUtil::encrypt($result[0]['password']->toString());
@@ -562,7 +568,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                     $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $e->getMessage(), false);
                 }
             } else {
-                $this->dic->logger()->root()->log("no result");
+                $this->dic->logger()->root()->debug("no result");
                 //$this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("must_not_empty"), false);   
                 //$this->dic->ui()->mainTemplate()->setContent($renderer->render([$form]));
             }
@@ -649,9 +655,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->redirectToRefId($this->parent_id);
         }
         if (count($availableConns) > 1) {
-            $this->dic->logger()->root()->log("multiple connections");
+            $this->dic->logger()->root()->debug("multiple connections");
             $conn_id = ilCloudStorageUtil::getIntParam('conn_id');
-            $this->dic->logger()->root()->log("conn_id:" . $conn_id);
+            $this->dic->logger()->root()->debug("conn_id:" . $conn_id);
             if ($conn_id == -1) {
                 $this->dic->ctrl()->setParameter($this, 'auth_mode', true);
                 //$url = $this->dic->ctrl()->getLinkTarget($this, "processConnectionSelection") . "&auth_mode=true";
@@ -669,7 +675,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         // check if user is already authenticated with that connection
         $user_id = $this->dic->user()->getId();
         $hasAccount = ilObjCloudStorageAccess::hasAccount($config->getConnId(), $user_id);
-        $this->dic->logger()->root()->log("hasAccount: " . (string) $hasAccount);
+        $this->dic->logger()->root()->debug("hasAccount: " . (string) $hasAccount);
         
         $connection = false;
         
@@ -773,7 +779,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->redirectToRefId($this->parent_id);
         }
         if (count($availableConns) == 1) {
-            $this->dic->logger()->root()->log("only one cloud connection is available");
+            $this->dic->logger()->root()->debug("only one cloud connection is available");
             foreach ($availableConns as $key => $value) {
                 $conn_id = $key;
                 $config = ilCloudStorageConfig::getInstance($conn_id);
@@ -781,7 +787,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             // check if user is already authenticated with that connection
             $user_id = $this->dic->user()->getId();
             $hasAccount = ilObjCloudStorageAccess::hasAccount($config->getConnId(), $user_id);
-            $this->dic->logger()->root()->log("hasAccount: " . (string) $hasAccount);
+            $this->dic->logger()->root()->debug("hasAccount: " . (string) $hasAccount);
             
             $connection = false;
             
@@ -847,8 +853,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     }
 
     public function cancelCreation(): void {
-        $this->dic->logger()->root()->log("ilObjCloudStorageGUI cancelCreation");
-        $this->dic->logger()->root()->log("object refId: " . $this->object->getRefId());
+        $this->dic->logger()->root()->debug("ilObjCloudStorageGUI cancelCreation");
+        $this->dic->logger()->root()->debug("object refId: " . $this->object->getRefId());
         assert($this->object instanceof ilObjCloudStorage);
         $objId = $this->object->getConnId();
         $this->object->delete();
@@ -860,7 +866,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
      */
     public function afterSave(ilObject $newObj): void
     {
-        $this->dic->logger()->root()->log("ilObjCloudStorageGUI afterSave");
+        $this->dic->logger()->root()->debug("ilObjCloudStorageGUI afterSave");
         
         $this->dic->ctrl()->saveParameterByClass(get_class($this), "action");
         
@@ -868,16 +874,16 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $online = ilCloudStorageUtil::getIntPost('online');
         $config = ilCloudStorageConfig::getInstance($connId);
         
-        $this->dic->logger()->root()->log("ilObjCloudStorageGUI afterSave connId: " . $connId);
+        $this->dic->logger()->root()->debug("ilObjCloudStorageGUI afterSave connId: " . $connId);
         
         $action = ilCloudStorageUtil::getStringParam('action');
         
-        $this->dic->logger()->root()->log("ilObjCloudStorageGUI action: " . $action);
+        $this->dic->logger()->root()->debug("ilObjCloudStorageGUI action: " . $action);
         
         assert($newObj instanceof ilObjCloudStorage);
         if ($action == 'new_folder') {
             $newFolder = ilCloudStorageUtil::getStringPost('new_folder');
-            $this->dic->logger()->root()->log("ilObjCloudStorageGUI new_folder: " . $newFolder);
+            $this->dic->logger()->root()->debug("ilObjCloudStorageGUI new_folder: " . $newFolder);
             if ($newFolder == '') {
                 $newObj->delete();
                 $this->tpl->setOnScreenMessage('failure', $this->txt("must_not_empty"), true);
@@ -928,7 +934,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageGenericService);
         $action = ilCloudStorageUtil::getStringParam('action');
-        $this->dic->logger()->root()->log("{$source} action: " . $action);
+        $this->dic->logger()->root()->debug("{$source} action: " . $action);
         switch ($action) {
             case "choose_root":
                 if ($this->object->currentUserIsOwner()) {
@@ -942,7 +948,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 break;
             case "new_folder":
                 if ($this->object->currentUserIsOwner()) {
-                    $this->dic->logger()->root()->log("{$source} root_folder: " . $this->object->getRootFolder());
+                    $this->dic->logger()->root()->debug("{$source} root_folder: " . $this->object->getRootFolder());
                     if ($this->service->folderExists($this->object->getRootFolder())) {
                         $this->object->delete();
                         $this->tpl->setOnScreenMessage('failure', $this->txt("cld_folder_already_existing_on_service") . ": " . $this->object->getRootFolder(), false);
@@ -971,13 +977,13 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
      */
     public function editProperties(): void
     {
-        $this->dic->logger()->root()->log("editProperties()");
+        $this->dic->logger()->root()->debug("editProperties()");
         $this->dic->tabs()->activateTab("properties");
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageGenericService);
         $root_path = ilCloudStorageUtil::getStringParam('root_path');
         if ($root_path != '') {
-            $this->dic->logger()->root()->log("editProperties() root_path: " . $root_path);
+            $this->dic->logger()->root()->debug("editProperties() root_path: " . $root_path);
             $this->setRootFolder($root_path);
             return;
         } else {
@@ -1252,7 +1258,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function showTreeView(bool $afterCreation = false): void
     {
-        $this->dic->logger()->root()->log("showTreeView");
+        $this->dic->logger()->root()->debug("showTreeView");
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageGenericService);
         $isAsync = false;
@@ -1262,11 +1268,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             }
         }
         if (!$isAsync) {
-            $this->dic->logger()->root()->log("showTreeView not async");
+            $this->dic->logger()->root()->debug("showTreeView not async");
             
             //$client = $this->service->getClient();
             if ($this->service->hasConnection()) {
-                $this->dic->logger()->root()->log("connection");
+                $this->dic->logger()->root()->debug("connection");
                 $tree = new ilCloudStorageTree($this->service);
                 $tree_gui = new ilCloudStorageTreeGUI('tree_expl', $this, 'editProperties', $tree);
                 $this->dic->tabs()->clearTargets();
@@ -1281,16 +1287,16 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $this->dic->ui()->mainTemplate()->setContent($tree_gui->getHTML());
                 
             } else {
-                $this->dic->logger()->root()->log("no connection");
+                $this->dic->logger()->root()->debug("no connection");
                 $this->dic->ctrl()->redirect($this, 'editProperties');
             }
             
         } else {
-            $this->dic->logger()->root()->log("showTreeView async");
+            $this->dic->logger()->root()->debug("showTreeView async");
             
             //$client = $this->service->getClient();
             if ($this->service->hasConnection()) {
-                $this->dic->logger()->root()->log("showTreeView async hasConnection");
+                $this->dic->logger()->root()->debug("showTreeView async hasConnection");
                 $tree = new ilCloudStorageTree($this->service);
                 $tree_gui = new ilCloudStorageTreeGUI('tree_expl', $this, 'editProperties', $tree);
                 $tree_gui->handleCommand();
@@ -2069,7 +2075,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                     $path = urldecode($path);
                 }
             } catch (Exception $e) {
-                $this->dic->logger()->root()->log("ERROR: " . $e->getMessage());
+                $this->dic->logger()->root()->error("ERROR: " . $e->getMessage());
                 $path = '';
             }
         } else {

@@ -137,6 +137,7 @@ root_folder#:#Ordner
 authentication_required#:#Authentifizierung erforderlich
 authentication#:#Authentifizierung
 not_authorized#:#Authentifizierung fehlgeschlagen. Bitte Laden Sie die Seite erneut, um an die Authentifizierungsstelle weitergeleitet zu werden.
+cloud_provider_not_online#:#Cloud-Anbindung zurzeit nicht möglich. Bitte kontaktieren Sie hierzu die technische Betreuung.
 successful_authenticated#:#Authentifizierung erfolgreich
 only_owner#:#Nur die Person, die den Cloud-Ordner angelegt hat, kann diesen aktuell öffnen.
 open_in_platform#:#In externem Editor öffnen
