@@ -208,3 +208,8 @@ please_wait#:#Bitte warten
 has_account#:#Ihr Account ist bereits mit dem Cloud-Service verknüpft.<br />Klicken Sie auf "Cloud-Ordner auswählen".
 root_folder_name#:#Wurzelverzeichnis
 new_folder_add_info#:#Der neue Cloud-Ordner wird im Verzeichnis %s angelegt
+rep_robj_xcls_grp_create_xcls#:#Cloud-Ordner anlegen
+rep_robj_xcls_crs_create_xcls#:#Cloud-Ordner anlegen
+rep_robj_xcls_fold_create_xcls#:#Cloud-Ordner anlegen
+rep_robj_xcls_cat_create_xcls#:#Cloud-Ordner anlegen
+rep_robj_xcls_root_create_xcls#:#Cloud-Ordner anlegen
