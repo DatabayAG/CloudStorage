@@ -207,3 +207,8 @@ please_wait#:#Please wait
 has_account#:#Your account is already linked to the Cloud Service. <br />Click "Select Cloud Folder".
 root_folder_name#:#Root
 new_folder_add_info#:#The new Cloud Folder will be created in %s
+rep_robj_xcls_grp_create_xcls#:#Create Cloud Folder
+rep_robj_xcls_crs_create_xcls#:#Create Cloud Folder
+rep_robj_xcls_fold_create_xcls#:#Create Cloud Folder
+rep_robj_xcls_cat_create_xcls#:#Create Cloud Folder
+rep_robj_xcls_root_create_xcls#:#Create Cloud Folder
