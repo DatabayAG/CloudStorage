@@ -1048,8 +1048,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $folder->setSize(50);
         $this->form->addItem($folder);
 
+        /*
         switch ($this->config->getAuthMethod()) {
             case $this->config::AUTH_METHOD_OAUTH2:
+                // Noting ToDo
+                
                 $n = new ilNonEditableValueGUI($this->object->txt('info_token_expires'));
 
                 $validThrough = $this->service->getToken()->getValidThrough();
@@ -1063,13 +1066,15 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
                 $n->setValue(date('d.m.Y - H:i:s', $refreshValidThrough));
                 $this->form->addItem($n);
+                
                 break;
             case $this->config::AUTH_METHOD_BASIC:
-                // Nothing toto
+                // Nothing ToDo
                 break;
             default:
                 //ToDo
         }
+        */
 
         $this->form->addCommandButton("updateProperties", $this->lng->txt("save"));
         $this->form->setTitle($this->txt("edit_properties"));
