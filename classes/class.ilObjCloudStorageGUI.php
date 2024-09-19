@@ -2046,6 +2046,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             // remove ref_id, "path" und "endPath"
             unset($content[0]);
             unset($content[1]);
+            unset($content[2]);
             array_pop($content);
             // reconstruct and set path
             $path = implode('_', $content);
