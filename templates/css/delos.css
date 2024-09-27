@@ -34,7 +34,7 @@
   white-space: inherit;
 }
 
-a.il_ContainerItemTitle, ol.breadcrumb > li > a {
+a.il_ContainerItemTitle, h3.il_ContainerItemTitle > span, ol.breadcrumb > li > a {
   white-space: nowrap;
   display: inline-block;
   overflow: hidden;
