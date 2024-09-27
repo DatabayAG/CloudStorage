@@ -1465,8 +1465,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 //				$item->setVariable("SRC_ICON", "./Modules/Cloud/templates/images/icon_folder_b.png");
                 $item->setVariable("SRC_ICON", self::getImagePath('icon_dcl_fold.svg'));
             }
-            $item->setVariable("TXT_TITLE_LINKED", htmlspecialchars(basename($node->getPath())));
-            $item->setVariable("HREF_TITLE_LINKED", $this->getLinkToFolder($node));
+            $folderName = htmlspecialchars(basename($node->getPath()));
+            $item->setVariable("TXT_TITLE_LINKED", $folderName);
+            $item->setVariable("HREF_TITLE_LINKED", $this->getLinkToFolder($node) . "\" . title=\"" . $folderName);
         } // File
         else {
             if ($node->getIconPath() == "") {
@@ -1478,11 +1479,12 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 "TXT_DESC",
                 $this->formatBytes($node->getSize()) . "&nbsp;&nbsp;&nbsp;" . $modified
             );
+            $fileName = htmlspecialchars(basename($node->getPath()));
             if ($download) {
-                $item->setVariable("TXT_TITLE_LINKED", htmlspecialchars(basename($node->getPath())));
-                $item->setVariable("HREF_TITLE_LINKED", $this->dic->ctrl()->getLinkTarget($this, "getFile") . "&id=" . $node->getId());
+                $item->setVariable("TXT_TITLE_LINKED", $fileName);
+                $item->setVariable("HREF_TITLE_LINKED", $this->dic->ctrl()->getLinkTarget($this, "getFile") . "&id=" . $node->getId() . "\" . title=\"" . $fileName);
             } else {
-                $item->setVariable("TXT_TITLE", htmlspecialchars(basename($node->getPath())));
+                $item->setVariable("TXT_TITLE", "<span title=\"" . $fileName . "\">" . $fileName . "</span>");
             }
         }
         return $item->get();
@@ -1525,7 +1527,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public static function getLinkToFolder(ilCloudStorageFileNode $node): string
     {
-        return "#/open_folder?id_parent=" . $node->getParentId() . "&current_id=" . $node->getId() . "&current_path=" . self::_urlencode($node->getPath());
+        return "#/open_folder?id_parent=" . $node->getParentId() . "&current_id=" . $node->getId() . "&current_path=" . self::_urlencode($node->getPath()) . "\" title=\"" . htmlspecialchars(basename($node->getPath()));
     }
 
     public function asyncUploadFile(): void
