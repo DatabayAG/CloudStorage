@@ -35,6 +35,9 @@ class ilObjCloudStorageAccess extends ilObjectPluginAccess
         }
         switch ($a_permission) {
             case "visible":
+                if (!ilObjCloudStorageAccess::checkConnAvailability($a_obj_id)) {
+                    return false;
+                }
                 if (!ilObjCloudStorageAccess::checkOnline($a_obj_id) && !$ilAccess->checkAccessOfUser($a_user_id, "write", "", $a_ref_id)) {
                     return false;
                 }
