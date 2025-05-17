@@ -18,7 +18,7 @@ use ILIAS\UI\Component\Input\Container\Form\Standard as StandardForm;
  *   screens) and ilInfoScreenGUI (handles the info screen).
  *
  * @ilCtrl_isCalledBy ilObjCloudStorageGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
- * @ilCtrl_Calls ilObjCloudStorageGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilRepositorySearchGUI, ilCloudStorageOwnCloudGUI, ilCloudStorageWebDavGUI, ilObjFileUploadHandlerGUI
+ * @ilCtrl_Calls ilObjCloudStorageGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilRepositorySearchGUI, ilObjFileUploadHandlerGUI
  *
  */
 class ilObjCloudStorageGUI extends ilObjectPluginGUI

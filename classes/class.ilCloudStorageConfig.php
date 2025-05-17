@@ -21,10 +21,13 @@ class ilCloudStorageConfig
 
     public const AVAILABLE_FS_CONN = [
         'ocld'		=> 'OwnCloud',
+        'ncld'		=> 'NextCloud',
         'dav'       => 'WebDav'
+
     ];
     public const AVAILABLE_XCLS_SERVICES = [
         'ocld'     => 'ilCloudStorageOwnCloud',
+        'ncld'     => 'ilCloudStorageNextCloud',
         'dav'      => 'ilCloudStorageWebDav'
     ];
     
@@ -70,7 +73,8 @@ class ilCloudStorageConfig
     public object $option;
 
     private array $objConfigAvailSetting = [
-        'ocld'   => []
+        'ocld'   => [],
+        'ncld'   => []
     ];
 
     private string $objIdsSpecial = '';
@@ -514,7 +518,6 @@ class ilCloudStorageConfig
             case 'second_email':
                 return $user->getSecondEmail();
         }
-
         return "";
     }
 
