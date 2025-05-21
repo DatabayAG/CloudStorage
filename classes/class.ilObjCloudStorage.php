@@ -68,6 +68,7 @@ class ilObjCloudStorage extends ilObjectPlugin
 
         $this->dic = $DIC;
         $this->db = $this->dic->database();
+        self::rbacSetup();
         /*
         if (null === $this->pluginIniSet) {
             $this->setPluginIniSet();
@@ -598,6 +599,43 @@ class ilObjCloudStorage extends ilObjectPlugin
         }
         return $returnParam;
     }
+
+    public static function rbacSetup(): void
+    {    
+        global $DIC; 
+        $rbac_exists = ilRbacReview::_getCustomRBACOperationId('edit_in_online_editor', $DIC->database());
+        if ($rbac_exists) return;
+
+        include_once('./Services/Migration/DBUpdate_3560/classes/class.ilDBUpdateNewObjectType.php');
+        $xcls_type_id = ilDBUpdateNewObjectType::addNewType('xcls', 'Cloud Folder'); //if xcls type exists: id is returned otherwise ceated
+        $rbac_ops = array(
+            ilDBUpdateNewObjectType::RBAC_OP_EDIT_PERMISSIONS,
+            ilDBUpdateNewObjectType::RBAC_OP_VISIBLE,
+            ilDBUpdateNewObjectType::RBAC_OP_READ,
+            ilDBUpdateNewObjectType::RBAC_OP_WRITE,
+            ilDBUpdateNewObjectType::RBAC_OP_DELETE
+        );
+        ilDBUpdateNewObjectType::addRBACOperations($xcls_type_id, $rbac_ops);
+        $parent_types = array('root', 'cat', 'crs', 'fold', 'grp');
+        ilDBUpdateNewObjectType::addRBACCreate('create_xcls', 'Create Cloud Folder', $parent_types);
+        $ops_id = ilDBUpdateNewObjectType::addCustomRBACOperation('upload', 'Upload Items', 'object', 3240);
+        ilDBUpdateNewObjectType::addRBACOperation($xcls_type_id, $ops_id);
+        $ops_id = ilDBUpdateNewObjectType::addCustomRBACOperation('delete_files', 'Delete Files', 'object', 3260);
+        ilDBUpdateNewObjectType::addRBACOperation($xcls_type_id, $ops_id);
+        $ops_id = ilDBUpdateNewObjectType::addCustomRBACOperation('delete_folders', 'Delete Folders', 'object', 3270);
+        ilDBUpdateNewObjectType::addRBACOperation($xcls_type_id, $ops_id);
+        $ops_id = ilDBUpdateNewObjectType::addCustomRBACOperation('download', 'Download Items', 'object', 3230);
+        ilDBUpdateNewObjectType::addRBACOperation($xcls_type_id, $ops_id);
+        $ops_id = ilDBUpdateNewObjectType::addCustomRBACOperation('files_visible', 'Files are visible', 'object', 3210);
+        ilDBUpdateNewObjectType::addRBACOperation($xcls_type_id, $ops_id);
+        $ops_id = ilDBUpdateNewObjectType::addCustomRBACOperation('folders_visible', 'Folders are visible', 'object', 3220);
+        ilDBUpdateNewObjectType::addRBACOperation($xcls_type_id, $ops_id);
+        $ops_id = ilDBUpdateNewObjectType::addCustomRBACOperation('folders_create', 'Folders may be created', 'object', 3250);
+        ilDBUpdateNewObjectType::addRBACOperation($xcls_type_id, $ops_id);
+        $ops_id = ilDBUpdateNewObjectType::addCustomRBACOperation('edit_in_online_editor', 'edit in online editor', 'object', 280);
+        ilDBUpdateNewObjectType::addRBACOperation($xcls_type_id, $ops_id);
+    }
+
 
     // nothing to do in ILIAS 9
     public static function migrationSetup(): void {
