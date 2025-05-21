@@ -327,3 +327,8 @@ if ($ilDB->tableExists('rep_robj_xcls_data')) {
     }
 }
 ?>
+<#10>
+<?php
+require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
+ilObjCloudStorage::rbacSetup();
+?>
