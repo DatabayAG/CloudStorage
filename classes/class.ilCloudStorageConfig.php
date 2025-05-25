@@ -501,6 +501,7 @@ class ilCloudStorageConfig
         $link = rtrim($url, '/') . '/' . $this->collaborationAppUrl;
         $link = str_replace('{FILE_ID}', $file_id, $link);
         $link = str_replace('{FILE_PATH}', $file_path, $link);
+        $link = str_replace('{FILE_DIRECTORY}', dirname($file_path), $link);
 
         return $link;
     }
