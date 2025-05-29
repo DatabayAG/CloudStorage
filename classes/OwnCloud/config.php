@@ -41,7 +41,7 @@ $ti = new ilTextInputGUI($pl->txt("base_directory"), "base_directory");
 $ti->setRequired(false);
 $ti->setMaxLength(255);
 $ti->setSize(60);
-$ti->setInfo($pl->txt("base_directory_info"));
+$ti->setInfo($pl->txt("base_directory_info_ocld"));
 $this->form->addItem($ti);
 
 /*
@@ -59,7 +59,7 @@ $ti = new ilTextInputGUI($pl->txt("col_app_url"), "col_app_url");
 $ti->setRequired(true);
 $ti->setMaxLength(1024);
 $ti->setSize(60);
-$ti->setInfo($pl->txt("col_app_url_info"));
+$ti->setInfo($pl->txt("col_app_url_info_ocld"));
 $cb->addSubItem($ti);
 
 $ti = new ilTextInputGUI($pl->txt("col_app_formats"), "col_app_formats");
@@ -78,7 +78,7 @@ $si->setOptions(
         'second_email'  => $this->lng->txt('second_email')
     )
 );
-$si->setInfo($this->plugin_object->txt('col_app_mapping_field_info'));
+$si->setInfo($this->plugin_object->txt('col_app_mapping_field_info_ocld'));
 $si->setRequired(true);
 $cb->addSubItem($si);
 
