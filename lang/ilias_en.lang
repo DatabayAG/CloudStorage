@@ -57,11 +57,13 @@ delete_old#:#Delete Cloud Folder from ILIAS 7
 col_app#:#Collaboration app integration
 col_app_info#:#Activate the action "Open in external editor", which opens documents directly in a collaboration app (e.g. OnlyOffice).
 col_app_url#:#Relative URL collaboration app
-col_app_url_info#:#The placeholders &#123FILE_ID} and &#123FILE_PATH} can be used. E.g. OnlyOffice: index.php/apps/onlyoffice/&#123FILE_ID}?filePath=&#123FILE_PATH}
+col_app_url_info_ocld#:#The placeholders &#123FILE_ID} and &#123FILE_PATH} can be used. E.g. OnlyOffice: index.php/apps/onlyoffice/&#123FILE_ID}?filePath=&#123FILE_PATH}
+col_app_url_info_ncld#:#The placeholders &#123FILE_ID} and &#123FILE_DIRECTORY} can be used. E.g. Collabora in NextCloud: apps/files/files/&#123FILE_ID}?dir=&#123FILE_DIRECTORY}&openfile=true
 col_app_formats#:#Supported formats
 col_app_formats_info#:#Comma-separated list of formats that can be opened in the app.
 col_app_mapping_field#:#Field for mapping
-col_app_mapping_field_info#:#Determines which field contains the OwnCloud login name (used to grant permissions to documents).
+col_app_mapping_field_info_ocld#:#Determines which field contains the OwnCloud login name (used to grant permissions to documents).
+col_app_mapping_field_info_ncld#:#Determines which field contains the NextCloud login name (used to grant permissions to documents).
 plugin_configuration#:#Configuration
 config_help_begin#:#The explanation under settings is:
 showcontent#:#Cloud Connection
@@ -105,7 +107,8 @@ link_choose_root#:#Select Folder
 no_connection#:#A connection to the Cloud Service could not be established. Please check your settings and in all cases contact technical support.
 no_connection_short#:#A connection to the Cloud Service could not be established.
 base_directory#:#Base directory
-base_directory_info#:#This directory is selected as the Base Folder for newly created objects. This is intended to prevent the entire OwnCloud from being integrated into new objects. However, the Base Folder can be customized later.
+base_directory_info_ocld#:#This directory is selected as the Base Folder for newly created objects. This is intended to prevent the entire OwnCloud from being integrated into new objects. However, the Base Folder can be customized later.
+base_directory_info_ncld#:#This directory is selected as the Base Folder for newly created objects. This is intended to prevent the entire NextCloud from being integrated into new objects. However, the Base Folder can be customized later.
 hint#:#Hint text
 server_url#:#Server URL
 server_url_info#:#Example: http(s)://SERVER_HOST or if Server not accessible by default ports: http(s)://SERVER_HOST:8080

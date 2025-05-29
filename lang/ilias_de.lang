@@ -58,11 +58,13 @@ delete_old#:#Cloud-Ordner aus ILIAS 7 löschen
 col_app#:#Collaboration-App-Integration
 col_app_info#:#Aktiviert die Aktion "In externem Editor öffnen", welche Dokumente direkt in einer Collaboration App (z.B. OnlyOffice) öffnet.
 col_app_url#:#Relative URL Collaboration-App
-col_app_url_info#:#Als Platzhalter können &#123FILE_ID} und &#123FILE_PATH} verwendet werden. Bsp. OnlyOffice: index.php/apps/onlyoffice/&#123FILE_ID}?filePath=&#123FILE_PATH}
+col_app_url_info_ocld#:#Als Platzhalter können &#123FILE_ID} und &#123FILE_PATH} verwendet werden. Bsp. OnlyOffice: index.php/apps/onlyoffice/&#123FILE_ID}?filePath=&#123FILE_PATH}
+col_app_url_info_ncld#:#Als Platzhalter können &#123FILE_ID} und &#123FILE_DIRECTORY} verwendet werden. Beispiel für Collabora in NextCloud: apps/files/files/&#123FILE_ID}?dir=&#123FILE_DIRECTORY}&openfile=true
 col_app_formats#:#Unterstützte Formate
 col_app_formats_info#:#Kommaseparierte Liste der Formate, welche in der App geöffnet werden können.
 col_app_mapping_field#:#Feld für Mapping
-col_app_mapping_field_info#:#Bestimmt, in welchem Feld der OwnCloud-Anmeldename enthalten ist (wird verwendet, um Berechtigungen auf Dokumente zu erteilen).
+col_app_mapping_field_info_ocld#:#Bestimmt, in welchem Feld der OwnCloud-Anmeldename enthalten ist (wird verwendet, um Berechtigungen auf Dokumente zu erteilen).
+col_app_mapping_field_info_ncld#:#Bestimmt, in welchem Feld der NextCloud-Anmeldename enthalten ist (wird verwendet, um Berechtigungen auf Dokumente zu erteilen).
 plugin_configuration#:#Konfiguration
 config_help_begin#:#Die Erläuterung unter Einstellungen lautet:
 showcontent#:#Cloud-Anbindung
@@ -106,7 +108,8 @@ link_choose_root#:#Ordner auswählen
 no_connection#:#Es konnte keine Verbindung zum Cloud-Service hergestellt werden. Bitte überprüfen Sie Einstellungen und kontaktieren Sie allenfalls die technische Betreuung.
 no_connection_short#:#Es konnte keine Verbindung zum Cloud-Service hergestellt werden.
 base_directory#:#Basis-Verzeichnis
-base_directory_info#:#Dieses Verzeichnis wird bei neu erstellten Objekten als Basis-Ordner gewählt. Dies soll verhindern, dass bei neuen Objekten die gesamte OwnCloud eingebunden wird. Der Basis-Ordner kann später trotzdem angepasst werden.
+base_directory_info_ocld#:#Dieses Verzeichnis wird bei neu erstellten Objekten als Basis-Ordner gewählt. Dies soll verhindern, dass bei neuen Objekten die gesamte OwnCloud eingebunden wird. Der Basis-Ordner kann später trotzdem angepasst werden.
+base_directory_info_ncld#:#Dieses Verzeichnis wird bei neu erstellten Objekten als Basis-Ordner gewählt. Dies soll verhindern, dass bei neuen Objekten die gesamte NextCloud eingebunden wird. Der Basis-Ordner kann später trotzdem angepasst werden.
 hint#:#Hinweistext
 server_url#:#Server-URL
 server_url_info#:#Beispiel: http(s)://SERVER_HOST oder falls der Server nicht über Standardports erreichbar ist zum Beispiel: http(s)://SERVER_HOST:8080
