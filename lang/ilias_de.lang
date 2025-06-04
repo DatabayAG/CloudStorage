@@ -65,6 +65,7 @@ col_app_formats_info#:#Kommaseparierte Liste der Formate, welche in der App geö
 col_app_mapping_field#:#Feld für Mapping
 col_app_mapping_field_info_ocld#:#Bestimmt, in welchem Feld der OwnCloud-Anmeldename enthalten ist (wird verwendet, um Berechtigungen auf Dokumente zu erteilen).
 col_app_mapping_field_info_ncld#:#Bestimmt, in welchem Feld der NextCloud-Anmeldename enthalten ist (wird verwendet, um Berechtigungen auf Dokumente zu erteilen).
+share_link_ncld#:#Public Link (kein Nutzerkonto in NextCloud benötigt)
 plugin_configuration#:#Konfiguration
 config_help_begin#:#Die Erläuterung unter Einstellungen lautet:
 showcontent#:#Cloud-Anbindung
