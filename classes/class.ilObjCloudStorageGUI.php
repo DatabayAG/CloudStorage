@@ -2138,6 +2138,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function openInPlatform(): void
     {
+        global $DIC;
         assert($this->service instanceof ilCloudStorageGenericService);
         $ref_id = $this->dic->http()->wrapper()->query()->retrieve('ref_id', $this->dic->refinery()->kindlyTo()->int());
         $upload_perm = $this->dic->access()->checkAccess('edit_in_online_editor', '', $ref_id);
@@ -2149,9 +2150,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $id = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_ID, $this->dic->refinery()->kindlyTo()->string());
         //$this->checkAndRefreshAuthentication();
         //$client = $this->service->getClient();
-        $this->service->shareItem($path, $this->dic->user());
-
-        $url = $this->config->getFullCollaborationAppPath($id, urlencode($path));
+        $ret = $this->service->shareItem($path, $this->dic->user());
+        $url = $ret->ocs->data->url;
+        //$url = $this->config->getFullCollaborationAppPath($id, urlencode($path));
         Header('Location: ' . $url);
         exit;
     }

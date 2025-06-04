@@ -75,7 +75,8 @@ $si->setOptions(
         'login'         => $this->lng->txt('login'),
         'ext_account'   => $this->lng->txt('user_ext_account'),
         'email'         => $this->lng->txt('email'),
-        'second_email'  => $this->lng->txt('second_email')
+        'second_email'  => $this->lng->txt('second_email'),
+        //'share_link'    => $pl->txt('share_link_ncld'),
     )
 );
 $si->setInfo($this->plugin_object->txt('col_app_mapping_field_info_ncld'));

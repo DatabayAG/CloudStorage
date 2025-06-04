@@ -597,24 +597,44 @@ abstract class ilCloudStorageGenericService extends Client
      * @throws GuzzleException
      */
     
-    public function shareItem(string $path, ilObjUser $user): void
+    // ToDo: conceptual discussion, implicit name mappings of ilias logins to storage provider accounts for sharing 
+    // is not secure! Maybe we should only support sharing with public links?
+    public function shareItem(string $path, ilObjUser $user): mixed
     {
-        if ($user->getId() == $this->object->getOwnerId()) {
-            // no need to share with yourself (can result in an error with nextcloud)
-            return;
-        }
-        $user_string = $this->config->getMappingValueForUser($user);
-        $shareAPI = $this->rest_client->shareAPI($this); // ToDo
-        $existing = $shareAPI->getForPath($path);
-        foreach ($existing as $share) {
-            if ($share->getShareWith() === $user_string) {
-                if (!$share->hasPermission(ilCloudStorageShareAPI::PERM_TYPE_UPDATE)) {
-                    $shareAPI->update($share->getId(), $share->getPermissions() | (ilCloudStorageShareAPI::PERM_TYPE_UPDATE + ilCloudStorageShareAPI::PERM_TYPE_READ));
+        // if ($user->getId() == $this->object->getOwnerId()) {
+        //     // no need to share with yourself (can result in an error with nextcloud)
+        //     return null;
+        // }
+        // $user_string = $this->config->getMappingValueForUser($user);
+        // $shareAPI = $this->rest_client->shareAPI($this); // ToDo
+        // $existing = $shareAPI->getForPath($path);
+        // foreach ($existing as $share) {
+        //     if ($share->getShareWith() === $user_string) {
+        //         if (!$share->hasPermission(ilCloudStorageShareAPI::PERM_TYPE_UPDATE)) {
+        //             $shareAPI->update($share->getId(), $share->getPermissions() | (ilCloudStorageShareAPI::PERM_TYPE_UPDATE + ilCloudStorageShareAPI::PERM_TYPE_READ));
+        //         }
+        //         return null;
+        //     }
+        // }
+        $shareAPI = $this->rest_client->shareAPI($this);
+        $userString = $this->config->getMappingValueForUser($user);
+        $shareType = ilCloudStorageShareAPI::SHARE_TYPE_USER;
+        //$perms = ilCloudStorageShareAPI::PERM_TYPE_READ_WRITE; // ToDo: no difference to PERM_TYPE_READ + PERM_TYPE_UPDATE (?)
+        $perms = ilCloudStorageShareAPI::PERM_TYPE_READ + ilCloudStorageShareAPI::PERM_TYPE_UPDATE;
+        if ($userString == '') {
+            $shareType = ilCloudStorageShareAPI::SHARE_TYPE_PUBLIC_LINK;
+        } else {
+            $existing = $shareAPI->getForPath($path);
+            foreach ($existing as $share) {
+                if ($share->getShareWith() === $userString) {
+                    if (!$share->hasPermission(ilCloudStorageShareAPI::PERM_TYPE_UPDATE)) {
+                        $shareAPI->update($share->getId(), $share->getPermissions() | ($perms));
+                    }
+                    return null;
                 }
-                return;
             }
         }
-        $shareAPI->create($path, $user_string, ilCloudStorageShareAPI::PERM_TYPE_UPDATE + ilCloudStorageShareAPI::PERM_TYPE_READ);
+        return $shareAPI->create($path, $userString, $perms, $shareType);
     }
     
 

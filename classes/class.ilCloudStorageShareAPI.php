@@ -13,7 +13,7 @@ use GuzzleHttp\Exception\GuzzleException;
 class ilCloudStorageShareAPI
 {
 
-    const URI_SHARE_API = 'ocs/v1.php/apps/files_sharing/api/v1/shares';
+    const URI_SHARE_API = 'ocs/v2.php/apps/files_sharing/api/v1/shares';
 
     const PARAM_FORMAT_JSON = 'format=json';
     const PARAM_PATH = 'path=';
@@ -95,12 +95,14 @@ class ilCloudStorageShareAPI
      * @return mixed
      * @throws GuzzleException
      */
-    public function create(string $path, string $user, int $permissions)
+    // ToDo: conceptual discussion, implicit name mappings of ilias logins to storage provider accounts for sharing 
+    // is not secure! Maybe we should only support sharing with public links?
+    public function create(string $path, string $user, int $permissions, int $sharetype = self::SHARE_TYPE_USER): mixed
     {
         $additional_options = [
             'form_params' => [
                 'path'        => $path,
-                'shareType'   => self::SHARE_TYPE_USER,
+                'shareType'   => $sharetype,
                 'shareWith'   => $user,
                 'permissions' => $permissions
             ]

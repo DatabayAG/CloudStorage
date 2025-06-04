@@ -64,6 +64,7 @@ col_app_formats_info#:#Comma-separated list of formats that can be opened in the
 col_app_mapping_field#:#Field for mapping
 col_app_mapping_field_info_ocld#:#Determines which field contains the OwnCloud login name (used to grant permissions to documents).
 col_app_mapping_field_info_ncld#:#Determines which field contains the NextCloud login name (used to grant permissions to documents).
+share_link_ncld#:#Public Link (NextCloud account not required)
 plugin_configuration#:#Configuration
 config_help_begin#:#The explanation under settings is:
 showcontent#:#Cloud Connection
