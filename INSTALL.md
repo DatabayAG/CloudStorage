@@ -7,7 +7,7 @@
     ```
     mkdir -p Customizing/global/plugins/Services/Repository/RepositoryObject
     cd Customizing/global/plugins/Services/Repository/RepositoryObject
-    git clone -b release_9 https://github.com/internetlehrer/CloudStorage.git
+    git clone -b release_9 https://gitlab.com/eqsoft/CloudStorage.git
     ```
   - Wechseln Sie ins Plugin-Verzeichnis und installieren Sie die composer Bibliotheken:
     ```

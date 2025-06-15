@@ -4,13 +4,11 @@
 
 Dieses [ILIAS](https://www.ilias.de) Plugin ermöglicht die Einbindung von Cloud-Ordnern verschiedener Cloud-Storage Services. 
 
-In der aktuellen Version werden die Cloud-Storage Services [ownCloud] (https://owncloud.com/de/) und [WebDAV] unterstützt.
+In der aktuellen Version werden die Cloud-Storage Services [Nextcloud] (https://nextcloud.com/de/) und [ownCloud] (https://owncloud.com/de/) und [WebDAV] unterstützt.
 
-Weitere Services wie bspw. NextCloud sind in Planung.
+Es lassen sich nun auch verschiedene Cloud-Anbindungen des gleichen Typs konfigurieren wie bspw. [sciebo] (https://hochschulcloud.nrw/) und parallel Services, die ebenfalls auf ownCloud bzw. Nextcloud basieren oder einen Zugriff via WebDAV ermöglichen.
 
-Es lassen sich nun auch verschiedene Cloud-Anbindungen des gleichen Typs konfigurieren wie bspw. [sciebo] (https://hochschulcloud.nrw/) und parallel Services, die ebenfalls auf ownCloud basieren oder einen Zugriff via WebDAV ermöglichen.
-
-Für die ILIAS-Version 9 nutzen Sie bitte den branch 'release_9' (https://github.com/internetlehrer/CloudStorage/tree/release_9).
+Für die ILIAS-Version 9 nutzen Sie bitte den branch 'release_9' (https://gitlab.com/eqsoft/CloudStorage/tree/release_9).
 
 ## Features
 
@@ -32,9 +30,9 @@ Die Mindestvoraussetzungen, mit denen das Plugin getestet wurde, finden Sie hier
 - MySQL 5.7 oder MariaDB 10.8
 - OAuth2 Credentials des Cloud-Anbieters
 
-Des Weiteren benötigen Sie eine funktionsfähige Installation des gewünschten ownCloud-Services bzw. ein Kundenkonto des ownCloud-Service Anbieters.
+Des Weiteren benötigen Sie eine funktionsfähige Installation des gewünschten Cloud-Anbieters.
 
-Die Redirect-URL zur Erstellung der benötigten OAuth2 Credentials lautet: `<SERVER_URL>/Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/OwnCloud/redirect.php`
+Die Redirect-URL zur Erstellung der benötigten OAuth2 Credentials lautet: `<SERVER_URL>/Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/redirect.php`
 
 ## Anpassungen der Icons für das Cloud-Ordner Objekt sowie Ordner- und Datei-Symbole
 
@@ -50,4 +48,4 @@ Wenn Sie einen eigenen Skin verwenden, können die Icons in den Image-Ordner des
 
 Wenn Sie **Probleme bei der Installation oder der Verwendung** dieses Plugins haben, melden Sie diese bitte im Mantis der ILIAS-Community unter https://mantis.ilias.de/. Wählen Sie oben rechts "ILIAS Plugins" aus und erstellen Sie einen Report in der Kategorie "CloudStorage".
 
-Wenn Sie **Vorschläge für Verbesserungen oder für neue Funktionen** haben, dokumentieren Sie diese gerne hier im github-Repository als issue.
+Wenn Sie **Vorschläge für Verbesserungen oder für neue Funktionen** haben, dokumentieren Sie diese gerne hier im gitlab-Repository als issue.
