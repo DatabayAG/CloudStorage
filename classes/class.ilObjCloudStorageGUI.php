@@ -1,8 +1,10 @@
 <?php
 
-//declare(strict_types=1);
+declare(strict_types=1);
 
-use ILIAS\DI\Container;
+use ILIAS\DI\Container as Container;
+use ILIAS\Setup\CLI\InstallCommand;
+use ILIAS\UI\Component\Input\Container\Form\Standard as StandardForm;
 //use ILIAS\UI\Component\MessageBox\MessageBox;
 
 /**
@@ -108,7 +110,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $serviceClass = ilCloudStorageConfig::AVAILABLE_XCLS_SERVICES[$this->platform];
             $this->service = new $serviceClass($this->object->getRefId(), $this->object->getConnId());
         } else {
+            $this->dic->logger()->root()->log((string) $this->getCreationMode());
             $this->commandMode = self::COMMAND_MODE_PRE_CREATION;
+
         }
     }
 
@@ -176,6 +180,10 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         }
 
         switch ($cmd) {
+            #case "create":
+            #    $this->checkPermission("write");
+            #    $this->create();
+            #    break;
             case "cancelCreation":
                 $this->checkPermission("write");
                 $this->cancelCreation();
@@ -383,6 +391,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function processConnectionSelection(): void
     {
+        $this->dic->logger()->root()->log("XXXXX processConnectionSelection");
         $request = $this->dic->http()->request();
         $refinery = $this->dic->refinery();
         $factory = $this->dic->ui()->factory();
@@ -412,8 +421,12 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         //$hidden = $factory->input()->field()->hidden()->withValue("just_for_layout");
 
         if ($request->getMethod() == "POST") {
+            $this->dic->logger()->root()->log("XXXX POST");
             $form = $form->withRequest($request);
             $result = $form->getData();
+
+            $this->dic->logger()->root()->log("XXXX " . var_export($result, true));
+
             if ($result) {
                 $this->redirectToCreate($ref_id, (int) $result['conn_id']);
             } else {
@@ -636,8 +649,10 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $this->addPermissionTab();
     }
 
-    public function initCreationForms(string $new_type): array
+    protected function initCreateForm(string $new_type): array
     {
+        $this->dic->logger()->root()->log("XXXX initCreateForm");
+        $this->dic->logger()->root()->log("XXXX " . $this->dic->ctrl()->getCmdClass());
         $forms = [
             self::CFORM_FOLDER_EXISTING => $this->initCreateFormExisting($new_type),
             self::CFORM_FOLDER_NEW => $this->initCreateFormNew($new_type)
@@ -645,23 +660,68 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         return $forms;
     }
     
+    protected function getCreationFormsHTML(StandardForm|ilPropertyFormGUI|array $forms): string
+    {
+        // ignore default form and return our forms (?)
+        $this->dic->logger()->root()->log("XXXX getCreationFormsHTML");
+        // $forms = $this->initCreateForms(ilCloudStoragePlugin::ID);
+
+        if (!is_array($forms)) {
+            $this->dic->logger()->root()->log("XXXX We only deal with arrays here.");
+            throw new Exception('We only deal with arrays here.');
+        }
+
+        $acc = new ilAccordionGUI();
+        $acc->setBehaviour(ilAccordionGUI::FIRST_OPEN);
+        array_walk(
+            $forms,
+            function (ilPropertyFormGUI $v, string $k) use ($acc): void {
+                $acc->addItem(
+                    $v->getTitle(),
+                    $v->getHTML()
+                );
+            }
+        );
+
+        return $acc->getHTML();
+        //return "<pre>sdfsdfd</pre>";
+    }
+
     // for both creation modes
     private function _initCreateForm(string $a_new_type): ?array
     {
         // check if conns are available
+        $this->dic->logger()->root()->log("XXXX _initCreateForm");
         $availableConns = ilCloudStorageConfig::_getAvailableCloudStorageConn(true);
         if (count($availableConns) == 0) {
             $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $this->txt("no_active_conn"), true);
             $this->redirectToRefId($this->parent_id);
         }
         if (count($availableConns) > 1) {
+            $this->dic->logger()->root()->log("XXXX _initCreateForm 1");
             $this->dic->logger()->root()->debug("multiple connections");
-            $conn_id = ilCloudStorageUtil::getIntParam('conn_id');
-            $this->dic->logger()->root()->debug("conn_id:" . $conn_id);
+            
+            $this->dic->logger()->root()->log("XXXX " . var_export($_GET, true));
+
+            $this->dic->logger()->root()->log("XXXX " . var_export($this->dic->ctrl()->getParameterArrayByClass('ilrepositorygui'), true));
+
+            //$conn_id = ilCloudStorageUtil::getIntParam('conn_id');
+            $conn_id = (int) ilSession::get('xcls_conn_id');
+
+            if ($conn_id == 0) {
+                $conn_id = -1;
+            } else {
+                ilSession::clear('xcls_conn_id');
+            }
+
+            $this->dic->logger()->root()->debug("conn_id: " . $conn_id);
+            $this->dic->logger()->root()->log("XXXX conn_id: " . $conn_id);
+            
             if ($conn_id == -1) {
                 $this->dic->ctrl()->setParameter($this, 'auth_mode', true);
                 //$url = $this->dic->ctrl()->getLinkTarget($this, "processConnectionSelection") . "&auth_mode=true";
                 $url = $this->dic->ctrl()->getLinkTarget($this, "processConnectionSelection");
+                $this->dic->logger()->root()->log("XXXX url: " . $url);
                 $this->dic->ctrl()->redirectToURL($url);
                 return null;
             }
@@ -731,6 +791,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function initCreateFormExisting($a_new_type): ?ilPropertyFormGUI
     {
+        $this->dic->logger()->root()->log("XXXX initCreateFormExisting");
         $this->dic->ctrl()->setParameterByClass(get_class($this), "action", "choose_root");
         $ret = $this->_initCreateForm($a_new_type);
         if (is_null($ret)) {
@@ -749,6 +810,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function initCreateFormNew($a_new_type): ?ilPropertyFormGUI
     {
+        $this->dic->logger()->root()->log("XXXX initCreateFormNew");
         $this->dic->ctrl()->setParameterByClass(get_class($this), "action", "new_folder");
         $ret = $this->_initCreateForm($a_new_type);
         if (is_null($ret)) {
@@ -851,6 +913,14 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         */
         return null;
     }
+
+    /*
+    public function create(): void {
+        $this->dic->logger()->root()->log("XXXX create");
+        $this->dic->ui()->mainTemplate()->setContent($this->getCreationFormsHTML(array()));
+        //$this->_initCreateForm(ilCloudStoragePlugin::ID);
+    }
+    */
 
     public function cancelCreation(): void {
         $this->dic->logger()->root()->debug("ilObjCloudStorageGUI cancelCreation");
@@ -1947,7 +2017,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public function checkFileInput(): string {
         if (!is_array($_FILES['upload_files'])) {
             $this->lng->txt("form_msg_file_size_exceeds");
-            return false;
+            return "";
         }
         
         // empty file, could be a folder
@@ -1992,11 +2062,12 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function redirectToCreate(int $ref_id, int $conn_id): void
     {
-        $this->dic->ctrl()->setParameterByClass('ilRepositoryGUI', 'cmd', 'create');
-        $this->dic->ctrl()->setParameterByClass('ilRepositoryGUI','new_type', 'xcls');
-        $this->dic->ctrl()->setParameterByClass('ilRepositoryGUI','ref_id', (string) $ref_id);
-        $this->dic->ctrl()->setParameterByClass('ilRepositoryGUI','conn_id', (string) $conn_id);
-        $this->dic->ctrl()->redirectByClass('ilRepositoryGUI');
+        $this->dic->logger()->root()->log("XXXX redirectToCreate with conn_id: " . $conn_id);
+        $this->dic->ctrl()->setParameterByClass('ilrepositorygui', 'cmd', 'create');
+        $this->dic->ctrl()->setParameterByClass('ilrepositorygui','new_type', 'xcls');
+        $this->dic->ctrl()->setParameterByClass('ilrepositorygui','ref_id', (string) $ref_id);
+        ilSession::set("xcls_conn_id", $conn_id);
+        $this->dic->ctrl()->redirectByClass('ilrepositorygui');
     }
 
     // keep for furhter usage

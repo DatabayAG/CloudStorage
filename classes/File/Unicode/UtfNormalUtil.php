@@ -35,6 +35,7 @@
  * @return String
  * @public
  */
+/*
 function codepointToUtf8($codepoint)
 {
     if ($codepoint < 0x80) {
@@ -59,7 +60,7 @@ function codepointToUtf8($codepoint)
     echo "Asked for code outside of range ($codepoint)\n";
     die(-1);
 }
-
+*/
 /**
  * Take a series of space-separated hexadecimal numbers representing
  * Unicode code points and return a UTF-8 string composed of those

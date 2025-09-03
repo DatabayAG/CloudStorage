@@ -48,6 +48,8 @@ class ilCloudStorageConnTableGUI extends ilTable2GUI
      */
     public function init($a_parent_obj)
     {
+        global $DIC;
+        $DIC->logger()->root()->log("init");
         $this->addColumn($this->dic->language()->txt('id'), 'type_id', '10%');
         $this->addColumn($this->dic->language()->txt('rep_robj_xcls_conf_title'), 'title', '30%');
         $this->addColumn($this->dic->language()->txt('rep_robj_xcls_conf_availability'), 'availability', '20%');
@@ -58,8 +60,8 @@ class ilCloudStorageConnTableGUI extends ilTable2GUI
         $this->addCommandButton('createCloudStorageConn', $this->dic->language()->txt('rep_robj_xcls_create_type'));
         // ToDo: check
         // $this->addCommandButton('viewLogs', $lng->txt('rep_robj_xxcf_view_logs'));
-        
-        $this->setRowTemplate(ilObjCloudStorage::PLUGIN_PATH . "/templates/tpl.types_row.html");
+        $DIC->logger()->root()->log("init 2");
+        $this->setRowTemplate("tpl.types_row.html", './public/'.ilObjCloudStorage::PLUGIN_PATH);
         $this->getMyDataFromDb();
     }
 

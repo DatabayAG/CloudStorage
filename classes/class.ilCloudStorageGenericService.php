@@ -18,7 +18,7 @@ abstract class ilCloudStorageGenericService extends Client
 
     public const INI_FILENAME = 'plugin';
     
-    public const PLUGIN_PATH = './Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage';
+    public const PLUGIN_PATH = './public/Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage';
 
     public const SESSION_CALLBACK_URL = 'callback_url';
     
