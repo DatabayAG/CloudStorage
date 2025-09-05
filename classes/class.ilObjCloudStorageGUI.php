@@ -85,6 +85,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
         $this->dic = $DIC;
 
+        $this->dic->logger()->root()->log("XXXX __construct");
+
         $this->lng->loadLanguageModule('rep_robj_xcls');
         $this->lng->loadLanguageModule('file');
 
@@ -103,6 +105,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         }
 
         if($this->object instanceof ilObjCloudStorage) {
+            $this->dic->logger()->root()->log("XXXX __construct: instanceof ilObjCloudStorage ");
             $this->commandMode = self::COMMAND_MODE_OBJECT;
             assert($this->object instanceof ilObjCloudStorage);
             $this->dic->logger()->root()->debug("platform id: " . $this->platform);
@@ -110,9 +113,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $serviceClass = ilCloudStorageConfig::AVAILABLE_XCLS_SERVICES[$this->platform];
             $this->service = new $serviceClass($this->object->getRefId(), $this->object->getConnId());
         } else {
-            $this->dic->logger()->root()->log((string) $this->getCreationMode());
+            $this->dic->logger()->root()->log("XXXX __construct: COMMAND_MODE_PRE_CREATION");
             $this->commandMode = self::COMMAND_MODE_PRE_CREATION;
-
         }
     }
 
@@ -128,9 +130,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function performCommand(string $cmd): void
     {
+        $this->dic->logger()->root()->log("XXXX performCommand " . $cmd);
         $this->dic->logger()->root()->debug("cmd " . $cmd);
 
         if ($this->commandMode == self::COMMAND_MODE_OBJECT) {
+            $this->dic->logger()->root()->log("XXXX performCommand COMMAND_MODE_OBJECT");
             assert($this->object instanceof ilObjCloudStorage);
             assert($this->service instanceof ilCloudStorageGenericService);
             $this->dic->ui()->mainTemplate()->setAlertProperties($this->getAlertProperties());
@@ -178,12 +182,12 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                     $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', 'unsupported auth_method:' . $this->config->getAuthMethod(), true);
             }
         }
-
+        $this->dic->logger()->root()->log("XXXX performCommand cmd " . $cmd);
         switch ($cmd) {
-            #case "create":
-            #    $this->checkPermission("write");
-            #    $this->create();
-            #    break;
+            case "save":
+                $this->checkPermission("write");
+                $this->saveObject();
+                break;
             case "cancelCreation":
                 $this->checkPermission("write");
                 $this->cancelCreation();
@@ -251,7 +255,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     }
 
     private function handleConnectionException(ilCloudStorageException $e) {
-
+        $this->dic->logger()->root()->log("XXXX handleConnectionException");
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageGenericService);
         switch ($e->getCode()) {
@@ -313,6 +317,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     // required? Maybe processAuth could be sufficient
     protected function serviceAuth(int $conn_id = -1)
     {
+        $this->dic->logger()->root()->log("XXXX serviceAuth");
         try {
             $cmd = $this->dic->ctrl()->getCmd();
             $this->dic->ctrl()->setParameter($this, 'auth_mode', 'true');
@@ -331,6 +336,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     protected function afterServiceAuth()
     {
+        $this->dic->logger()->root()->log("XXXX afterServiceAuth");
         try {
             $this->dic->logger()->root()->debug("ilObjCloudStorageGUI afterServiceAuth");
             $conn_id = $this->getConnId();
@@ -391,7 +397,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function processConnectionSelection(): void
     {
-        $this->dic->logger()->root()->log("XXXXX processConnectionSelection");
+        $this->dic->logger()->root()->log("XXXX processConnectionSelection");
         $request = $this->dic->http()->request();
         $refinery = $this->dic->refinery();
         $factory = $this->dic->ui()->factory();
@@ -424,9 +430,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $this->dic->logger()->root()->log("XXXX POST");
             $form = $form->withRequest($request);
             $result = $form->getData();
-
             $this->dic->logger()->root()->log("XXXX " . var_export($result, true));
-
             if ($result) {
                 $this->redirectToCreate($ref_id, (int) $result['conn_id']);
             } else {
@@ -455,6 +459,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function processAuth(): void
     {
+        $this->dic->logger()->root()->log("XXXX processAuth");
         $request = $this->dic->http()->request();
         $factory = $this->dic->ui()->factory();
         $renderer = $this->dic->ui()->renderer();
@@ -508,6 +513,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         \Psr\Http\Message\ServerRequestInterface $request,
         ilCloudStorageConfig $config): ?array
     {   
+        $this->dic->logger()->root()->log("XXXX processOAuth2");
         $user_id = $this->dic->user()->getId();
 
         $factory = $this->dic->ui()->factory();
@@ -532,10 +538,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         return [$connItem, $button];
     }
 
-    public function processBasicAuth(
+    public function processBasicAuth (
         \Psr\Http\Message\ServerRequestInterface $request,
         ilCloudStorageConfig $config): ?array
     {   
+        $this->dic->logger()->root()->log("XXXX processBasicAuth");
         // build form
         $factory = $this->dic->ui()->factory();
         $refinery = $this->dic->refinery();
@@ -590,14 +597,17 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     }
 
     public function getRefId(): int {
+        $this->dic->logger()->root()->log("XXXX getRefId");
         return ($this->dic->http()->wrapper()->query()->has("ref_id")) ? (int) $this->dic->http()->wrapper()->query()->retrieve('ref_id', $this->dic->refinery()->kindlyTo()->int()): 0;
     }
 
     public function getConnId(): int {
+        $this->dic->logger()->root()->log("XXXX getConnId");
        return ($this->dic->http()->wrapper()->query()->has('conn_id')) ? (int) $this->dic->http()->wrapper()->query()->retrieve('conn_id', $this->dic->refinery()->kindlyTo()->string()): -1;
     }
 
     public function getAlertProperties(): array {
+        $this->dic->logger()->root()->log("XXXX getAlertProperties");
         assert($this->object instanceof ilObjCloudStorage);
 
         if (!$this->object->getAuthComplete()) {
@@ -623,6 +633,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function setTabs(): void
     {
+        $this->dic->logger()->root()->log("XXXX setTabs");
         if ($this->commandMode == self::COMMAND_MODE_PRE_CREATION) {
             return;
         }
@@ -705,17 +716,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
             $this->dic->logger()->root()->log("XXXX " . var_export($this->dic->ctrl()->getParameterArrayByClass('ilrepositorygui'), true));
 
-            //$conn_id = ilCloudStorageUtil::getIntParam('conn_id');
-            $conn_id = (int) ilSession::get('xcls_conn_id');
+            $conn_id = ilCloudStorageUtil::getIntParam('conn_id');
 
-            if ($conn_id == 0) {
-                $conn_id = -1;
-            } else {
-                ilSession::clear('xcls_conn_id');
-            }
-
-            $this->dic->logger()->root()->debug("conn_id: " . $conn_id);
-            $this->dic->logger()->root()->log("XXXX conn_id: " . $conn_id);
+            $this->dic->logger()->root()->debug("conn_id:" . $conn_id);
+            
+            $this->dic->logger()->root()->log("XXXX conn_id:" . $conn_id);
             
             if ($conn_id == -1) {
                 $this->dic->ctrl()->setParameter($this, 'auth_mode', true);
@@ -762,7 +767,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             return null;
         }
         // a custom PropertyForm might be a better solution
-        $form = parent::initCreateForm($a_new_type);
+        //$form = parent::initCreateForm($a_new_type);
+        $form = $this->initCreatePropertyForm($a_new_type);
         $form->setMode("subform");
         
         $serviceInfoText = $this->txt('conn_id') . ": " . $config->getTitle();
@@ -921,6 +927,34 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         //$this->_initCreateForm(ilCloudStoragePlugin::ID);
     }
     */
+    /**
+     * Init object creation form
+     */
+    protected function initCreatePropertyForm(string $new_type): ilPropertyFormGUI
+    {
+        $form = new ilPropertyFormGUI();
+        $form->setTarget("_top");
+        $form->setFormAction($this->ctrl->getFormAction($this, "save"));
+        $form->setTitle($this->txt($new_type . "_new"));
+
+        // title
+        $ti = new ilTextInputGUI($this->lng->txt("title"), "title");
+        $ti->setSize(min(40, ilObject::TITLE_LENGTH));
+        $ti->setMaxLength(ilObject::TITLE_LENGTH);
+        $ti->setRequired(true);
+        $form->addItem($ti);
+
+        // description
+        $ta = new ilTextAreaInputGUI($this->lng->txt("description"), "desc");
+        $ta->setCols(40);
+        $ta->setRows(2);
+        $form->addItem($ta);
+
+        $form->addCommandButton("save", $this->txt($new_type . "_add"));
+        $form->addCommandButton("cancel", $this->lng->txt("cancel"));
+
+        return $form;
+    }
 
     public function cancelCreation(): void {
         $this->dic->logger()->root()->debug("ilObjCloudStorageGUI cancelCreation");
@@ -930,12 +964,35 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $this->object->delete();
         $this->redirectToCreate($this->parent_id, $objId);
     }
-    /**
-     * @param ilObject $newObj
-     * @global $DIC
-     */
+    
+    public function save(): void
+    {
+        $this->dic->logger()->root()->log("XXXX save");
+
+        // create permission is already checked in createObject. This check here is done to prevent hacking attempts
+        if (!$this->checkPermissionBool("create", "", $this->requested_new_type)) {
+            $this->error->raiseError($this->lng->txt("no_create_permission"), $this->error->MESSAGE);
+        }
+
+        $this->ctrl->setParameter($this, 'new_type', '');
+        $title = ilCloudStorageUtil::getStringParam('title');
+        $new_obj = new ilObjCloudStorage();
+        $new_obj->setType('xcls');
+        $new_obj->processAutoRating();
+        $new_obj->setTitle(ilCloudStorageUtil::getStringParam('title'));
+        $new_obj->setDescription("");
+        $new_obj->create();
+
+        $new_obj->getObjectProperties()->storePropertyTitleAndDescription(
+           new ilObjectPropertyTitleAndDescription($title, "")
+        );
+        $this->putObjectInTree($new_obj);
+        $this->afterSave($new_obj);
+    }
+
     public function afterSave(ilObject $newObj): void
     {
+        $this->dic->logger()->root()->log("XXXX afterSave");
         $this->dic->logger()->root()->debug("ilObjCloudStorageGUI afterSave");
         
         $this->dic->ctrl()->saveParameterByClass(get_class($this), "action");
@@ -978,6 +1035,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     // this is for suppressing the object "object created" screen message
     private function parentAfterSave(ilObjCloudStorage $new_object) {
+        $this->dic->logger()->root()->log("XXXX parentAfterSave");
         $this->dic->ctrl()->setTargetScript('ilias.php');
         $this->dic->ctrl()->setParameterByClass(get_class($this), "ref_id", $new_object->getRefId());
         $this->dic->ctrl()->redirectByClass(["ilobjplugindispatchgui", get_class($this)], $this->getAfterCreationCmd());
@@ -1001,6 +1059,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     }
 
     public function handleAfterCreation(string $source): bool {
+        $this->dic->logger()->root()->log("XXXX handleAfterCreation");
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageGenericService);
         $action = ilCloudStorageUtil::getStringParam('action');
@@ -1047,6 +1106,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
      */
     public function editProperties(): void
     {
+        $this->dic->logger()->root()->log("XXXX editProperties");
         $this->dic->logger()->root()->debug("editProperties()");
         $this->dic->tabs()->activateTab("properties");
         assert($this->object instanceof ilObjCloudStorage);
@@ -1069,6 +1129,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function initPropertiesForm(): void
     {
+        $this->dic->logger()->root()->log("XXXX initPropertiesForm");
         assert($this->object instanceof ilObjCloudStorage);
         //assert($this->serviceGUI instanceof ilCloudStorageServiceGUIInterface);
         $this->form = new ilPropertyFormGUI();
@@ -1155,6 +1216,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public function getPropertiesValues(): void
     {
         global $DIC;
+        $this->dic->logger()->root()->log("XXXX getPropertiesValues");
         assert($this->object instanceof ilObjCloudStorage);
         //assert($this->serviceGUI instanceof ilCloudStorageServiceGUIInterface);
         $values["title"] = ilStr::shortenTextExtended($this->object->getTitle(), 64, true);
@@ -1168,6 +1230,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function updateProperties(): void
     {
+        $this->dic->logger()->root()->log("XXXX updateProperties");
         assert($this->object instanceof ilObjCloudStorage);
         //assert($this->serviceGUI instanceof ilCloudStorageServiceGUIInterface);
         $this->initPropertiesForm();
@@ -1209,6 +1272,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function setRootFolder(string $root_path)
     {
+        $this->dic->logger()->root()->log("XXXX setRootFolder");
         assert($this->object instanceof ilObjCloudStorage);
         if ($this->object->currentUserIsOwner()) {
             $this->object->setRootFolder(ilCloudStorageUtil::normalizePath($root_path));
@@ -1227,6 +1291,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     }
 
     private function clearParams() {
+        $this->dic->logger()->root()->log("XXXX clearParams");
         $this->dic->ctrl()->setParameter($this, 'action', '');
         $this->dic->ctrl()->setParameter($this, 'root_path', '');
         //unset($_SESSION['xcls_create_folder_action']);
@@ -1235,6 +1300,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     // Sn: from class.ilCloudPluginInitGUI.php
     public function showContent()
     {
+        $this->dic->logger()->root()->log("XXXX showContent");
         assert($this->object instanceof ilObjCloudStorage);
         // bug dirty hack: if comming from wrong locator entry in objectactivationgui or conditionhandlergui
         // it would be better to avoid the locator entry
@@ -1333,6 +1399,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function showTreeView(bool $afterCreation = false): void
     {
+        $this->dic->logger()->root()->log("XXXX showTreeView");
         $this->dic->logger()->root()->debug("showTreeView");
         assert($this->object instanceof ilObjCloudStorage);
         assert($this->service instanceof ilCloudStorageGenericService);
@@ -1383,6 +1450,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function asyncGetBlock(): string
     {
+        $this->dic->logger()->root()->log("XXXX asyncGetBlock");
         $this->dic->logger()->root()->debug("asyncGetBlock");
         $response = new stdClass();
         $response->message = null;
@@ -1437,6 +1505,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
      */
     public function addToolbar(ilCloudStorageFileNode $root_node): void
     {
+        $this->dic->logger()->root()->log("XXXX addToolbar");
         $create_list_gui = new ilCloudStorageItemCreationListGUI();
 
         $list_gui_html = $create_list_gui->getGroupedListItemsHTML($this->checkPermissionBool("upload"), $this->checkPermissionBool("folders_create"));
@@ -1468,6 +1537,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     
     public function getFolderHtml(ilCloudStorageFileTree $file_tree, int $id, bool $delete_files = false, bool $delete_folder = false, bool $download = false, bool $files_visible = false, $folders_visible = false): string
     {
+        $this->dic->logger()->root()->log("XXXX getFolderHtml");
         $this->dic->logger()->root()->debug("getFolderHtml");
         $node = null;
 
@@ -1512,6 +1582,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function getItemHtml(ilCloudStorageFileNode $node, bool $delete_files = false, bool $delete_folder = false, bool $download = false): string
     {
+        $this->dic->logger()->root()->log("XXXX getItemHtml");
         $this->dic->logger()->root()->debug("getItemHtml");
         $item = new ilGlobalTemplate("tpl.container_list_item.html", true, true, "Services/Container");
 
@@ -1581,6 +1652,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function getLocatorHtml(ilCloudStorageFileNode $node) : string
     {
+        $this->dic->logger()->root()->log("XXXX getLocatorHtml");
         static $ilLocator;
         //assert($ilLocator instanceof ilLocatorGUI);
         $file_tree = ilCloudStorageFileTree::getFileTreeFromSession($this->object->getRefId());
@@ -1602,6 +1674,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function asyncUploadFile(): void
     {
+        $this->dic->logger()->root()->log("XXXX asyncUploadFile");
         $this->dic->tabs()->activateTab("content");
         iljQueryUtil::initjQuery();
 
@@ -1624,6 +1697,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function getUploadFormHTML(): string
     {
+        $this->dic->logger()->root()->log("XXXX getUploadFormHTML");
         // keep for later refactoring
 
         // $file_upload = new ilObjFileUploadDropzone(
@@ -1663,6 +1737,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function cancelUploadFiles()
     {
+        $this->dic->logger()->root()->log("XXXX cancelUploadFiles");
         echo "<script language='javascript' type='text/javascript'>window.parent.il.CloudFileList.afterUpload('cancel');</script>";
         exit;
     }
@@ -1674,6 +1749,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function uploadFiles()
     {
+        $this->dic->logger()->root()->log("XXXX uploadFiles");
         $this->dic->logger()->root()->debug("uploadFiles");
         $response = new stdClass();
         $response->error = null;
@@ -1719,6 +1795,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function handleFileUpload($file_upload)
     {
+        $this->dic->logger()->root()->log("XXXX handleFileUpload");
         $this->dic->logger()->root()->debug("handleFileUpload");
 
         $response = new stdClass();
@@ -1764,6 +1841,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     protected function uploadDirectory($dir, $parent_id, $file_tree, $keep_structure = true): void
     {
+        $this->dic->logger()->root()->log("XXXX uploadDirectory");
         $this->dic->logger()->root()->debug("uploadDirectory " . $dir . "," . $parent_id);
         $dirlist = opendir($dir);
         while (false !== ($file = readdir($dirlist))) {
@@ -1798,6 +1876,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function getSelectionListItemsHTML(bool $delete_item, bool $delete_folder, ilCloudStorageFileNode $node): string
     {
+        $this->dic->logger()->root()->log("XXXX getSelectionListItemsHTML");
         $this->dic->logger()->root()->debug("getSelectionListItemsHTML");
 
         if (($delete_item && !$node->getIsDir()) || ($delete_folder && $node->getIsDir()) || $this->checkHasAction($node)) {
@@ -1821,6 +1900,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function asyncDeleteItem()
     {
+        $this->dic->logger()->root()->log("XXXX asyncDeleteItem");
         $response = new stdClass();
         $response->success = null;
         $response->message = null;
@@ -1858,7 +1938,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function getDeleteItemConfirmationHTML(bool $is_dir, string $path, int $id): string
     {
-        
+        $this->dic->logger()->root()->log("XXXX getDeleteItemConfirmationHTML");
         $gui = new ilConfirmationTableGUI(true);
         $gui->setFormName("frm_cld_delete_item");
 
@@ -1893,6 +1973,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function deleteItem()
     {
+        $this->dic->logger()->root()->log("XXXX deleteItem");
         $this->dic->logger()->root()->debug("deleteItem");
         $response = new stdClass();
         $response->success = null;
@@ -1913,6 +1994,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function cancelDeleteItem()
     {
+        $this->dic->logger()->root()->log("XXXX cancelDeleteItem");
         $response = new stdClass();
         $response->status = "cancel";
         echo "<script language='javascript' type='text/javascript'>window.parent.il.CloudFileList.afterDeleteItem(" . json_encode($response) . ");</script>";
@@ -1922,6 +2004,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     
     public function asyncCreateFolder(): void
     {
+        $this->dic->logger()->root()->log("XXXX asyncCreateFolder");
         $response = new stdClass();
         $response->success = null;
         $response->error = null;
@@ -1942,6 +2025,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function getCreateFolderHTML(): string
     {
+        $this->dic->logger()->root()->log("XXXX getCreateFolderHTML");
         $form = new ilPropertyFormGUI();
         $form->setId("cld_create_folder");
 
@@ -1965,6 +2049,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function createFolder()
     {
+        $this->dic->logger()->root()->log("XXXX createFolder");
         $response = new stdClass();
         $response->success = null;
         $response->message = null;
@@ -1990,6 +2075,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function cancelCreateFolder()
     {
+        $this->dic->logger()->root()->log("XXXX cancelCreateFolder");
         $response = new stdClass();
         $response->status = "cancel";
 
@@ -1999,6 +2085,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function getFile(): void
     {
+        $this->dic->logger()->root()->log("XXXX getFile");
         $this->dic->logger()->root()->debug("getFile");
         try {
             $file_tree = ilCloudStorageFileTree::getFileTreeFromSession($this->object->getRefId());
@@ -2015,6 +2102,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
      */
 
     public function checkFileInput(): string {
+        $this->dic->logger()->root()->log("XXXX checkFileInput");
         if (!is_array($_FILES['upload_files'])) {
             $this->lng->txt("form_msg_file_size_exceeds");
             return "";
@@ -2033,6 +2121,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public static function getImagePath(string $img): string {
         // ToDo: Caching in Session?
         global $DIC;
+        $DIC->logger()->root()->log("XXXX getImagePath");
         $styleDefinition = $DIC["styleDefinition"];
         $currentStyle = $DIC["styleDefinition"]::getCurrentStyle();
         
@@ -2053,6 +2142,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public static function _redirectToRefId(int $ref_id, string $cmd = ""): void
     {
         global $DIC;
+        $DIC->logger()->root()->log("XXXX _redirectToRefId");
         $obj_type = ilObject::_lookupType($ref_id, true);
         $class_name = $DIC['objDefinition']->getClassName($obj_type);
         $class = strtolower("ilObj" . $class_name . "GUI");
@@ -2061,15 +2151,28 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     }
 
     public function redirectToCreate(int $ref_id, int $conn_id): void
-    {
-        $this->dic->logger()->root()->log("XXXX redirectToCreate with conn_id: " . $conn_id);
-        $this->dic->ctrl()->setParameterByClass('ilrepositorygui', 'cmd', 'create');
-        $this->dic->ctrl()->setParameterByClass('ilrepositorygui','new_type', 'xcls');
-        $this->dic->ctrl()->setParameterByClass('ilrepositorygui','ref_id', (string) $ref_id);
-        ilSession::set("xcls_conn_id", $conn_id);
-        $this->dic->ctrl()->redirectByClass('ilrepositorygui');
-    }
+    {        
+        // $this->dic->ctrl()->setParameterByClass('ilrepositorygui', 'cmd', 'create');
+        // $this->dic->ctrl()->setParameterByClass('ilrepositorygui','new_type', 'xcls');
+        // $this->dic->ctrl()->setParameterByClass('ilrepositorygui','ref_id', (string) $ref_id);
+        // // This does not work anymore 
+        // $this->dic->ctrl()->setParameterByClass('ilrepositorygui', "conn_id", $conn_id);
+        // ilSession::set("xcls_conn_id", $conn_id);
+        // $this->dic->ctrl()->redirectByClass('ilrepositorygui');
 
+        // $this->dic->logger()->root()->log("XXXX redirectToCreate with conn_id: " . $conn_id);
+        // $this->dic->logger()->root()->log("XXXX redirectToCreate url " . $this->dic->ctrl()->getLinkTargetByClass('ilrepositorygui', 'create'));
+        // $this->dic->logger()->root()->log("XXXX redirectToCreate cmdNode " . $_GET["cmdNode"]);
+
+        $url = $this->dic->ctrl()->getLinkTargetByClass('ilrepositorygui', 'create') . 
+            "&cmdNode=" . $_GET["cmdNode"] . 
+            "&cmdClass=ilobjcloudstoragegui" . 
+            "&new_type=xcls" . 
+            "&ref_id=" . $_GET["ref_id"] .
+            "&conn_id=" . $conn_id;
+
+        $this->dic->ctrl()->redirectToURL($url);
+    }
     // keep for furhter usage
     // public static function exit(): void {
     //     global $DIC;
@@ -2083,6 +2186,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
      */
     public static function getParam(string $param, string $type) {
         global $DIC;
+        $DIC->logger()->root()->log("XXXX getParam");
         if ($DIC->http()->wrapper()->query()->has($param)) {
             switch ($type) {
                 case self::INT:
@@ -2105,6 +2209,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public static function _goto(array $a_target): void
     {
         global $DIC;
+        $DIC->logger()->root()->log("XXXX _goto");
         $main_tpl = $DIC->ui()->mainTemplate();
 
         $ilCtrl = $DIC->ctrl();
@@ -2144,6 +2249,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     }
 
     public function getPath(): string {
+        $this->dic->logger()->root()->log("XXXX getPath");
         $path = '';
         if ($this->dic->http()->wrapper()->query()->has("path")) {
             try {
@@ -2167,6 +2273,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function getRootName(): string 
     {
+        $this->dic->logger()->root()->log("XXXX getRootName");
         return $this->txt('root_folder_name');
     }
 
@@ -2175,6 +2282,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function addItemsAfter(ilCloudStorageFileNode $node, ilAdvancedSelectionListGUI &$selection_list): void
     {
+        $this->dic->logger()->root()->log("XXXX addItemsAfter");
         if ($this->checkHasAction($node)) {
             $this->dic->ctrl()->setParameter($this, self::ITEM_ID, $node->getId());
             $this->dic->ctrl()->setParameter($this, self::ITEM_PATH, urlencode($node->getPath()));
@@ -2193,7 +2301,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     {
         // Sn: ToDo ?
         //$upload_perm = $this->dic->access()->checkAccess('edit_in_online_editor', '', filter_input(INPUT_GET, 'ref_id', FILTER_SANITIZE_NUMBER_INT));
-        
+        $this->dic->logger()->root()->log("XXXX checkHasAction");
         $this->dic->logger()->root()->debug("checkHasAction: " . $node->getPath());
         $upload_perm = $this->dic->access()->checkAccess('edit_in_online_editor', '', $this->object->getRefId());
         $this->dic->logger()->root()->debug("checkHasAction: upload_perm: " . $upload_perm);
@@ -2209,6 +2317,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
     public function openInPlatform(): void
     {
+        global $DIC;
+        $this->dic->logger()->root()->log("XXXX openInPlatform");
         assert($this->service instanceof ilCloudStorageGenericService);
         $ref_id = $this->dic->http()->wrapper()->query()->retrieve('ref_id', $this->dic->refinery()->kindlyTo()->int());
         $upload_perm = $this->dic->access()->checkAccess('edit_in_online_editor', '', $ref_id);
@@ -2220,15 +2330,16 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $id = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_ID, $this->dic->refinery()->kindlyTo()->string());
         //$this->checkAndRefreshAuthentication();
         //$client = $this->service->getClient();
-        $this->service->shareItem($path, $this->dic->user());
-
-        $url = $this->config->getFullCollaborationAppPath($id, urlencode($path));
+        $ret = $this->service->shareItem($path, $this->dic->user());
+        $url = $ret->ocs->data->url;
+        //$url = $this->config->getFullCollaborationAppPath($id, urlencode($path));
         Header('Location: ' . $url);
         exit;
     }
 
     protected function isOpenInPlatformActive(): bool
     {
+        $this->dic->logger()->root()->log("XXXX isOpenInPlatformActive");
         if (is_null($this->open_in_platform_active)) {
             $this->open_in_platform_active = $this->config->getCollaborationAppIntegration();
         }

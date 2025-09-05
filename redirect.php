@@ -2,16 +2,10 @@
 
 declare(strict_types=1);
 
-echo "not implemented yet";
+chdir('../../../../../../../');
 
-exit;
+require_once '../vendor/composer/vendor/autoload.php';
+require_once('./Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilCloudStorageOAuth2.php');
 
-chdir('../../../../../../');
-
-require_once('./components/ILIAS/Init/classes/class.ilInitialisation.php');
 ilInitialisation::initILIAS();
-chdir('./public');
-require_once('./public/Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilCloudStorageOAuth2.php');
 ilCloudStorageOAuth2::redirect();
-
-?>
