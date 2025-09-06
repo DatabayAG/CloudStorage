@@ -606,7 +606,7 @@ class ilObjCloudStorage extends ilObjectPlugin
         $rbac_exists = ilRbacReview::_getCustomRBACOperationId('edit_in_online_editor', $DIC->database());
         if ($rbac_exists) return;
 
-        include_once('./Services/Migration/DBUpdate_3560/classes/class.ilDBUpdateNewObjectType.php');
+        include_once('../components/ILIAS/Migration/DBUpdate_3560/classes/class.ilDBUpdateNewObjectType.php');
         $xcls_type_id = ilDBUpdateNewObjectType::addNewType('xcls', 'Cloud Folder'); //if xcls type exists: id is returned otherwise ceated
         $rbac_ops = array(
             ilDBUpdateNewObjectType::RBAC_OP_EDIT_PERMISSIONS,
