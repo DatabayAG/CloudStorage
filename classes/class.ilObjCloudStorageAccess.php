@@ -204,6 +204,7 @@ class ilObjCloudStorageAccess extends ilObjectPluginAccess
     {
         global $DIC;
         $ilDB = $DIC['ilDB'];
+        // $DIC->ui()->mainTemplate()->setTitleIcon(ilObjCloudStorage::PLUGIN_PATH . "/templates/default/images/icon_xcls.svg");
         try {
         if (!isset(self::$access_cache[$a_id]["auth_status"])) {
             $set = $ilDB->query("SELECT auth_complete FROM rep_robj_xcls_data " . " WHERE id = " . $ilDB->quote($a_id, "integer"));

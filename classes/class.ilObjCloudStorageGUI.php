@@ -1301,6 +1301,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public function showContent()
     {
         $this->dic->logger()->root()->log("XXXX showContent");
+        $this->dic->ui()->mainTemplate()->setTitleIcon(ilObjCloudStorage::PLUGIN_PATH . "/templates/default/images/icon_xcls.svg");
         assert($this->object instanceof ilObjCloudStorage);
         // bug dirty hack: if comming from wrong locator entry in objectactivationgui or conditionhandlergui
         // it would be better to avoid the locator entry
@@ -1322,7 +1323,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
             $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH."/templates/default/js/ilCloudFileList.js");
             $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH."/templates/default/js/jquery.address.js");
-            $this->dic->ui()->mainTemplate()->addJavascript("./assets/js/AdvancedSelectionList.js");
+            //$this->dic->ui()->mainTemplate()->addJavascript("./assets/js/AdvancedSelectionList.js");
             $this->dic->ui()->mainTemplate()->addCss(ilObjCloudStorage::PLUGIN_PATH."/templates/default/css/cloud.css");
 
             // for FileUpload
@@ -1522,7 +1523,10 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
             $ilCloudStorageGroupedListGUI = $create_list_gui->getGroupedListItems($this->checkPermissionBool("upload"), $this->checkPermissionBool("folders_create"));
 
+            $this->dic->logger()->root()->log("XXXX addToolbar " . $ilCloudStorageGroupedListGUI->getHTML());
+
             if ($ilCloudStorageGroupedListGUI->hasItems()) {
+                $this->dic->logger()->root()->log("XXXX addToolbar hasItems");
                 $adv->setGroupedList($ilCloudStorageGroupedListGUI);
             }
 
@@ -1543,14 +1547,14 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
         $node = $file_tree->getNodeFromId($id);
         if (!$node) {
-            throw new ilCloudStorageException(ilCloudStorageException::ID_DOES_NOT_EXIST_IN_FILE_TREE_IN_SESSION, $id);
+            throw new ilCloudStorageException(ilCloudStorageException::ID_DOES_NOT_EXIST_IN_FILE_TREE_IN_SESSION, (string) $id);
         }
-        $tree_tpl = new ilTemplate(ilObjCloudStorage::PLUGIN_PATH . "/templates/default/tpl.cloud_block.html", true, true);
+        $tree_tpl = new ilTemplate('tpl.cloud_block.html', true, true, './public/' . ilObjCloudStorage::PLUGIN_PATH);
 
         if ($files_visible || $folders_visible) {
             $tree_tpl->setVariable("NODE_ID", $node->getId());
 
-            $block = new ilTemplate("tpl.container_list_block.html", true, true, "Services/Container/");
+            $block = new ilTemplate("tpl.container_list_block.html", true, true, "components/ILIAS/Container");
             
             if ($node->hasChildren()) {
                 $this->dic->logger()->root()->debug("getFolderHtml 1");
@@ -1584,7 +1588,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     {
         $this->dic->logger()->root()->log("XXXX getItemHtml");
         $this->dic->logger()->root()->debug("getItemHtml");
-        $item = new ilGlobalTemplate("tpl.container_list_item.html", true, true, "Services/Container");
+        $item = new ilGlobalTemplate("tpl.container_list_item.html", true, true, "components/ILIAS/Container");
 
         //$action_list_gui = ilCloudConnector::getActionListGUIClass($this->getService());
         //$item->setVariable("COMMAND_SELECTION_LIST", $action_list_gui->getSelectionListItemsHTML($delete_files, $delete_folder, $node));
@@ -2089,7 +2093,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $this->dic->logger()->root()->debug("getFile");
         try {
             $file_tree = ilCloudStorageFileTree::getFileTreeFromSession($this->object->getRefId());
-            $id = $this->dic->http()->wrapper()->query()->retrieve('id', $this->dic->refinery()->kindlyTo()->string());
+            $id = $this->dic->http()->wrapper()->query()->retrieve('id', $this->dic->refinery()->kindlyTo()->int());
             $file_tree->downloadFromService($id);
         } catch (Exception $e) {
             $this->dic->tabs()->activateTab("content");
@@ -2121,7 +2125,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     public static function getImagePath(string $img): string {
         // ToDo: Caching in Session?
         global $DIC;
-        $DIC->logger()->root()->log("XXXX getImagePath");
+        $DIC->logger()->root()->log("XXXX getImagePath " . $img);
         $styleDefinition = $DIC["styleDefinition"];
         $currentStyle = $DIC["styleDefinition"]::getCurrentStyle();
         
@@ -2130,11 +2134,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $currentSkinPath = rtrim($styleDefinition->getSystemStylesConf()->getCustomizingSkinPath(), "/");
             $styleImagePath = $currentSkinPath . "/" . $currentStyle . "/" . $styleDefinition->getImageDirectory($currentStyle) . "/" . $img;
             if (!file_exists($styleImagePath)) {
-                $styleImagePath = ilObjCloudStorage::PLUGIN_PATH."/templates/images/".$img;    
+                $styleImagePath = ilObjCloudStorage::PLUGIN_PATH."/templates/default/images/".$img;    
             }
         } else {
             // always get plugin default images if current skin is delos
-            $styleImagePath = ilObjCloudStorage::PLUGIN_PATH."/templates/images/".$img;
+            $styleImagePath = ilObjCloudStorage::PLUGIN_PATH."/templates/default/images/".$img;
         }
         return $styleImagePath;
     }

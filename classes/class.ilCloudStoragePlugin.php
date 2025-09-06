@@ -28,6 +28,10 @@ class ilCloudStoragePlugin extends ilRepositoryObjectPlugin
         return "CloudStorage";
     }
 
+    public static function _getIcon(string $a_type): string {
+        return ilObjCloudStorage::PLUGIN_PATH . "/templates/default/images/icon_xcls.svg";
+    }
+    
     protected function uninstallCustom(): void
     {
         global $DIC;
