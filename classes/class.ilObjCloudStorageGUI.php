@@ -1320,10 +1320,10 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             //if($this->getPluginObject()->getAsyncDrawing())
             $this->dic->logger()->root()->debug("showContent");
 
-            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH."/templates/js/ilCloudFileList.js");
-            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH."/templates/js/jquery.address.js");
-            $this->dic->ui()->mainTemplate()->addJavascript("./Services/UIComponent/AdvancedSelectionList/js/AdvancedSelectionList.js");
-            $this->dic->ui()->mainTemplate()->addCss(ilObjCloudStorage::PLUGIN_PATH."/templates/css/cloud.css");
+            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH."/templates/default/js/ilCloudFileList.js");
+            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH."/templates/default/js/jquery.address.js");
+            $this->dic->ui()->mainTemplate()->addJavascript("./assets/js/AdvancedSelectionList.js");
+            $this->dic->ui()->mainTemplate()->addCss(ilObjCloudStorage::PLUGIN_PATH."/templates/default/css/cloud.css");
 
             // for FileUpload
             // needed scripts
@@ -1336,9 +1336,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             // needed styles
             $this->dic->ui()->mainTemplate()->addCss(ilObjCloudStorage::PLUGIN_PATH. "/classes/File/templates/default/fileupload.css");
 
-            include_once("./Services/YUI/classes/class.ilYuiUtil.php");
+            include_once("../components/ILIAS/YUI/classes/class.ilYuiUtil.php");
             ilYuiUtil::initConnection();
-            $this->tpl_file_tree = new ilGlobalTemplate(ilObjCloudStorage::PLUGIN_PATH."/templates/tpl.cloud_file_tree.html", false, false);
+            $this->tpl_file_tree = new ilGlobalTemplate("tpl.cloud_file_tree.html", false, false, './public/' . ilObjCloudStorage::PLUGIN_PATH);
             $this->tpl_file_tree->setVariable("PLEASE_WAIT", $this->txt("please_wait"));
             $this->tpl_file_tree->setVariable("PLEASE_WAIT_ALT", $this->txt("please_wait"));
 
@@ -1545,7 +1545,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         if (!$node) {
             throw new ilCloudStorageException(ilCloudStorageException::ID_DOES_NOT_EXIST_IN_FILE_TREE_IN_SESSION, $id);
         }
-        $tree_tpl = new ilTemplate(ilObjCloudStorage::PLUGIN_PATH . "/templates/tpl.cloud_block.html", true, true);
+        $tree_tpl = new ilTemplate(ilObjCloudStorage::PLUGIN_PATH . "/templates/default/tpl.cloud_block.html", true, true);
 
         if ($files_visible || $folders_visible) {
             $tree_tpl->setVariable("NODE_ID", $node->getId());
