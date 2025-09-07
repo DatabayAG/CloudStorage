@@ -1511,27 +1511,42 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
         $list_gui_html = $create_list_gui->getGroupedListItemsHTML($this->checkPermissionBool("upload"), $this->checkPermissionBool("folders_create"));
         if ($list_gui_html) {
+
             //toolbar
+            
             $toolbar_locator = new ilLocatorGUI();
             $toolbar_locator->addItem($this->object->getTitle(), self::getLinkToFolder($root_node));
             $this->dic->toolbar()->setId('xcld_toolbar');
             $this->dic->toolbar()->addText("<div class='xcld_locator'>" . $toolbar_locator->getHtml() . "</div>");
             $this->dic->toolbar()->addSeparator();
 
-            $adv = new ilAdvancedSelectionListGUI();
-            $adv->setListTitle($this->txt("cld_add_new_item"));
+            $f = $this->dic->ui()->factory();
+            $renderer = $this->dic->ui()->renderer();
 
-            $ilCloudStorageGroupedListGUI = $create_list_gui->getGroupedListItems($this->checkPermissionBool("upload"), $this->checkPermissionBool("folders_create"));
+            $items = array(
+                $f->button()->shy($this->txt('cld_add_file'), "javascript:il.CloudFileList.uploadFile();"),
+                $f->button()->shy($this->txt('cld_add_folder'), "javascript:il.CloudFileList.createFolder();")
+            );
 
-            $this->dic->logger()->root()->log("XXXX addToolbar " . $ilCloudStorageGroupedListGUI->getHTML());
+            $this->dic->toolbar()->addText($renderer->render($f->dropdown()->standard($items)->withLabel($this->txt("cld_add_new_item"))));
+            // $this->txt("cld_add_new_item")
+            // return $renderer->render($f->dropdown()->standard($items)->withLabel("Actions"));
+            
+            // $adv = new ilAdvancedSelectionListGUI();
+            // $adv->setListTitle($this->txt("cld_add_new_item"));
 
-            if ($ilCloudStorageGroupedListGUI->hasItems()) {
-                $this->dic->logger()->root()->log("XXXX addToolbar hasItems");
-                $adv->setGroupedList($ilCloudStorageGroupedListGUI);
-            }
+            // $ilCloudStorageGroupedListGUI = $create_list_gui->getGroupedListItems($this->checkPermissionBool("upload"), $this->checkPermissionBool("folders_create"));
 
-            $adv->setStyle(ilAdvancedSelectionListGUI::STYLE_EMPH);
-            $this->dic->toolbar()->addText($adv->getHTML());
+            // $this->dic->logger()->root()->log("XXXX addToolbar " . $ilCloudStorageGroupedListGUI->getHTML());
+
+            // if ($ilCloudStorageGroupedListGUI->hasItems()) {
+            //     $this->dic->logger()->root()->log("XXXX addToolbar hasItems");
+            //     $adv->setGroupedList($ilCloudStorageGroupedListGUI);
+            // }
+
+            // $adv->setStyle(ilAdvancedSelectionListGUI::STYLE_EMPH);
+            // $this->dic->toolbar()->addText($adv->getHTML());
+
         }
     }
 
@@ -1680,9 +1695,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
     {
         $this->dic->logger()->root()->log("XXXX asyncUploadFile");
         $this->dic->tabs()->activateTab("content");
+        $this->dic->logger()->root()->log("XXXX 1");
         iljQueryUtil::initjQuery();
-
+        $this->dic->logger()->root()->log("XXXX 2");
         echo $this->getUploadFormHTML();
+        $this->dic->logger()->root()->log("XXXX 3");
 
         $options = new stdClass();
         $options->dropZone = "#ilFileUploadDropZone_1";
@@ -1692,10 +1709,11 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $options->dropArea = "#ilFileUploadDropArea_1";
         $options->fileList = "#ilFileUploadList_1";
         $options->fileSelectButton = "#ilFileUploadFileSelect_1";
-        echo "<script language='javascript' type='text/javascript'>var fileUpload1 = new ilFileUpload(1, " . json_encode($options) . ");</script>";
-        
+        $script = "<script language='javascript' type='text/javascript'>var fileUpload1 = new ilFileUpload(1, " . json_encode($options) . ");</script>";
+        $this->dic->logger()->root()->log("XXXX " . $script);
+        $this->dic->logger()->root()->log("XXXX folcer_id " . $_POST["folder_id"]);
+        echo $script;
         $_SESSION["cld_folder_id"] = $_POST["folder_id"];
-
         exit;
     }
 
@@ -1720,21 +1738,18 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $form->setId("upload");
         $form->setMultipart(true);
         $form->setHideLabels();
-
         $file = new ilDragDropFileInputGUI($this->txt("cld_upload_files"), "upload_files");
         $file->setRequired(true);
         $form->addItem($file);
-
         $form->addCommandButton("uploadFiles", $this->lng->txt("upload"));
         $form->addCommandButton("cancelUploadFiles", $this->lng->txt("cancel"));
-
         $form->setTableWidth("100%");
-        //        $this->form->setTitleIcon(ilUtil::getImagePath('icon_file.gif'), $lng->txt('obj_file'));
-        $form->setTitleIcon(self::getImagePath('icon_dcl_file.svg'), $this->lng->txt('obj_file'));
-
-        $form->setTitle($this->lng->txt("upload_files"));
+        // $form->setTitleIcon(self::getImagePath('icon_dcl_file.svg'), $this->txt('obj_file'));
+        $form->setTitleIcon(self::getImagePath('icon_dcl_file.svg'), $this->dic->language()->txt('obj_file'));
+        $form->setTitle($this->txt("cld_upload_files"));
         $form->setFormAction($this->dic->ctrl()->getFormAction($this, "uploadFiles"));
         $form->setTarget("cld_blank_target");
+        
         return $form->getHTML();
     }
 
@@ -1838,7 +1853,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
 
             return $response;
         } else {
-            $file_tree->uploadFileToService($_SESSION["cld_folder_id"], $file_upload["tmp_name"], $_POST["title"]);
+            $file_tree->uploadFileToService((int) $_SESSION["cld_folder_id"], $file_upload["tmp_name"], $_POST["title"]);
             return $response;
         }
     }
@@ -2062,7 +2077,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             $response->status = "done";
             $file_tree = ilCloudStorageFileTree::getFileTreeFromSession($this->object->getRefId());
             //Sn: ToDo remove POST and exit
-            $new_node = $file_tree->addFolderToService($_POST["parent_folder_id"], $_POST["folder_name"]);
+            $new_node = $file_tree->addFolderToService((int) $_POST["parent_folder_id"], $_POST["folder_name"]);
             $response->folder_id = $new_node->getId();
             $response->folder_path = $new_node->getPath();
             $response->success = true;

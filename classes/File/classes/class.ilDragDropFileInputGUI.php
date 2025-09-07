@@ -81,7 +81,7 @@ class ilDragDropFileInputGUI extends ilFileInputGUI
         global $DIC;
         $lng = $this->lng;
 
-        $tpl = new ilTemplate(ilObjCloudStorage::PLUGIN_PATH . "/classes/File/templates/default/tpl.prop_dndfiles.html", false, false);
+        $tpl = new ilTemplate('tpl.prop_dndfiles.html', false, false, './public/' . ilObjCloudStorage::PLUGIN_PATH . "/classes/File");
         // general variables
         $tpl->setVariable("UPLOAD_ID", $this->uniqueId);
         

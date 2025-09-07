@@ -185,8 +185,8 @@ class ilFileUploadGUI
         //self::initFileUpload();
         
         // load script template
-        $tpl_shared = new ilTemplate(ilObjCloudStorage::PLUGIN_PATH . "/classes/File/templates/default/tpl.fileupload_shared.html", true, true);
-        
+        $tpl_shared = new ilTemplate('tpl.fileupload_shared.html', true, true, './public/' . ilObjCloudStorage::PLUGIN_PATH . "/classes/File");
+
         // initialize localized texts
         $lng->loadLanguageModule("form");
         $tpl_shared->setCurrentBlock("fileupload_texts");
@@ -210,7 +210,8 @@ class ilFileUploadGUI
         $tpl_shared->parseCurrentBlock();
             
         // load panel template
-        $tpl_panel = new ilTemplate(ilObjCloudStorage::PLUGIN_PATH . "/classes/File/templates/default/tpl.fileupload_panel_template.html", true, true);
+        $tpl_panel = new ilTemplate('tpl.fileupload_panel_template.html', true, true, './public/' . ilObjCloudStorage::PLUGIN_PATH . "/classes/File");
+
         $tpl_panel->setVariable("TXT_HEADER", $lng->txt("upload_files_title"));
         $tpl_panel->setVariable("TXT_SHOW_ALL_DETAILS", $lng->txt('show_all_details'));
         $tpl_panel->setVariable("TXT_HIDE_ALL_DETAILS", $lng->txt('hide_all_details'));
@@ -222,7 +223,8 @@ class ilFileUploadGUI
         $tpl_shared->parseCurrentBlock();
             
         // load row template
-        $tpl_row = new ilTemplate(ilObjCloudStorage::PLUGIN_PATH . "/classes/File/templates/default/tpl.fileupload_row_template.html", true, true);
+        $tpl_row = new ilTemplate('tpl.fileupload_row_template.html', true, true, './public/' . ilObjCloudStorage::PLUGIN_PATH . "/classes/File");
+
         $tpl_row->setVariable("IMG_ALERT", ilUtil::getImagePath("icon_alert.svg"));
         $tpl_row->setVariable("ALT_ALERT", $lng->txt("alert"));
         $tpl_row->setVariable("TXT_CANCEL", $lng->txt("cancel"));
@@ -240,7 +242,6 @@ class ilFileUploadGUI
             
         // shared code now loaded
         self::$shared_code_loaded = true;
-        
         // create HTML
         return $tpl_shared->get();
     }
