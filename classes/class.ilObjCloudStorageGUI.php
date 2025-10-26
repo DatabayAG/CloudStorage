@@ -2148,11 +2148,8 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         }
         $path = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_PATH, $this->dic->refinery()->kindlyTo()->string());
         $id = $this->dic->http()->wrapper()->query()->retrieve(self::ITEM_ID, $this->dic->refinery()->kindlyTo()->string());
-        //$this->checkAndRefreshAuthentication();
-        //$client = $this->service->getClient();
         $ret = $this->service->shareItem($path, $this->dic->user());
-        $url = $ret->ocs->data->url;
-        //$url = $this->config->getFullCollaborationAppPath($id, urlencode($path));
+        $url = $this->config->getFullCollaborationAppPath($id, urlencode($path));
         Header('Location: ' . $url);
         exit;
     }
