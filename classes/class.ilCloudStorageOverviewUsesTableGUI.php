@@ -36,7 +36,7 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $this->setDefaultFilterVisiblity(true);
         $this->setDisableFilterHiding(true);
         $this->setFormAction($DIC->ctrl()->getFormAction($a_parent_obj, $a_parent_cmd));
-        $this->setRowTemplate(ilObjCloudStorage::PLUGIN_PATH . "/templates/tpl.uses_row.html");
+        $this->setRowTemplate("tpl.uses_row.html", './public/'.ilObjCloudStorage::PLUGIN_PATH);
     }
 
     /**

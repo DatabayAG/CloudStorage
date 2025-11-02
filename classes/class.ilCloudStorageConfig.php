@@ -679,8 +679,10 @@ class ilCloudStorageConfig
         $result = $ilDB->query($query);
         $data = [];
         while ($row = $ilDB->fetchAssoc($result)) {
-            $row['connTitle'] = $data0[$row['xclsConnId']]['title'];
-            $data[$row['xclsRefId']] = $row;
+            if (isset($data0[$row['xclsConnId']])) {
+                $row['connTitle'] = $data0[$row['xclsConnId']]['title'];
+                $data[$row['xclsRefId']] = $row;
+            }
         }
         // Get repo data to conn uses
         $query = "select tree.child, tree.parent parentRefId, object_data.title parentTitle
