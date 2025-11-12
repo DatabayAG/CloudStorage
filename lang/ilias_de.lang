@@ -97,7 +97,7 @@ delete_conn#:#Cloud-Anbindung löschen?
 conn_deleted#:#Die Cloud-Anbindung wurde gelöscht.
 delete#:#Löschen
 conn_id#:#Cloud-Anbindung
-overview_uses#:#Übersicht Verwendungen
+overview_uses#:#Verwendungen
 references#:#Verknüpfungen
 create_info#:#Anbindung des Cloud-Services OwnCloud
 proxy#:#Proxy

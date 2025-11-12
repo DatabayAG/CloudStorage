@@ -96,7 +96,7 @@ delete_conn#:#Delete Cloud Connection?
 conn_deleted#:#The Cloud Connection was deleted.
 delete#:#Delete
 conn_id#:#Cloud Connection
-Overview_uses#:#Overview uses
+Overview_uses#:#Uses
 references#:#Links
 create_info#:#Connection to the Cloud Service OwnCloud
 Proxy#:#Proxy
