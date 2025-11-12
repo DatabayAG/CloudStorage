@@ -206,21 +206,30 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $this->tpl->setVariable('TXT_AUTH_STATUS', '<span class="small">' . $AuthStatusHtml . '</span>');
 
         // Action
-        $linkText = ((bool)$a_set['isInTrash']) ? $this->dic->language()->txt('rep_robj_xcls_purge') : $lng->txt('delete');
-        $linkTitle = $this->dic->language()->txt('rep_robj_xcls_obj_xcls') . " (";
-        $linkTitle .= $a_set['isInTrash'] ? $lng->txt('trash') : $lng->txt('repository');
-        $linkTitle .= ")";
+        $f = $this->dic->ui()->factory();
+        $renderer = $this->dic->ui()->renderer();
+
+        // delete
+        $delLinkText = ((bool)$a_set['isInTrash']) ? $this->dic->language()->txt('rep_robj_xcls_purge') : $lng->txt('delete');
+        $delLinkTitle = $this->dic->language()->txt('rep_robj_xcls_obj_xcls') . " (";
+        $delLinkTitle .= $a_set['isInTrash'] ? $lng->txt('trash') : $lng->txt('repository');
+        $delLinkTitle .= ")";
         $purge = ((bool)$a_set['isInTrash']) ? "&purge=1" : "";
-        $this->tpl->setVariable(
-            'TXT_ACTION',
-            '<a class="il_ContainerItemCommand" href="' .
-            $ilCtrl->getLinkTarget($this->parent_obj, 'confirmDeleteUsesCloudStorageConn') .
+        $delLink = $ilCtrl->getLinkTarget(
+            $this->parent_obj, 'confirmDeleteUsesCloudStorageConn') .
             '&parent_ref_id=' . $a_set['parentRefId'] .
             '&item_ref_id=' . $a_set['xclsRefId'] .
-            $purge . 
+            $purge .
             '&cGuiItemContent=' . rawurlencode($a_set['xclsObjTitle'] . ' &nbsp;<span class="small">(' . $a_set['connTitle'] . ')</span> ')
-            . '" title="' . $linkTitle . '">' .
-            $linkText . '</a>'
+        ;
+
+        $items = array(
+            $f->button()->shy($delLinkText, $delLink)
+        );
+
+        $this->tpl->setVariable(
+            'TXT_ACTION',
+            $renderer->render($f->dropdown()->standard($items))
         );
 
     }
