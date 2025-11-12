@@ -51,7 +51,7 @@ while (false !== ($line = fgets($in))) {
             $last = $first;
         }
         for ($i = hexdec($first); $i <= hexdec($last); $i++) {
-            $char = codepointToUtf8($i);
+            $char = _codepointToUtf8($i);
             $checkNFC[$char] = $value;
         }
     }
@@ -69,7 +69,7 @@ $exclude = array();
 while (false !== ($line = fgets($in))) {
     if (preg_match('/^([0-9A-F]+)/i', $line, $matches)) {
         $codepoint = $matches[1];
-        $source = codepointToUtf8(hexdec($codepoint));
+        $source = _codepointToUtf8(hexdec($codepoint));
         $exclude[$source] = true;
     }
 }
@@ -99,7 +99,7 @@ while (false !== ($line = fgets($in))) {
     $canonicalCombiningClass = $columns[3];
     $decompositionMapping = $columns[5];
 
-    $source = codepointToUtf8(hexdec($codepoint));
+    $source = _codepointToUtf8(hexdec($codepoint));
 
     if ($canonicalCombiningClass != 0) {
         $combiningClass[$source] = intval($canonicalCombiningClass);

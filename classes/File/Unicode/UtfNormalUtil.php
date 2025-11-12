@@ -35,8 +35,7 @@
  * @return String
  * @public
  */
-/*
-function codepointToUtf8($codepoint)
+function _codepointToUtf8($codepoint)
 {
     if ($codepoint < 0x80) {
         return chr($codepoint);
@@ -60,7 +59,7 @@ function codepointToUtf8($codepoint)
     echo "Asked for code outside of range ($codepoint)\n";
     die(-1);
 }
-*/
+
 /**
  * Take a series of space-separated hexadecimal numbers representing
  * Unicode code points and return a UTF-8 string composed of those
@@ -75,7 +74,7 @@ function hexSequenceToUtf8($sequence)
     $utf = '';
     foreach (explode(' ', $sequence) as $hex) {
         $n = hexdec($hex);
-        $utf .= codepointToUtf8($n);
+        $utf .= _codepointToUtf8($n);
     }
     return $utf;
 }
