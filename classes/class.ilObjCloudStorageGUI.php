@@ -1269,13 +1269,18 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             //if($this->getPluginObject()->getAsyncDrawing())
             $this->dic->logger()->root()->debug("showContent");
 
-            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH."/templates/default/js/ilCloudFileList.js");
-            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH."/templates/default/js/jquery.address.js");
+            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/templates/default/js/ilCloudFileList.js");
+            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/templates/default/js/jquery.address.js");
             //$this->dic->ui()->mainTemplate()->addJavascript("./assets/js/AdvancedSelectionList.js");
-            $this->dic->ui()->mainTemplate()->addCss(ilObjCloudStorage::PLUGIN_PATH."/templates/default/css/cloud.css");
-
+            $this->dic->ui()->mainTemplate()->addCss(ilObjCloudStorage::PLUGIN_PATH. "/templates/default/css/cloud.css");
+            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/templates/default/js/jquery-ui.js");
+            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/templates/default/js/jquery.qtip.min.js");
+            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/templates/default/js/yahoo-dom-events.js");
+            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/templates/default/js/jquery-migrate.min.js");
+            $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/templates/default/js/connection-min.js");
             // for FileUpload
             // needed scripts
+
             $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/classes/File/js/tmpl.js");
             $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/classes/File/js/jquery.ui.widget.js");
             $this->dic->ui()->mainTemplate()->addJavaScript(ilObjCloudStorage::PLUGIN_PATH. "/classes/File/js/jquery.iframe-transport.js");
