@@ -1,5 +1,9 @@
 # ILIAS CloudStorage-Plugin
 
+## Aktuelle Hinweise
+
+* Das 3.0.1 Release vom Oct 26 musste aktualisert werden, da die Plugin Version noch auf 3.0.0 stand, dies ist behoben in dem aktualisierten 3.0.1 Release.
+
 ## Über
 
 Dieses [ILIAS](https://www.ilias.de) Plugin ermöglicht die Einbindung von Cloud-Ordnern verschiedener Cloud-Storage Services. 
