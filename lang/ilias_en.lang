@@ -71,6 +71,11 @@ showcontent#:#Cloud Connection
 repository_object#:#Repository Object
 show_trash#:#Show Trash Objects
 in_trash#:#In Trash
+delete_object#:#Delete Cloud-Folder
+delete_token#:#Delete Access Token
+delete_token_more_then_one#:#Please note that this token is linked to %s more folders.
+delete_token_info#:#Cloud-Folder will be accessible after renewed owner authentication (%s)
+delete_token_success#:#Access Token deleted
 purge#:#Delete from System
 purge_confirm#:#Delete Cloud-Folder from System? This is not recoverable!
 title#:#Title

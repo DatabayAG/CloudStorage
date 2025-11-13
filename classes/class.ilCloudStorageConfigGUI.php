@@ -540,6 +540,94 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $this->dic->ctrl()->redirect($this, 'overviewUses');
     }
 
+    public function confirmDeleteUserToken(): void
+    {
+        $this->dic->tabs()->activateTab('overview_uses');
+
+        $item_ref_id = 0;
+        $itemType = '';
+        $xcls = null;
+        if ($this->dic->http()->wrapper()->query()->has('item_ref_id')) {
+            $item_ref_id = $this->dic->http()->wrapper()->query()->retrieve('item_ref_id', $this->dic->refinery()->kindlyTo()->int());
+            $itemType = ilObject::_lookupType($item_ref_id, true);
+            $xcls = new ilObjCloudStorage($item_ref_id);
+        }
+
+        if($item_ref_id === 0 || $itemType !== $this->getPluginObject()->getId() || $xcls === null) {
+            $this->returnFailure($this->dic->language()->txt('select_one'));
+        }
+        assert($xcls instanceof ilObjCloudStorage);
+        $owner = new ilObjUser($xcls->getOwnerId());
+        $xclss = $xcls->getAllWithSameOwnerAndConnection();
+        $connTitle = ilObjCloudStorage::getConnTitleFromObjId($xcls->getId());
+        
+        //$this->dic->logger()->root()->log(var_export($xclss, true));
+        $msg = sprintf($this->txt('delete_token_info'), $owner->getLogin());
+        $allRefs = array();
+        foreach ($xclss as $id) {
+            //$obj = ilObjectFactory::getInstanceByObjId($id);
+            $refs = ilObject::_getAllReferences($id);
+            //ilObjectFactory::_isInTrash($obj->getRefId());
+            foreach ($refs as $ref) {
+                if (ilObject::_isInTrash($ref)) {
+                    continue;
+                }
+                $allRefs[] = $ref;
+            }
+        }
+
+        if (count($allRefs) > 1) {
+            $msg .= ". " . sprintf($this->txt('delete_token_more_then_one'), count($allRefs));
+        }
+        $this->dic->ui()->mainTemplate()->setOnScreenMessage('info', $msg);
+        $c_gui = new ilConfirmationGUI();
+        
+        // set confirm/cancel commands
+        $c_gui->setFormAction($this->dic->ctrl()->getFormAction($this, "overviewUses"));
+        $c_gui->setHeaderText($this->dic->language()->txt('rep_robj_xcls_delete_token') . "?");
+        $c_gui->setCancel($this->dic->language()->txt("cancel"), "overviewUses");
+        $c_gui->setConfirm($this->dic->language()->txt("confirm"), "deleteUserToken");
+
+        foreach($allRefs as $ref) {
+            $item = ilObjectFactory::getInstanceByRefId($ref)->getTitle() . '&nbsp;<span class="small">(' . $connTitle . ')</span>';
+            $c_gui->addItem("item_ref_id", (string) $ref, $item);
+    
+        }
+        $c_gui->addHiddenItem('all_folder', (string) join(",",$allRefs));
+        $c_gui->addHiddenItem('conn_id', (string) $xcls->getConnId());
+        $c_gui->addHiddenItem('owner_id', (string) $xcls->getOwnerId());
+        $this->dic->ui()->mainTemplate()->setContent($c_gui->getHTML());
+    }
+
+    private function deleteUserToken(): void
+    {
+        $connId = -1;
+        if ($this->dic->http()->wrapper()->post()->has('conn_id')) {
+            $connId = $this->dic->http()->wrapper()->post()->retrieve('conn_id', $this->dic->refinery()->kindlyTo()->int());
+        }
+        $ownerId = -1;
+        if ($this->dic->http()->wrapper()->post()->has('owner_id')) {
+            $ownerId = $this->dic->http()->wrapper()->post()->retrieve('owner_id', $this->dic->refinery()->kindlyTo()->int());
+        }
+        if($connId == -1 || $ownerId == -1) {
+            $this->returnFailure($this->dic->language()->txt('select_one'));
+        } else {
+            ilCloudStorageOAuth2::deleteUserToken($connId, $ownerId);
+            // try to reset auth status for all folder directly
+            if ($this->dic->http()->wrapper()->post()->has('all_folder')) {
+                $refs = explode(",", $this->dic->http()->wrapper()->post()->retrieve('all_folder', $this->dic->refinery()->kindlyTo()->string()));
+                foreach($refs as $ref) {
+                    $obj = new ilObjCloudStorage((int) $ref);
+                    $obj->doRead();
+                    $obj->setAuthComplete(false);
+                    $obj->doUpdate();
+                }
+            }
+            $this->dic->ui()->mainTemplate()->setOnScreenMessage('success', $this->txt('delete_token_success'), true);
+            $this->dic->ctrl()->redirect($this, 'overviewUses');
+        }
+    }
+
     private function returnFailure(string $txt = 'error', bool $redirect = true, string $gui = 'overviewUses'): void
     {
         $this->dic->ui()->mainTemplate()->setOnScreenMessage('failure', $txt);

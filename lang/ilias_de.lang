@@ -72,6 +72,11 @@ showcontent#:#Cloud-Anbindung
 repository_object#:#Magazin-Objekt
 show_trash#:#Gelöschte Objekte im Papierkorb anzeigen
 in_trash#:#Im Papierkorb
+delete_object#:#Cloud-Ordner löschen
+delete_token#:#Access-Token löschen
+delete_token_more_then_one#:#Bitte beachten Sie dass mit diesem Token noch %s weitere Ordner verknüpft sind.
+delete_token_info#:#Der Zugriff auf die Cloud-Ordner wird erst wieder ermöglicht nach erneuter Authentifizierung durch den Besitzer (%s)
+delete_token_success#:#Access-Token wurde gelöscht
 purge#:#aus dem System entfernen
 purge_confirm#:#Cloud-Ordner unwiderruflich aus dem System enfernen?
 title#:#Titel

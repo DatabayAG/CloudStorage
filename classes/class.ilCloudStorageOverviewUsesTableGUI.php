@@ -164,6 +164,8 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
      */
     protected function fillRow($a_set): void
     {
+        global $DIC;
+        $DIC->logger()->root()->log(var_export($a_set, true));
         $lng = $this->dic->language();
         $ilCtrl = $this->dic->ctrl();
 
@@ -209,24 +211,32 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
         $f = $this->dic->ui()->factory();
         $renderer = $this->dic->ui()->renderer();
 
-        // delete
-        $delLinkText = ((bool)$a_set['isInTrash']) ? $this->dic->language()->txt('rep_robj_xcls_purge') : $lng->txt('delete');
-        $delLinkTitle = $this->dic->language()->txt('rep_robj_xcls_obj_xcls') . " (";
-        $delLinkTitle .= $a_set['isInTrash'] ? $lng->txt('trash') : $lng->txt('repository');
-        $delLinkTitle .= ")";
+        // deleteObject
+        $delObjectText = ((bool)$a_set['isInTrash']) ? $this->txt('purge') : $this->txt('delete_object');
+        $delObjectTitle = $this->dic->language()->txt('rep_robj_xcls_obj_xcls') . " (";
+        $delObjectTitle .= $a_set['isInTrash'] ? $lng->txt('trash') : $lng->txt('repository');
+        $delObjectTitle .= ")";
         $purge = ((bool)$a_set['isInTrash']) ? "&purge=1" : "";
-        $delLink = $ilCtrl->getLinkTarget(
+        $delObjectLink = $ilCtrl->getLinkTarget(
             $this->parent_obj, 'confirmDeleteUsesCloudStorageConn') .
             '&parent_ref_id=' . $a_set['parentRefId'] .
             '&item_ref_id=' . $a_set['xclsRefId'] .
             $purge .
             '&cGuiItemContent=' . rawurlencode($a_set['xclsObjTitle'] . ' &nbsp;<span class="small">(' . $a_set['connTitle'] . ')</span> ')
         ;
-
+        
+        // deleteToken
+        $delTokenText = $this->txt('delete_token');
+        $delTokenTitle = $this->txt('delete_token_title');
+        
+        $delTokenLink = $ilCtrl->getLinkTarget($this->parent_obj, 'confirmDeleteUserToken') . '&item_ref_id=' . $a_set['xclsRefId'];
+        
         $items = array(
-            $f->button()->shy($delLinkText, $delLink)
+            $f->button()->shy($delObjectText, $delObjectLink)
         );
-
+        if ((bool)$a_set['auth_complete']) {
+            $items[] = $f->button()->shy($delTokenText, $delTokenLink);
+        }
         $this->tpl->setVariable(
             'TXT_ACTION',
             $renderer->render($f->dropdown()->standard($items))
