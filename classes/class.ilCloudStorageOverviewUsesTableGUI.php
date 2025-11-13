@@ -165,7 +165,6 @@ class ilCloudStorageOverviewUsesTableGUI extends ilTable2GUI
     protected function fillRow($a_set): void
     {
         global $DIC;
-        $DIC->logger()->root()->log(var_export($a_set, true));
         $lng = $this->dic->language();
         $ilCtrl = $this->dic->ctrl();
 

@@ -101,7 +101,6 @@ class ilCloudStorageConfig
         global $DIC;
         $this->dic = $DIC;
         $this->db = $this->dic->database();
-        $this->dic->logger()->root()->log("connId: " . $connId);
         if(!is_null($connId)) {
             $this->read($connId);
         }
