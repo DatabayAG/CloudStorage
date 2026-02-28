@@ -257,7 +257,7 @@ if (!$ilDB->tableExists('rep_robj_xcls_ocld_tk')) {
 ?>
 <#4>
 <?php
-require_once("./public/Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
+require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
 ilObjCloudStorage::migrationSetup();
 ?>
 <#5>
