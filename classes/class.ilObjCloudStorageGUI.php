@@ -1290,8 +1290,6 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             // needed styles
             $this->dic->ui()->mainTemplate()->addCss(ilObjCloudStorage::PLUGIN_PATH. "/classes/File/templates/default/fileupload.css");
 
-            include_once("../components/ILIAS/YUI/classes/class.ilYuiUtil.php");
-            ilYuiUtil::initConnection();
             $this->tpl_file_tree = new ilGlobalTemplate("tpl.cloud_file_tree.html", false, false, './public/' . ilObjCloudStorage::PLUGIN_PATH);
             $this->tpl_file_tree->setVariable("PLEASE_WAIT", $this->txt("please_wait"));
             $this->tpl_file_tree->setVariable("PLEASE_WAIT_ALT", $this->txt("please_wait"));
