@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class ilCloudStorageOwnCloud extends ilCloudStorageGenericService
+class ilCloudStorageOwnCloud extends ilCloudStorageGenericDAV
 {
     public const SERVICE_ID = "ocld";
 

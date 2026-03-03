@@ -1,7 +1,10 @@
 {
   "require": {
-    "league/oauth2-client": "^2.4",
-    "php": ">=7.4"
+    "league/oauth2-client": "^2",
+    "php": ">=8.3",
+    "league/flysystem-webdav": "^3",
+    "leapt/flysystem-onedrive": "^1.1",
+    "microsoft/microsoft-graph": "^1.0"
   },
   "autoload": {
     "classmap": [
@@ -13,6 +16,9 @@
     "psr/http-message": "*",
     "guzzlehttp/guzzle": "*",
     "psr/http-client": "*",
-    "psr/http-factory": "*"
+    "psr/http-factory": "*",
+    "sabre/dav": "*",
+    "league/flysystem": "*"
+
   }
 }

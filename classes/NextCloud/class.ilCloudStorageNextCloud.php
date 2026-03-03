@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class ilCloudStorageNextCloud extends ilCloudStorageGenericService
+class ilCloudStorageNextCloud extends ilCloudStorageGenericDAV
 {
     public const SERVICE_ID = "ncld";
 
