@@ -221,4 +221,7 @@ rep_robj_xcls_grp_create_xcls#:#Cloud-Ordner anlegen
 rep_robj_xcls_crs_create_xcls#:#Cloud-Ordner anlegen
 rep_robj_xcls_fold_create_xcls#:#Cloud-Ordner anlegen
 rep_robj_xcls_cat_create_xcls#:#Cloud-Ordner anlegen
-rep_robj_xcls_root_create_xcls#:#Cloud-Ordner anlegen
+rep_robj_xcls_root_create_xcls#:#Cloud-Ordner anlegenoa2_tenant_id#:#Azure Tenant ID
+oa2_tenant_id_info#:#Die Verzeichnis-ID (Tenant-ID) aus dem Microsoft Entra Admin Center. Zu finden unter: Entra Admin Center → Übersicht → Mandanten-ID.
+oa2_client_id_odrv_info#:#Die Anwendungs-ID (Client-ID) der registrierten App im Microsoft Entra Admin Center.
+base_directory_info_odrv#:#Optionaler Unterordner im OneDrive-Stammverzeichnis als Wurzel für ILIAS (z.B. "ILIASshare"). Leer lassen für das Stammverzeichnis.

@@ -332,3 +332,16 @@ if ($ilDB->tableExists('rep_robj_xcls_data')) {
 require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
 ilObjCloudStorage::rbacSetup();
 ?>
+<#11>
+<?php
+if ($ilDB->tableExists('rep_robj_xcls_conn')) {
+    if (!$ilDB->tableColumnExists('rep_robj_xcls_conn', 'oa2_tenant_id')) {
+        $ilDB->addTableColumn('rep_robj_xcls_conn', 'oa2_tenant_id', [
+            'type'    => 'text',
+            'length'  => 255,
+            'notnull' => true,
+            'default' => ''
+        ]);
+    }
+}
+?>

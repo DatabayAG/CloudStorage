@@ -220,4 +220,7 @@ rep_robj_xcls_grp_create_xcls#:#Create Cloud Folder
 rep_robj_xcls_crs_create_xcls#:#Create Cloud Folder
 rep_robj_xcls_fold_create_xcls#:#Create Cloud Folder
 rep_robj_xcls_cat_create_xcls#:#Create Cloud Folder
-rep_robj_xcls_root_create_xcls#:#Create Cloud Folder
+rep_robj_xcls_root_create_xcls#:#Create Cloud Folderoa2_tenant_id#:#Azure Tenant ID
+oa2_tenant_id_info#:#The directory (tenant) ID from the Microsoft Entra Admin Center. Found at: Entra Admin Center → Overview → Tenant ID.
+oa2_client_id_odrv_info#:#The application (client) ID of the registered app in the Microsoft Entra Admin Center.
+base_directory_info_odrv#:#Optional subfolder in the OneDrive root to use as the base for ILIAS (e.g. "ILIASshare"). Leave empty for the root directory.

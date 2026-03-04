@@ -337,6 +337,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $values['oa2_path']                 = $this->object->getOAuth2Path();
         $values['oa2_token_request_auth']   = $this->object->getOAuth2TokenRequestAuth();
         $values['server_url']               = $this->object->getServerURL();
+        $values['oa2_tenant_id']            = $this->object->getOAuth2TenantId();
         $values['proxy_url']               = $this->object->getProxyURL();
         $values['webdav_url']               = $this->object->getWebDavURL();
         $values['obj_ids_special']			= $this->object->getObjIdsSpecial();
@@ -385,6 +386,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
             $this->object->setOauth2ClientSecret(trim($form->getInput("oa2_client_secret")));
             $this->object->setOauth2Path($form->getInput("oa2_path"));
             $this->object->setOauth2TokenRequestAuth($form->getInput("oa2_token_request_auth"));
+            $this->object->setOauth2TenantId(trim($form->getInput("oa2_tenant_id")));
             $this->object->setServerUrl($form->getInput("server_url"));
             $this->object->setProxyUrl($form->getInput("proxy_url"));
             $this->object->setWebDavUrl($form->getInput("webdav_url"));
@@ -424,6 +426,7 @@ class ilCloudStorageConfigGUI extends ilPluginConfigGUI
         $values['oa2_client_id']            = $this->object->getOAuth2ClientId();
         $values['oa2_client_secret']        = $this->object->getOAuth2ClientSecret();
         $values['oa2_path']                 = $this->object->getOAuth2Path();
+        $values['oa2_tenant_id']            = $this->object->getOAuth2TenantId();
         $values['oa2_token_request_auth']   = $this->object->getOAuth2TokenRequestAuth();
         $values['server_url']               = $this->object->getServerURL();
         $values['obj_ids_special']			= $this->object->getObjIdsSpecial();

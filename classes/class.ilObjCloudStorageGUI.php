@@ -464,7 +464,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $this->dic->ctrl()->saveParameter($this, 'conn_id');
         $this->dic->ctrl()->saveParameter($this,'ref_id');
         $this->dic->ctrl()->saveParameter($this,'last_cmd');
-
+        $ret = null;
         switch ($config->getAuthMethod()) {
             case ilCloudStorageConfig::AUTH_METHOD_OAUTH2:
                 $ret = $this->processOAuth2($request, $config);

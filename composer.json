@@ -9,7 +9,8 @@
   "autoload": {
     "classmap": [
       "./classes/",
-      "./classes/OwnCloud/"
+      "./classes/OwnCloud/",
+      "./classes/OneDrive/"
     ]
   },
   "replace": {

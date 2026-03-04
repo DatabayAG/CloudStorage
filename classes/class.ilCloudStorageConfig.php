@@ -32,6 +32,11 @@ class ilCloudStorageConfig
         'dav'      => 'ilCloudStorageWebDav',
         'odrv'     => 'ilCloudStorageOneDrive'
     ];
+
+    /**
+     * Services that use Microsoft Graph / Flysystem instead of WebDAV/Sabre.
+     */
+    public const GRAPH_ADAPTER_SERVICES = ['odrv'];
     
     public const AVAILABILITY_NONE = 0;  // Type is not longer available (error message)
     public const AVAILABILITY_EXISTING = 1; // Existing objects of the can be used, but no new created
@@ -66,6 +71,7 @@ class ilCloudStorageConfig
     private string $oauth2ClientId = '';
     private string $oauth2ClientSecret = '';
     private string $oauth2Path = '';
+    private string $oauth2TenantId = '';
     private string $oauth2TokenRequestAuth = 'header';
     private string $serverUrl = '';
     private string $webdavUrl = '';
@@ -147,6 +153,7 @@ class ilCloudStorageConfig
             'oa2_client_id'             => ['text', $this->getOAuth2ClientId()],
             'oa2_client_secret'         => ['text', $this->getOAuth2ClientSecret()],
             'oa2_path'                  => ['text', $this->getOAuth2Path()],
+            'oa2_tenant_id'             => ['text', $this->getOAuth2TenantId()],
             'oa2_token_request_auth'    => ['text', $this->getOAuth2TokenRequestAuth()],
             'server_url'                => ['text', $this->getServerURL()],
             'proxy_url'                 => ['text', $this->getProxyURL()],
@@ -234,6 +241,7 @@ class ilCloudStorageConfig
             $this->setOauth2ClientId($record["oa2_client_id"]);
             $this->setOauth2ClientSecret($record["oa2_client_secret"]);
             $this->setOauth2Path($record["oa2_path"]);
+            $this->setOauth2TenantId($record["oa2_tenant_id"] ?? '');
             $this->setOauth2TokenRequestAuth($record["oa2_token_request_auth"]);
             $this->setObjIdsSpecial($record["obj_ids_special"]);
             $this->setServerUrl($record["server_url"]);
@@ -413,6 +421,26 @@ class ilCloudStorageConfig
     public function setOAuth2Path(string $oauth2Path): void
     {
         $this->oauth2Path = $oauth2Path;
+    }
+
+    public function getOAuth2TenantId(): string
+    {
+        return $this->oauth2TenantId;
+    }
+
+    public function setOAuth2TenantId(string $oauth2TenantId): void
+    {
+        $this->oauth2TenantId = $oauth2TenantId;
+    }
+
+    public function isOneDrive(): bool
+    {
+        return $this->getServiceId() === 'odrv';
+    }
+
+    public function usesGraphAdapter(): bool
+    {
+        return in_array($this->getServiceId(), self::GRAPH_ADAPTER_SERVICES, true);
     }
 
     public function getOAuth2TokenRequestAuth(): string
@@ -596,8 +624,11 @@ class ilCloudStorageConfig
 
     public static function getServiceFromConfig(int $refId, int $connId): ilCloudStorageGenericService
     {
-        $serviceId = ilCloudStorageConfig::getInstance($connId)->getServiceId();
+        $config       = ilCloudStorageConfig::getInstance($connId);
+        $serviceId    = $config->getServiceId();
         $serviceClass = ilCloudStorageConfig::AVAILABLE_XCLS_SERVICES[$serviceId];
+        // Graph-based services (OneDrive) receive no extra adapter arg –
+        // their concrete constructor hardwires ADAPTER_ONEDRIVE via parent::__construct().
         return new $serviceClass($refId, $connId);
     }
 
