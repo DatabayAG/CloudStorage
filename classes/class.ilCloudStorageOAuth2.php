@@ -376,3 +376,138 @@ class ilCloudStorageOAuth2
         return unserialize(ilSession::get(self::SESSION_AUTH_BEARER));
     }
 }
+
+// <?php
+
+// declare(strict_types=1);
+
+// use League\OAuth2\Client\Provider\GenericProvider;
+// use League\OAuth2\Client\OptionProvider\HttpBasicAuthOptionProvider;
+// use League\OAuth2\Client\OptionProvider\PostAuthOptionProvider;
+// use Sabre\DAV\Client;
+
+// class ilCloudStorageOAuth2
+// {
+//     // ... (alle Konstanten und DB-Methoden bleiben identisch)
+
+//     // -------------------------------------------------------------------------
+//     // Provider Options – jetzt service-aware
+//     // -------------------------------------------------------------------------
+
+//     public static function getOAuth2ProviderOptions(ilCloudStorageConfig $config): array
+//     {
+//         $serviceId = $config->getServiceId();
+
+//         if ($serviceId === ilCloudStorageConfig::SERVICE_ONEDRIVE) {
+//             $tenantId = $config->getOAuth2TenantId(); // neues Config-Feld
+//             return [
+//                 'clientId'                => $config->getOAuth2ClientID(),
+//                 'clientSecret'            => $config->getOAuth2ClientSecret(),
+//                 'redirectUri'             => self::getRedirectUri($config->getConnId()),
+//                 'urlAuthorize'            => 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/v2.0/authorize',
+//                 'urlAccessToken'          => 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/v2.0/token',
+//                 'urlResourceOwnerDetails' => 'https://graph.microsoft.com/v1.0/me',
+//                 'scopes'                  => ['Files.ReadWrite', 'offline_access'],
+//             ];
+//         }
+
+//         // Default: WebDAV/OwnCloud/Nextcloud
+//         return [
+//             'clientId'                => $config->getOAuth2ClientID(),
+//             'clientSecret'            => $config->getOAuth2ClientSecret(),
+//             'redirectUri'             => self::getRedirectUri($config->getConnId()),
+//             'urlAuthorize'            => $config->getFullOAuth2Path() . '/authorize',
+//             'urlAccessToken'          => $config->getFullOAuth2Path() . '/api/v1/token',
+//             'urlResourceOwnerDetails' => $config->getFullOAuth2Path() . '/resource',
+//         ];
+//     }
+
+//     // -------------------------------------------------------------------------
+//     // Connection Check – jetzt service-aware, kein Sabre mehr direkt hier
+//     // -------------------------------------------------------------------------
+
+//     public static function checkConnection(int $conn_id, int $user_id, ilCloudStorageConfig $config): void
+//     {
+//         $serviceId = $config->getServiceId();
+
+//         if ($serviceId === ilCloudStorageConfig::SERVICE_ONEDRIVE) {
+//             // Für OneDrive reicht es zu prüfen ob ein gültiger Token vorhanden ist
+//             $token = self::getUserToken($conn_id, $user_id);
+//             if (!$token->getAccessToken()) {
+//                 throw new ilCloudStorageException(ilCloudStorageException::NOT_AUTHORIZED);
+//             }
+//             return;
+//         }
+
+//         // Default: WebDAV PROPFIND
+//         $status = self::getHTTPStatus($conn_id, $user_id, $config);
+//         if ($status == 401) {
+//             throw new ilCloudStorageException(ilCloudStorageException::NOT_AUTHORIZED);
+//         }
+//         if ($status > 401) {
+//             throw new ilCloudStorageException(ilCloudStorageException::NO_CONNECTION);
+//         }
+//     }
+
+//     public static function getHTTPStatus(int $conn_id, int $user_id, ilCloudStorageConfig $config): int
+//     {
+//         global $DIC;
+//         try {
+//             $client = new Client(self::getClientSettings($config));
+//             $response = $client->request('PROPFIND', '', null, self::getHeaders($conn_id, $user_id));
+//         } catch (Exception $e) {
+//             $DIC->logger()->root()->error($e->getMessage());
+//             throw new ilCloudStorageException(ilCloudStorageException::NO_CONNECTION, $e->getMessage());
+//         }
+//         return $response['statusCode'];
+//     }
+
+//     // Bleibt für WebDAV – OneDrive braucht das nicht
+//     public static function getClientSettings(ilCloudStorageConfig $config): array
+//     {
+//         $settings = [
+//             'baseUri'    => $config->getFullWebDAVPath(),
+//             'webDavPath' => $config->getWebDavPath(),
+//         ];
+//         if ($config->getProxyURL() !== '') {
+//             $settings['proxy'] = $config->getProxyURL();
+//         }
+//         return $settings;
+//     }
+
+//     // -------------------------------------------------------------------------
+//     // Authenticate – bleibt generisch, provider-spezifische URLs kommen
+//     //                jetzt aus getOAuth2ProviderOptions()
+//     // -------------------------------------------------------------------------
+
+//     public static function Authenticate(int $user_id, ilCloudStorageConfig $config): void
+//     {
+//         global $DIC;
+//         $DIC->logger()->root()->debug("OAuth2: Authenticate");
+
+//         $redirectURI = self::getRedirectUri($config->getConnId());
+//         $DIC->ctrl()->setParameterByClass('ilObjCloudStorageGUI', 'cmd', 'afterServiceAuth');
+//         $DIC->ctrl()->setParameterByClass('ilObjCloudStorageGUI', 'auth_mode', 'true');
+//         $callbackUrl = $DIC->ctrl()->getLinkTargetByClass('ilObjCloudStorageGUI');
+
+//         if (!self::checkAndRefreshAuthentication($user_id, $config)) {
+//             $provider = self::getOAuth2Provider($config);
+//             ilSession::set(self::SESSION_CALLBACK_URL, ilObjCloudStorage::getHttpPath() . $callbackUrl);
+//             ilSession::set(self::SESSION_CONN_ID, $config->getConnId());
+
+//             $authParams = ['redirect_uri' => $redirectURI];
+
+//             // OneDrive braucht expliziten scope beim authorize-Aufruf
+//             if ($config->getServiceId() === ilCloudStorageConfig::SERVICE_ONEDRIVE) {
+//                 $authParams['scope'] = 'Files.ReadWrite offline_access';
+//             }
+
+//             $provider->authorize($authParams);
+//         } else {
+//             header("Location: " . htmlspecialchars_decode($callbackUrl));
+//         }
+//     }
+
+//     // alle anderen Methoden (getUserToken, storeUserToken, refreshToken, etc.)
+//     // bleiben vollständig unverändert
+// }
