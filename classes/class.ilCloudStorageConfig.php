@@ -22,13 +22,15 @@ class ilCloudStorageConfig
     public const AVAILABLE_FS_CONN = [
         'ocld'		=> 'OwnCloud',
         'ncld'		=> 'NextCloud',
-        'dav'       => 'WebDav'
+        'dav'       => 'WebDav',
+        'odrv'      => 'OneDrive'
 
     ];
     public const AVAILABLE_XCLS_SERVICES = [
         'ocld'     => 'ilCloudStorageOwnCloud',
         'ncld'     => 'ilCloudStorageNextCloud',
-        'dav'      => 'ilCloudStorageWebDav'
+        'dav'      => 'ilCloudStorageWebDav',
+        'odrv'     => 'ilCloudStorageOneDrive'
     ];
     
     public const AVAILABILITY_NONE = 0;  // Type is not longer available (error message)
