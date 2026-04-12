@@ -1,2 +1,5 @@
 vendor
 composer.lock
+# Continue lokale Daten
+.continue/.db
+.continue/index/

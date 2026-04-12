@@ -41,6 +41,10 @@ $hi = new ilHiddenInputGUI('auth_method');
 $hi->setValue('oauth2');
 $this->form->addItem($hi);
 
+$hi = new ilHiddenInputGUI('oa2_token_request_auth');
+$hi->setValue(ilCloudStorageConfig::POST_BODY);
+$this->form->addItem($hi);
+
 // Base directory (optional subfolder in OneDrive root)
 $ti = new ilTextInputGUI($pl->txt('base_directory'), 'base_directory');
 $ti->setRequired(false);

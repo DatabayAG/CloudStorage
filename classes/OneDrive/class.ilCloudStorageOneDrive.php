@@ -56,4 +56,9 @@ class ilCloudStorageOneDrive extends ilCloudStorageGenericFilesystem
     {
         return self::REFRESH_TOKEN_EXPIRES;
     }
+
+    public function shareItem(string $path): ?array
+    {
+        throw new \Exception('Not implemented');
+    }
 }

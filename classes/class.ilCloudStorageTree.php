@@ -19,10 +19,17 @@ class ilCloudStorageTree
 
     public function getChilds($id, string $a_order = "", string $a_direction = "ASC"): array
     {
-        return $this->service->listFolder(ilCloudStorageUtil::decodeBase64Path($id));
+        $path = ilCloudStorageUtil::decodeBase64Path($id);
+        try {
+            return $this->service->listFolder($path);
+        } catch (\Throwable $e) {
+            // OneDrive returns 422 when listing children of a file.
+            // Return empty array instead of crashing.
+            return [];
+        }
     }
 
-    function getRootNode()
+    public function getRootNode(): ilCloudStorageFolder
     {
         $root = new ilCloudStorageFolder();
         $root->setName('');

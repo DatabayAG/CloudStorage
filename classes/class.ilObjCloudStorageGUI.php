@@ -465,11 +465,15 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $this->dic->ctrl()->saveParameter($this,'ref_id');
         $this->dic->ctrl()->saveParameter($this,'last_cmd');
         $ret = null;
+        $this->dic->logger()->root()->debug("XXX AUTH: " . $config->getAuthMethod());
+
         switch ($config->getAuthMethod()) {
             case ilCloudStorageConfig::AUTH_METHOD_OAUTH2:
+                $this->dic->logger()->root()->debug("XXXXX OAuth2");
                 $ret = $this->processOAuth2($request, $config);
             break;
             case ilCloudStorageConfig::AUTH_METHOD_BASIC:
+                $this->dic->logger()->root()->debug("XXXXX Basic");
                 $ret = $this->processBasicAuth($request, $config);
             break;
         }
@@ -1035,11 +1039,10 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 if ($this->object->currentUserIsOwner()) {
                     $this->dic->logger()->root()->debug("{$source} root_folder: " . $this->object->getRootFolder());
                     if ($this->service->folderExists($this->object->getRootFolder())) {
-                        $this->object->delete();
-                        $this->tpl->setOnScreenMessage('failure', $this->txt("cld_folder_already_existing_on_service") . ": " . $this->object->getRootFolder(), false);
-                        $this->redirectToCreate($this->parent_id, $this->object->getConnId());
-                        return true;
-                        // ToDo
+                        // Folder already exists on the service – reuse it instead of
+                        // deleting the ILIAS object. This is safe for OneDrive where
+                        // the folder may have been created in a previous attempt.
+                        $this->dic->logger()->root()->debug("root_folder already exists on service, reusing: " . $this->object->getRootFolder());
                     } else {
                         try {
                             $this->service->createFolder($this->object->getRootFolder());
@@ -1202,7 +1205,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $this->object->setTitle($title);
             }
             $this->object->setDescription($this->form->getInput("desc"));
-            $this->object->setOnline($this->form->getInput("online"));
+            $this->object->setOnline((bool) $this->form->getInput("online"));
             //$this->serviceGUI->updateProperties();
             $root_folder = ($this->form->getInput("root_folder") == "") ? $this->config->getBaseDirectory() : $this->form->getInput("root_folder");
             $this->object->setRootFolder($root_folder);
@@ -1369,11 +1372,9 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $tree = new ilCloudStorageTree($this->service);
                 $tree_gui = new ilCloudStorageTreeGUI('tree_expl', $this, 'editProperties', $tree);
                 $this->dic->tabs()->clearTargets();
-                if (!$afterCreation) {
-                    $this->dic->tabs()->setBackTarget($this->object->txt('back'), $this->dic->ctrl()->getLinkTarget($this, 'editProperties'));
-                } else {
-                    $this->dic->tabs()->setBackTarget($this->object->txt('back'), $this->dic->ctrl()->getLinkTarget($this, 'cancelCreation'));
-                }
+                // Always go back to editProperties – never to cancelCreation which deletes the object.
+                // cancelCreation is only meant for truly aborting before any data is saved.
+                $this->dic->tabs()->setBackTarget($this->object->txt('back'), $this->dic->ctrl()->getLinkTarget($this, 'editProperties'));
                 
                 $this->dic->ui()->mainTemplate()->setOnScreenMessage('info', $this->object->txt('choose_root'), true);
                 $this->dic->ctrl()->setParameter($this, 'action', 'choose_root');
@@ -1386,8 +1387,17 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
             
         } else {
             $this->dic->logger()->root()->debug("showTreeView async");
-            
-            //$client = $this->service->getClient();
+
+            // For OAuth2 services, refresh the token before checking connection.
+            // Without this, an expired token causes hasConnection() to return false
+            // and the async getNodeAsync handler returns an empty response (500).
+            if ($this->config->getAuthMethod() === $this->config::AUTH_METHOD_OAUTH2) {
+                ilCloudStorageOAuth2::checkAndRefreshAuthentication(
+                    $this->object->getOwnerId(),
+                    $this->config
+                );
+            }
+
             if ($this->service->hasConnection()) {
                 $this->dic->logger()->root()->debug("showTreeView async hasConnection");
                 $tree = new ilCloudStorageTree($this->service);
@@ -1796,7 +1806,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
         $dirlist = opendir($dir);
         while (false !== ($file = readdir($dirlist))) {
             if (!is_file($dir . "/" . $file) && !is_dir($dir . "/" . $file)) {
-                throw new ilCloudStorageException($this->dic->language()->txt("filenames_not_supported"), ilFileUtilsException::$BROKEN_FILE);
+                throw new ilCloudStorageException(ilFileUtilsException::$BROKEN_FILE, $this->dic->language()->txt("filenames_not_supported"));
             }
             if ($file != '.' && $file != '..') {
                 $newpath = $dir . '/' . $file;

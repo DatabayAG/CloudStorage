@@ -82,7 +82,8 @@ class ilCloudStorageConfig
 
     private array $objConfigAvailSetting = [
         'ocld'   => [],
-        'ncld'   => []
+        'ncld'   => [],
+        'odrv'   => []
     ];
 
     private string $objIdsSpecial = '';

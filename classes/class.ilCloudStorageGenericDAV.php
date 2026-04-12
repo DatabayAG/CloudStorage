@@ -588,7 +588,7 @@ abstract class ilCloudStorageGenericDAV extends Client implements ilCloudStorage
     
     // ToDo: conceptual discussion, implicit name mappings of ilias logins to storage provider accounts for sharing 
     // is not secure! Maybe we should only support sharing with public links?
-    public function shareItem(string $path, ilObjUser $user): void
+    public function shareItemWithUser(string $path, ilObjUser $user): void
     {
         if ($user->getId() == $this->object->getOwnerId()) {
             // no need to share with yourself (can result in an error with nextcloud)
@@ -696,5 +696,15 @@ abstract class ilCloudStorageGenericDAV extends Client implements ilCloudStorage
         }
         //$DIC->logger()->root()->log("items: " . var_export($return,true));
         return $ret;
+    }
+
+    /**
+     * Share an item and get share URL/info
+     * Interface implementation - returns null until fully implemented
+     */
+    public function shareItem(string $path): ?array
+    {
+        // Dummy implementation - returns null until fully implemented
+        return null;
     }
 }

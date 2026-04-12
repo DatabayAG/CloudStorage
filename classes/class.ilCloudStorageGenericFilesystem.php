@@ -62,7 +62,7 @@ abstract class ilCloudStorageGenericFilesystem implements ilCloudStorageGenericS
     {
         $graph = new Graph();
         $graph->setAccessToken($this->getToken()->getAccessToken());
-        return new Filesystem(new OneDriveAdapter($graph, 'root'));
+        return new Filesystem(new OneDriveAdapter($graph, 'me/drive/root'));
     }
 
     protected function createSabreClient(): SabreClient
@@ -127,13 +127,27 @@ abstract class ilCloudStorageGenericFilesystem implements ilCloudStorageGenericS
         $items   = [];
 
         foreach ($listing as $item) {
+            // The Leapt OneDrive adapter returns paths prefixed with 'me/drive/root'
+            // (the adapter prefix). Strip it so paths are relative to the drive root.
+            $itemPath = $item->path();
+            if ($this->config->isOneDrive()) {
+                $itemPath = preg_replace('#^me/drive/root/?#', '', $itemPath);
+            }
+
+            // path = parent directory, name = basename – required for getFullPath()
+            $cleanPath = '/' . ltrim($itemPath, '/');
+            $itemName  = basename($cleanPath);
+            $parentPath = rtrim(dirname($cleanPath), '/') ?: '/';
+
             if ($item->isDir()) {
                 $folder = new ilCloudStorageFolder();
-                $folder->setPath('/' . ltrim($item->path(), '/'));
+                $folder->setPath($parentPath);
+                $folder->setName($itemName);
                 $items[] = $folder;
             } else {
                 $file = new ilCloudStorageFile();
-                $file->setPath('/' . ltrim($item->path(), '/'));
+                $file->setPath($parentPath);
+                $file->setName($itemName);
                 if ($item instanceof FileAttributes) {
                     $file->setSize($item->fileSize());
                     if ($item->lastModified()) {
@@ -170,7 +184,16 @@ abstract class ilCloudStorageGenericFilesystem implements ilCloudStorageGenericS
             $path = ilCloudStorageUtil::joinPaths($file_tree->getRootPath(), $path);
         }
         $path = ltrim($path, '/');
-        if ($path !== '' && !$this->filesystem->directoryExists($path)) {
+        if ($path === '') {
+            return;
+        }
+        // OneDrive/Graph: directoryExists() throws a 404 exception for non-existent paths
+        // instead of returning false – so skip the check and just create directly.
+        if ($this->config->isOneDrive()) {
+            $this->filesystem->createDirectory($path);
+            return;
+        }
+        if (!$this->filesystem->directoryExists($path)) {
             $this->filesystem->createDirectory($path);
         }
     }
@@ -209,6 +232,20 @@ abstract class ilCloudStorageGenericFilesystem implements ilCloudStorageGenericS
     public function delete(string $path): bool
     {
         $path = ltrim($path, '/');
+        // OneDrive/Graph: fileExists/directoryExists throw on missing paths.
+        // Attempt delete directly and catch 404 as a no-op.
+        if ($this->config->isOneDrive()) {
+            try {
+                $this->filesystem->delete($path);
+            } catch (\Throwable $e) {
+                try {
+                    $this->filesystem->deleteDirectory($path);
+                } catch (\Throwable) {
+                    // item did not exist – that's fine
+                }
+            }
+            return true;
+        }
         if ($this->filesystem->fileExists($path)) {
             $this->filesystem->delete($path);
         } elseif ($this->filesystem->directoryExists($path)) {
@@ -230,6 +267,11 @@ abstract class ilCloudStorageGenericFilesystem implements ilCloudStorageGenericS
         return false;
     }
 
+    public function isCaseSensitive(): bool
+    {
+        return true;
+    }
+
     public function fileExists(string $path): bool
     {
         return $this->filesystem->fileExists(ltrim($path, '/'));
@@ -237,7 +279,16 @@ abstract class ilCloudStorageGenericFilesystem implements ilCloudStorageGenericS
 
     public function folderExists(string $path): bool
     {
-        return $this->filesystem->directoryExists(ltrim($path, '/'));
+        $path = ltrim($path, '/');
+        // OneDrive/Graph: directoryExists() throws 404 for non-existent paths.
+        if ($this->config->isOneDrive()) {
+            try {
+                return $this->filesystem->directoryExists($path);
+            } catch (\Throwable) {
+                return false;
+            }
+        }
+        return $this->filesystem->directoryExists($path);
     }
 
     public function deliverFile(string $path): void
@@ -306,5 +357,82 @@ abstract class ilCloudStorageGenericFilesystem implements ilCloudStorageGenericS
             $this->config::AUTH_METHOD_BASIC  => ilCloudStorageBasicAuth::getClientSettings($this->config),
             default                           => [],
         };
+    }
+
+    /*
+     |--------------------------------------------------------------------------
+     | Interface Methods - Dummy Implementations
+     |--------------------------------------------------------------------------
+     */
+
+    public function shareItem(string $path): ?array
+    {
+        // Dummy implementation - returns null until fully implemented
+        return null;
+    }
+
+    public function hasParentId(): bool
+    {
+        // Generic filesystem adapters typically don't support parent ID tracking
+        return false;
+    }
+
+    public function hasFileId(): bool
+    {
+        // Generic filesystem adapters typically don't support file ID tracking
+        return false;
+    }
+
+    public function getParentIdField(): string
+    {
+        // Return empty string as filesystem adapters don't use parent ID fields
+        return '';
+    }
+
+    public function getFileIdField(): string
+    {
+        // Return empty string as filesystem adapters don't use file ID fields
+        return '';
+    }
+
+    public function getDecodedWebUrl(string $webUrl): string
+    {
+        return rawurldecode($webUrl);
+    }
+
+    public function getPathFromWebUrl(string $webUrl, int $type): string
+    {
+        $decodedUrl = $this->getDecodedWebUrl($webUrl);
+        
+        // For folder type, remove trailing slash
+        if ($type == ilCloudStorageItem::TYPE_FOLDER) {
+            $decodedUrl = rtrim($decodedUrl, '/');
+        }
+        
+        // Extract directory path (everything except the filename)
+        $lastSlashPos = strrpos($decodedUrl, '/');
+        if ($lastSlashPos !== false) {
+            return substr($decodedUrl, 0, $lastSlashPos + 1);
+        }
+        
+        return '/';
+    }
+
+    public function getNameFromWebUrl(string $webUrl, int $type): string
+    {
+        $decodedUrl = $this->getDecodedWebUrl($webUrl);
+        
+        // For folder type, remove trailing slash
+        if ($type == ilCloudStorageItem::TYPE_FOLDER) {
+            $decodedUrl = rtrim($decodedUrl, '/');
+        }
+        
+        // Extract filename/dirname (everything after the last slash)
+        $lastSlashPos = strrpos($decodedUrl, '/');
+        if ($lastSlashPos !== false) {
+            return substr($decodedUrl, $lastSlashPos + 1);
+        }
+        
+        return $decodedUrl;
     }
 }

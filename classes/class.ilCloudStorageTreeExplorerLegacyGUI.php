@@ -343,7 +343,9 @@ abstract class ilCloudStorageTreeExplorerLegacyGUI extends ilExplorerBaseGUI imp
 
     public function getChildren($record, $environment = null): array
     {
-        return $this->getChildsOfNode($record["child"]);
+        // $record is an ilCloudStorageItem object - use getNodeId() to get the encoded path
+        $nodeId = $this->getNodeId($record);
+        return $this->getChildsOfNode($nodeId);
     }
 
     /**
@@ -390,7 +392,7 @@ abstract class ilCloudStorageTreeExplorerLegacyGUI extends ilExplorerBaseGUI imp
             $node = $node->withLink(new \ILIAS\Data\URI(ILIAS_HTTP_PATH . '/' . $href));
         }
 
-        if ($this->isNodeOpen((int) $this->getNodeId($record))) {
+        if ($this->isNodeOpen($this->getNodeId($record))) {
             $node = $node->withExpanded(true);
         }
 

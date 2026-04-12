@@ -257,7 +257,7 @@ if (!$ilDB->tableExists('rep_robj_xcls_ocld_tk')) {
 ?>
 <#4>
 <?php
-require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
+require_once("./public/Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
 ilObjCloudStorage::migrationSetup();
 ?>
 <#5>
@@ -329,7 +329,7 @@ if ($ilDB->tableExists('rep_robj_xcls_data')) {
 ?>
 <#10>
 <?php
-require_once("./Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
+require_once("./public/Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
 ilObjCloudStorage::rbacSetup();
 ?>
 <#11>
@@ -344,4 +344,10 @@ if ($ilDB->tableExists('rep_robj_xcls_conn')) {
         ]);
     }
 }
+?>
+<#12>
+<?php
+file_put_contents("/tmp/log.txt", getcwd() . "\n", 1);
+require_once("./public/Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
+file_put_contents("/tmp/log.txt", getcwd() . "\n", 1);
 ?>

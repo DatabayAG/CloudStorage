@@ -226,7 +226,8 @@ class ilCloudStorageOAuth2
         if (file_exists(__DIR__ . '/' . $serviceName . '/redirect.php')) {
             return $plugin_path . '/classes/' . $serviceName . '/redirect.php';
         } else { // new services
-            return $plugin_path . '/redirect.php?conn_id=' . (string) $conn_id;
+            //return $plugin_path . '/redirect.php?conn_id=' . (string) $conn_id;
+            return $plugin_path . '/redirect.php';
         }
     }
 
@@ -252,7 +253,8 @@ class ilCloudStorageOAuth2
                 'urlAuthorize'            => 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/v2.0/authorize',
                 'urlAccessToken'          => 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/v2.0/token',
                 'urlResourceOwnerDetails' => 'https://graph.microsoft.com/v1.0/me',
-                'scopes'                  => ['Files.ReadWrite', 'offline_access'],
+                'scopes'                  => 'openid offline_access Files.ReadWrite',
+                'scopeSeparator'          => ' '
             ];
         }
 
@@ -270,10 +272,23 @@ class ilCloudStorageOAuth2
     public static function getOAuth2Provider(ilCloudStorageConfig $config): GenericProvider {
         global $DIC;
         $options = self::getOAuth2ProviderOptions($config);
-        //$DIC->logger()->root()->debug(var_export($options, true));
-        return new GenericProvider($options,['optionProvider' => self::getOptionProvider($config->getOAuth2TokenRequestAuth())]);
+        $DIC->logger()->root()->debug(var_export($options, true));
+        // Microsoft requires credentials in POST body, not HTTP Basic Auth header
+        if ($config->isOneDrive()) {
+            $DIC->logger()->root()->debug('isOneDrive');
+            $optionProvider = new PostAuthOptionProvider();
+        } else {
+            $optionProvider = self::getOptionProvider($config->getOAuth2TokenRequestAuth());
+        }
+        return new GenericProvider($options, ['optionProvider' => $optionProvider]);
     }
 
+    // public static function getOAuth2Provider(ilCloudStorageConfig $config): GenericProvider {
+    //     global $DIC;
+    //     $options = self::getOAuth2ProviderOptions($config);
+    //     $DIC->logger()->root()->debug(var_export($options, true));
+    //     return new GenericProvider($options,['optionProvider' => self::getOptionProvider($config->getOAuth2TokenRequestAuth())]);
+    // }
 
     public static function getHeaders(int $conn_id, int $user_id): array
     {
@@ -354,9 +369,9 @@ class ilCloudStorageOAuth2
             $authParams = ['redirect_uri' => $redirectURI];
 
             // OneDrive requires an explicit scope at the authorize step
-            if ($config->isOneDrive()) {
-                $authParams['scope'] = 'Files.ReadWrite offline_access';
-            }
+            // if ($config->isOneDrive()) {
+            //     $authParams['scope'] = 'Files.ReadWrite offline_access';
+            // }
 
             $provider->authorize($authParams);
         } else {
