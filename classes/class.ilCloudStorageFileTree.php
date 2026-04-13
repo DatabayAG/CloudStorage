@@ -306,14 +306,22 @@ class ilCloudStorageFileTree
             $new_folder_id = $service->createFolderById($id, $folder_name);
             $new_node = null;
 
-            if (is_null($new_folder_id) || !$new_folder_id) {
-                // Use path
-                $service->createFolder($path, $this);
+            if (is_null($new_folder_id) || $new_folder_id === ilCloudStorageFileNode::ID_UNKNOWN) {
+                // Use path (no real ID available, e.g. OneDrive/Flysystem adapters)
+                // Pass null for file_tree: $path already contains the full absolute path
+                // including the root folder. Passing $this would cause createFolder() to
+                // prepend getRootPath() a second time, resulting in a doubled path.
+                $service->createFolder($path, null);
                 $this->addItemsFromService($current_node->getId());
                 $new_path = ilCloudStorageUtil::joinPaths($current_node->getPath(), $folder_name);
                 $new_node = $this->getNodeFromPath($new_path);
+                // Debug: log what's in the tree vs what we're looking for
+                global $DIC;
+                $DIC->logger()->root()->debug('addFolderToService new_path: ' . $new_path);
+                $DIC->logger()->root()->debug('addFolderToService item_list keys: ' . implode(', ', array_keys($this->item_list)));
+                $DIC->logger()->root()->debug('addFolderToService new_node: ' . ($new_node ? $new_node->getPath() : 'NULL'));
             } else {
-                // Use id
+                // Use id (WebDAV-based services that return a real folder ID)
                 $this->addItemsFromService($current_node->getId());
                 $new_node = $this->getNodeFromId($new_folder_id);
             }
@@ -333,6 +341,7 @@ class ilCloudStorageFileTree
      */
     public function uploadFileToService(int $current_id, string $tmp_name, string $file_name): void
     {
+        global $DIC;
         $max_file_size = ilFileUploadUtil::getMaxFileSize();
         if ($max_file_size >= filesize($tmp_name)) {
             $current_node = $this->getNodeFromId($current_id);
@@ -341,7 +350,12 @@ class ilCloudStorageFileTree
             try {
                 $service = ilCloudStorageConfig::getServiceFromConfig($this->refId, $this->connId);
                 $service->putFile($tmp_name, $file_name, $current_node->getPath(), $this);
-            } catch (Exception $e) {
+                $DIC->logger()->root()->debug('uploadFileToService putFile done, reloading tree');
+                // Reload the folder contents so the new file appears in the tree
+                $this->addItemsFromService($current_node->getId());
+                $DIC->logger()->root()->debug('uploadFileToService addItemsFromService done');
+            } catch (\Throwable $e) {
+                $DIC->logger()->root()->debug('uploadFileToService exception: ' . get_class($e) . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
                 if ($e instanceof ilCloudStorageException) {
                     throw $e;
                 }
@@ -449,7 +463,13 @@ class ilCloudStorageFileTree
         return $list;
     }
 
-    public function getUniqueId() {
-        return count($this->id_to_path_map);
+    public function getUniqueId(): int {
+        // count() is not safe as a unique ID generator – if nodes have been removed
+        // or the count happens to equal an existing ID, we get a collision.
+        // Use the max existing ID + 1 to guarantee uniqueness.
+        if (empty($this->id_to_path_map)) {
+            return 1;
+        }
+        return max(array_keys($this->id_to_path_map)) + 1;
     }
 }

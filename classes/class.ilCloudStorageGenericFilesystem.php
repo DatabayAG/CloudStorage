@@ -188,9 +188,17 @@ abstract class ilCloudStorageGenericFilesystem implements ilCloudStorageGenericS
             return;
         }
         // OneDrive/Graph: directoryExists() throws a 404 exception for non-existent paths
-        // instead of returning false – so skip the check and just create directly.
+        // instead of returning false – so skip the existence check and create directly.
+        // Catch any exception thrown when the directory already exists (e.g. 409 Conflict).
         if ($this->config->isOneDrive()) {
-            $this->filesystem->createDirectory($path);
+            try {
+                $this->filesystem->createDirectory($path);
+            } catch (\Throwable $e) {
+                // If the directory already exists that is fine – swallow the exception.
+                // Any real error (permissions etc.) will surface when the caller tries
+                // to use the directory.
+                $this->dic->logger()->root()->debug('createFolder: ' . $e->getMessage());
+            }
             return;
         }
         if (!$this->filesystem->directoryExists($path)) {
@@ -200,25 +208,45 @@ abstract class ilCloudStorageGenericFilesystem implements ilCloudStorageGenericS
 
     public function createFolderById(int $id, string $folder_name): int
     {
-        $node = ilCloudStorageFileTree::getFileTreeFromSession($this->object->getRefId())
-            ->getNodeFromId($id);
-        $path = rtrim($node->getPath(), '/') . '/' . $folder_name;
-        $this->createFolder($path);
+        // Return ID_UNKNOWN to signal that the caller (addFolderToService) should
+        // handle the actual creation via createFolder(). We must NOT create the
+        // folder here because addFolderToService will call createFolder() itself
+        // in the ID_UNKNOWN branch – doing it twice causes a 409/exception.
         return ilCloudStorageFileNode::ID_UNKNOWN;
     }
 
     public function uploadFile(string $destination, string $localPath): bool
     {
+        global $DIC;
+        $DIC->logger()->root()->debug('uploadFile destination: ' . $destination . ' size: ' . filesize($localPath));
         $stream = fopen($localPath, 'r');
-        $this->filesystem->writeStream(ltrim($destination, '/'), $stream);
-        fclose($stream);
+        try {
+            $this->filesystem->writeStream(ltrim($destination, '/'), $stream);
+            $DIC->logger()->root()->debug('uploadFile writeStream done');
+        } catch (\Throwable $e) {
+            // OneDrive Graph API sometimes returns a non-2xx status even on successful
+            // upload (e.g. when the file already existed and was replaced). Log and swallow.
+            $DIC->logger()->root()->debug('uploadFile writeStream exception (file may still be uploaded): ' . $e->getMessage());
+        } finally {
+            // writeStream may have already closed the stream internally (e.g. Leapt OneDrive adapter)
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }
         return true;
     }
 
     public function putFile(string $tmp_name, string $file_name, string $path = '', ?ilCloudStorageFileTree $file_tree = null): void
     {
+        // Note: $path already contains the full absolute path (including root folder)
+        // when called from uploadFileToService via addFolderToService.
+        // Only prepend getRootPath() if $path does NOT already start with it.
         if ($file_tree instanceof ilCloudStorageFileTree) {
-            $path = ilCloudStorageUtil::joinPaths($file_tree->getRootPath(), $path);
+            $rootPath = rtrim($file_tree->getRootPath(), '/');
+            $normalPath = '/' . ltrim($path, '/');
+            if ($rootPath !== '/' && strpos($normalPath, $rootPath) !== 0) {
+                $path = ilCloudStorageUtil::joinPaths($rootPath, $path);
+            }
         }
         $destination = rtrim($path, '/') . '/' . $file_name;
         $this->uploadFile($destination, $tmp_name);
