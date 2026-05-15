@@ -347,7 +347,8 @@ if ($ilDB->tableExists('rep_robj_xcls_conn')) {
 ?>
 <#12>
 <?php
-file_put_contents("/tmp/log.txt", getcwd() . "\n", 1);
-require_once("./public/Customizing/global/plugins/Services/Repository/RepositoryObject/CloudStorage/classes/class.ilObjCloudStorage.php");
-file_put_contents("/tmp/log.txt", getcwd() . "\n", 1);
+if ($ilDB->tableExists('rep_robj_xcls_oauth2')) {
+    $ilDB->modifyTableColumn('rep_robj_xcls_oauth2', 'access_token', array("type" => "text", "length" => 4000));
+    $ilDB->modifyTableColumn('rep_robj_xcls_oauth2', 'refresh_token', array("type" => "text", "length" => 4000));
+}
 ?>
