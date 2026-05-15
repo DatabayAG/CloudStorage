@@ -175,36 +175,41 @@ class ilCloudStorageOAuth2
         if (!$token->getAccessToken() && !$token->getRefreshToken()) {
             $DIC->logger()->root()->debug("No access or refresh token found for user with id " . $token->getUserId());
             return false;
-        } else {
-            if ($token->isExpired()) {
-                $atom_query = $DIC->database()->buildAtomQuery();
-                $atom_query->addTableLock(ilCloudStorageOAuth2::DB_TABLE_NAME);
-                $atom_query->addTableLock("rep_robj_xcls_conn");
-                $atom_query->addQueryCallable(function (ilDBInterface $ilDB) use ($DIC, $conn_id, $user_id, $config) {
-                    $token = ilCloudStorageOAuth2::getUserToken($conn_id, $user_id); // reload token and check again inside table lock to prevent race condition
-                    if (!$token->isExpired()) {
-                        return true;
-                    }
-                    $refresh_token = $token->getRefreshToken();
-                    try {
-                        self::refreshToken($conn_id,$user_id, $config);
-                        $msg = 'Token successfully refreshed for user with id ' . $token->getUserId() . ' with refresh token ' . $refresh_token;
-                        $DIC->logger()->root()->debug($msg);
-                        return true;
-                    } catch (Exception $e) {
-                        $msg = 'Exception: Token refresh for user with id ' . $token->getUserId()
-                        . ' and refresh token ' . $refresh_token
-                        . ' failed with message: ' . $e->getMessage();
-                        $DIC->logger()->root()->debug($msg);
-                        return false;
-                    }
-                });
-                $atom_query->run();
-            } else {
-                return true;
-            }
         }
-        return true;
+
+        if (!$token->isExpired()) {
+            return true;
+        }
+
+        // Token is expired – try to refresh it inside a table lock to prevent race conditions.
+        $refreshSucceeded = false;
+        $atom_query = $DIC->database()->buildAtomQuery();
+        $atom_query->addTableLock(ilCloudStorageOAuth2::DB_TABLE_NAME);
+        $atom_query->addTableLock("rep_robj_xcls_conn");
+        $atom_query->addQueryCallable(function (ilDBInterface $ilDB) use ($DIC, $conn_id, $user_id, $config, &$refreshSucceeded) {
+            // Reload inside lock – another process may have already refreshed it
+            $token = ilCloudStorageOAuth2::getUserToken($conn_id, $user_id);
+            if (!$token->isExpired()) {
+                $refreshSucceeded = true;
+                return;
+            }
+            $refresh_token = $token->getRefreshToken();
+            try {
+                self::refreshToken($conn_id, $user_id, $config);
+                $DIC->logger()->root()->debug('Token successfully refreshed for user ' . $user_id);
+                $refreshSucceeded = true;
+            } catch (Exception $e) {
+                $DIC->logger()->root()->debug(
+                    'Token refresh failed for user ' . $user_id
+                    . ' with refresh token ' . $refresh_token
+                    . ': ' . $e->getMessage()
+                );
+                $refreshSucceeded = false;
+            }
+        });
+        $atom_query->run();
+
+        return $refreshSucceeded;
     }
 
     public static function refreshToken(int $conn_id, int $user_id, ilCloudStorageConfig $config): void
