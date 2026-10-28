@@ -1,4 +1,4 @@
-// 
+//
 // German Language File for CloudStorage Plugin
 //
 <!-- language file start -->
@@ -13,7 +13,7 @@ multifs#:#Cloud Folder
 xcls_multifs#:#Cloud Folder
 xcls_add#:#Add Cloud Folder
 xcls_new#:#Add new Cloud Folder
-xcls_read#:#Read access: Read access to Cloud Folder 
+xcls_read#:#Read access: Read access to Cloud Folder
 xcls_write#:#Change settings: Edit Cloud Folder
 xcls_copy#:#Copy: Copy Cloud Folder
 xcls_delete#:#Delete: Delete, Move and Link Cloud Folder
@@ -216,11 +216,14 @@ please_wait#:#Please wait
 has_account#:#Your account is already linked to the Cloud Service. <br />Click "Select Cloud Folder".
 root_folder_name#:#Root
 new_folder_add_info#:#The new Cloud Folder will be created in %s
-rep_robj_xcls_grp_create_xcls#:#Create Cloud Folder
-rep_robj_xcls_crs_create_xcls#:#Create Cloud Folder
-rep_robj_xcls_fold_create_xcls#:#Create Cloud Folder
-rep_robj_xcls_cat_create_xcls#:#Create Cloud Folder
-rep_robj_xcls_root_create_xcls#:#Create Cloud Folderoa2_tenant_id#:#Azure Tenant ID
+
+grp_create_xcls#:#Create Cloud Folder
+crs_create_xcls#:#Create Cloud Folder
+fold_create_xcls#:#Create Cloud Folder
+cat_create_xcls#:#Create Cloud Folder
+root_create_xcls#:#Create Cloud Folder
+
+oa2_tenant_id#:#Azure Tenant ID
 oa2_tenant_id_info#:#The directory (tenant) ID from the Microsoft Entra Admin Center. Found at: Entra Admin Center → Overview → Tenant ID.
 oa2_client_id_odrv_info#:#The application (client) ID of the registered app in the Microsoft Entra Admin Center.
 base_directory_info_odrv#:#Optional subfolder in the OneDrive root to use as the base for ILIAS (e.g. "ILIASshare"). Leave empty for the root directory.
