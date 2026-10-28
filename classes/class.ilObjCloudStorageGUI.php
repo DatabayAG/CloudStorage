@@ -1202,7 +1202,7 @@ class ilObjCloudStorageGUI extends ilObjectPluginGUI
                 $this->object->setTitle($title);
             }
             $this->object->setDescription($this->form->getInput("desc"));
-            $this->object->setOnline($this->form->getInput("online"));
+            $this->object->setOnline((bool) $this->form->getInput("online"));
             //$this->serviceGUI->updateProperties();
             $root_folder = ($this->form->getInput("root_folder") == "") ? $this->config->getBaseDirectory() : $this->form->getInput("root_folder");
             $this->object->setRootFolder($root_folder);
